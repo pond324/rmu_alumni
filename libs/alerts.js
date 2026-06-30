@@ -9,7 +9,7 @@ export const alerts = {
     return Swal.fire("สำเร็จ", text, "success");
   },
   warning: (text = "") => {
-    return Swal.fire("แจ้งเตือน", text, "warning");
+    return Swal.fire("ไม่สามารถดำเนินการได้", text, "warning");
   },
   confirmDialog: (
     title,

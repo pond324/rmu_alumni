@@ -10,11 +10,11 @@ export default function useCountry() {
   const fetchCountry = async () => {
     setLoad(true);
     try {
-      const res = await axios.get("https://restcountries.com/v3.1/all?fields=name");
-      setCountries(res?.data);
-      const options = res.data.map((c) => ({
-        label:c.name.common,
-        value:c.name.common
+      const res = await axios.get("https://countriesnow.space/api/v0.1/countries");
+      setCountries(res?.data?.data);
+      const options = res.data?.data.map((c) => ({
+        label:c.country,
+        value:c.country
       }))
       setCountryOPtions(options);
     } catch (error) {

@@ -10,14 +10,19 @@ const StudyCard = ({ e, handleEdit, fetchWorkExprerience }) => {
   const deleteWork = async (id) => {
     const { isConfirmed } = await alerts.confirmDialog(
       "ลบประวัติ",
-      "ต้องการลบประวัตินี้หรือไม่?"
+      "ต้องการลบประวัตินี้หรือไม่?",
     );
     if (!isConfirmed) return;
 
     try {
       const res = await axios.delete(
         apiConfig.rmuAPI + "/alumni/work-delete/" + id,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          params: {
+            std: true,
+          },
+        },
       );
       if (res?.status === 200) {
         alerts.success("ลบข้อมูลแล้ว");
@@ -71,12 +76,12 @@ const StudyCard = ({ e, handleEdit, fetchWorkExprerience }) => {
         <span className="flex items-center gap-2">
           <Book size={18} color="gray" />
           <p className="text-gray-600 text-[0.9rem]">
-            {e?.edu_faculty} , {e?.edu_university}
+            {e?.edu_faculty}, {e?.edu_university}
           </p>
         </span>
         <span className="flex items-center gap-2">
           <Map size={18} color="gray" />
-          <p className="text-gray-600 text-[0.9rem]">{e?.company_place}</p>
+          <p className="text-gray-600 text-[0.9rem]">{e?.place}</p>
         </span>
         <span className="flex items-center gap-2">
           <Calendar size={18} color="gray" />

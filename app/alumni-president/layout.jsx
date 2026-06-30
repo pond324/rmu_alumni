@@ -28,9 +28,9 @@ const Layout = ({ children }) => {
   return (
     <div className="w-screen h-screen flex items-center">
       <Menu />
-      <div className="flex flex-col w-full h-full overflow-auto p-3">
+      <div className="flex flex-col w-full h-full overflow-auto">
         {/* header */}
-        <header className="mb-2 w-full flex items-center gap-2 pb-2 border-b border-gray-300">
+        <header className="mb-2 p-3 w-full flex items-center gap-2 pb-2 border-b shadow-sm border-gray-300">
           <Image alt="logo" priority className="w-10 h-10" src={logo} />
           <div className="flex lg:gap-2 lg:items-center lg:flex-row flex-col">
             <h1 className="font-bold text-sm text-blue-600">RMU ALUMNI</h1>

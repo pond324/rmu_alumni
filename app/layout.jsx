@@ -3,7 +3,7 @@ import "./globals.css";
 import PaginateProgress from "@/components/paginate-progress";
 
 const sarabun = Sarabun({
-  weight: ["400", "800"],
+  weight: ["400","600", "800"],
   subsets: ["thai"],
 });
 

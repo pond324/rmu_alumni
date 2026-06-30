@@ -11,8 +11,9 @@ export function isValidThaiPhoneNumber(phone) {
 }
 
 export function formatPhoneNumber(phone) {
+  if (!phone) return "-";
   // ลบอักขระที่ไม่ใช่ตัวเลขออก
-  const cleaned = phone.replace(/\D/g, '');
+  const cleaned = phone.replace(/\D/g, "");
 
   // ตรวจว่ามีความยาว 10 หลักหรือไม่ (เบอร์มือถือไทย)
   if (cleaned.length !== 10) return phone;

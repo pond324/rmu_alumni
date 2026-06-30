@@ -24,6 +24,8 @@ import Modal from "@/components/modal";
 import { authService } from "@/service/auth";
 import useGetSession from "@/hook/useGetSeesion";
 import { useRouter } from "next/navigation";
+import RegisterAlumni from "@/components/register-alumni";
+import SearchAlumniName from "@/components/search-alumni-name";
 
 const Page = () => {
   const { checking, user } = useGetSession();
@@ -36,10 +38,9 @@ const Page = () => {
   const [showAuthKeyDetail, setShowAuthKeyDetail] = useState(false);
   const [isRedirect, setIsRedirect] = useState(false);
 
-  const [passKey, setPassKey] = useState("");
   const [firstLogin, setFirstLogin] = useState(false);
   const [authkey, setAuthKey] = useState("");
-  const [passkeyID, setPassKeyID] = useState("");
+  const [sendToEmail, setSendToEmail] = useState("");
 
   const router = useRouter();
 
@@ -47,6 +48,7 @@ const Page = () => {
     control,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     defaultValues: {
       username: "",
@@ -62,11 +64,11 @@ const Page = () => {
       const res = await authService.login(data);
       if (res?.data?.isFirstLogin) {
         setFirstLogin(true);
-        setPassKey(res?.data?.key);
-        setPassKeyID(res?.data?.user);
+        setShowPass(false);
+        setSendToEmail(res?.data?.email);
       }
       if (res.data?.err) {
-        return alerts.err(res.data?.err);
+        return alerts.warning(res.data?.err);
       }
 
       if (res?.data?.ok) {
@@ -86,7 +88,7 @@ const Page = () => {
 
       if (status === 429) {
         return alerts.err(
-          "คุณพยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่อีกครั้งในอีก 10 นาที"
+          "คุณพยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่อีกครั้งในอีก 10 นาที",
         );
       }
       alerts.err();
@@ -97,12 +99,16 @@ const Page = () => {
 
   const authenticate = async (e) => {
     e.preventDefault();
-    if (passKey !== Number(authkey) || !authkey) {
-      return alerts.err("รหัสยืนยันตัวตนไม่ถูกต้อง!");
-    }
+
     setLoading(true);
     try {
-      const res = await authService.authSuccess({ alumni_id: passkeyID });
+      const res = await authService.authSuccess({
+        username: watch("username"),
+        code: authkey,
+      });
+      if (res.data?.err) {
+        return alerts.warning(res?.data?.err);
+      }
       if (res?.data?.ok) {
         setIsRedirect(true);
         alerts.success("เข้าสู่ระบบแล้ว!");
@@ -143,112 +149,135 @@ const Page = () => {
         />
         <div className="w-full h-full absolute top-0 bg-white/10 backdrop-blur-sm"></div>
 
-        <form
-          onSubmit={!firstLogin ? handleSubmit(submitForm) : authenticate}
-          className="z-50 lg:w-1/3 w-full bg-white rounded-md shadow-md shadow-gray-600 border border-gray-400 p-5 lg:p-8 flex flex-col items-center justify-center"
+        <div
+          method="post"
+          className={`z-50 lg:w-1/3 md:w-2/3 overflow-auto w-full bg-white rounded-md shadow-md shadow-gray-600 border border-gray-400 p-5 lg:p-8 flex flex-col items-center justify-center ${firstLogin && "h-[600px]"}`}
         >
           {/* logo */}
-          <Image alt="logo" priority src={logo} className="w-24 lg:w-1/5 h-auto" />
+          <Image
+            alt="logo"
+            priority
+            src={logo}
+            className={`w-20 lg:w-1/5 h-20 ${firstLogin && "mt-24"}`}
+          />
 
           <h1 className="font-bold text-3xl mt-2 text-blue-700">RMU ALUMNI</h1>
           <p className="mt-1 text-sm md:text-[1rem] w-full text-center">
             ระบบสารสนเทศเครือข่ายศิษย์เก่า มหาวิทยาลัยราชภัฏมหาสารคาม
           </p>
-          {!firstLogin ? (
-            <>
-              {/* username */}
-              <div className="mt-3 w-full flex flex-col gap-1.5">
-                <span className="flex items-center gap-3">
-                  <label className="text-black">รหัสผู้ใช้งาน</label>
-                  <CircleQuestionMark
-                    size={18}
-                    color="gray"
-                    className="cursor-pointer"
-                    onClick={() => setShowUsernameDetail(true)}
-                  />
-                </span>
 
-                <div
-                  className={`flex items-center gap-3 py-3 border-b-2 ${
-                    errors.username ? "border-red-500" : "border-blue-500"
-                  }`}
+          {/* username */}
+          <div className="mt-3 w-full flex flex-col gap-1.5">
+            <span className="flex items-center gap-3">
+              <label className="text-black">รหัสผู้ใช้งาน</label>
+              <CircleQuestionMark
+                size={18}
+                color="gray"
+                className="cursor-pointer"
+                onClick={() => setShowUsernameDetail(true)}
+              />
+            </span>
+
+            <div
+              className={`flex items-center gap-3 py-3 border-b-2 ${
+                errors.username
+                  ? "border-red-500"
+                  : firstLogin
+                    ? "border-gray-300"
+                    : "border-blue-500"
+              } ${firstLogin ? "cursor-not-allowed " : ""}`}
+            >
+              <User size={20} />
+              <Controller
+                name="username"
+                control={control}
+                rules={{ required: "กรุณากรอกรหัสผู้ใช้งาน" }}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    value={field.value || ""}
+                    disabled={firstLogin}
+                    className={`w-[95%] text-[0.9rem]`}
+                    placeholder="กรอกรหัสผู้ใช้งาน"
+                  />
+                )}
+              />
+            </div>
+          </div>
+          {errors.username && (
+            <small className="w-full text-xs text-red-500 mt-2">
+              {errors.username.message}
+            </small>
+          )}
+
+          {/* password */}
+          <div
+            className={`mt-8 w-full flex flex-col gap-1.5 ${
+              errors.password ? "border-red-500" : "border-blue-500"
+            } ${firstLogin ? "cursor-not-allowed " : ""}`}
+          >
+            <span className="flex items-center gap-3">
+              <label className="">รหัสผ่าน</label>
+              <CircleQuestionMark
+                size={18}
+                color="gray"
+                className="cursor-pointer"
+                onClick={() => setShowPassDetail(true)}
+              />
+            </span>
+            <div
+              className={`flex items-center gap-3 py-3 border-b-2 ${
+                errors.password
+                  ? "border-red-500"
+                  : firstLogin
+                    ? "border-gray-300"
+                    : "border-blue-500"
+              }`}
+            >
+              <Key size={20} />
+              <Controller
+                name="password"
+                rules={{ required: "กรุณากรอกรหัสผ่าน" }}
+                control={control}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    value={field.value || ""}
+                    disabled={firstLogin}
+                    type={showPass ? "text" : "password"}
+                    className="w-[88%] text-[0.9rem]"
+                    placeholder="กรอกรหัสผ่าน"
+                  />
+                )}
+              />
+
+              {showPass ? (
+                <button
+                  type="button"
+                  disabled={firstLogin}
+                  className={`${firstLogin ? "cursor-not-allowed " : "cursor-pointer "}`}
+                  onClick={() => setShowPass(!showPass)}
                 >
-                  <User size={20} />
-                  <Controller
-                    name="username"
-                    control={control}
-                    rules={{ required: "กรุณากรอกรหัสผู้ใช้งาน" }}
-                    render={({ field }) => (
-                      <input
-                        {...field}
-                        value={field.value || ""}
-                        className="w-[95%] text-[0.9rem]"
-                        placeholder="กรอกรหัสผู้ใช้งาน"
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-              {errors.username && (
-                <small className="w-full text-xs text-red-500 mt-2">
-                  {errors.username.message}
-                </small>
-              )}
-
-              {/* password */}
-              <div className="mt-8 w-full flex flex-col gap-1.5">
-                <span className="flex items-center gap-3">
-                  <label className="">รหัสผ่าน</label>
-                  <CircleQuestionMark
-                    size={18}
-                    color="gray"
-                    className="cursor-pointer"
-                    onClick={() => setShowPassDetail(true)}
-                  />
-                </span>
-                <div
-                  className={`flex items-center gap-3 py-3 border-b-2 ${
-                    errors.password ? "border-red-500" : "border-blue-500"
-                  }`}
+                  <Eye size={20} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className={`${firstLogin ? "cursor-not-allowed " : "cursor-pointer "}`}
+                  disabled={firstLogin}
                 >
-                  <Key size={20} />
-                  <Controller
-                    name="password"
-                    rules={{ required: "กรุณากรอกรหัสผ่าน" }}
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        {...field}
-                        value={field.value || ""}
-                        type={showPass ? "text" : "password"}
-                        className="w-[88%] text-[0.9rem]"
-                        placeholder="กรอกรหัสผ่าน"
-                      />
-                    )}
-                  />
-
-                  {showPass ? (
-                    <Eye
-                      onClick={() => setShowPass(!showPass)}
-                      size={20}
-                      className="cursor-pointer"
-                    />
-                  ) : (
-                    <EyeClosed
-                      onClick={() => setShowPass(!showPass)}
-                      size={20}
-                      className="cursor-pointer"
-                    />
-                  )}
-                </div>
-              </div>
-              {errors.password && (
-                <small className="w-full text-xs text-red-500 mt-2">
-                  {errors.password.message}
-                </small>
+                  <EyeClosed size={20} />
+                </button>
               )}
-            </>
-          ) : (
+            </div>
+          </div>
+          {errors.password && (
+            <small className="w-full text-xs text-red-500 mt-2">
+              {errors.password.message}
+            </small>
+          )}
+          {firstLogin && (
             <div className="mt-8 w-full flex flex-col gap-1.5">
               <span className="flex items-center gap-3">
                 <label className="">รหัสยืนยันตัวตน</label>
@@ -259,35 +288,47 @@ const Page = () => {
                   onClick={() => setShowAuthKeyDetail(true)}
                 />
               </span>
-              <div className="flex items-center gap-3 py-3 border-b-2">
+
+              <div className="flex items-center gap-3 py-3 border-b-2 border-blue-500">
                 <RectangleEllipsis size={18} />
                 <input
                   value={authkey}
                   onChange={(e) => setAuthKey(e.target.value)}
                   type="text"
                   className="w-[88%] text-[0.9rem]"
-                  placeholder="กรอกตัวเลขที่ได้จากอีเมล เพื่อยืนยันตัวตน"
+                  placeholder={`กรอกรหัสยืนยันที่ส่งไปยังอีเมล ${sendToEmail}`}
                 />
               </div>
             </div>
           )}
 
           {/* more */}
-          <div className="w-full flex items-center gap-1 justify-between mt-5">
-            <button
-              type="button"
-              onClick={() => setShowWonderDetail(true)}
-              className="text-sm text-gray-500 hover:underline hover:text-gray-800"
-            >
-              มีข้อสงสัย?
-            </button>
-            {!firstLogin && (
-              <Link
-                href="/forgot-password"
-                className="text-sm text-blue-800 hover:underline hover:text-blue-600"
+          <div className="w-full flex lg:flex-row flex-col items-center gap-1 justify-between mt-5">
+            <span className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowWonderDetail(true)}
+                className="text-sm text-gray-500 hover:underline hover:text-gray-800 "
               >
-                ลืมรหัสผ่าน?
-              </Link>
+                มีข้อสงสัย?
+              </button>
+              <div className="border-l-2 border-gray-500 h-3"></div>
+              {!firstLogin && (
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-gray-600 hover:underline hover:text-blue-600"
+                >
+                  ลืมรหัสผ่าน?
+                </Link>
+              )}
+            </span>
+
+            {!firstLogin && (
+              <span className="flex items-center gap-2">
+                <RegisterAlumni />
+                <div className="border-l-2 border-gray-500 h-3"></div>
+                <SearchAlumniName />
+              </span>
             )}
           </div>
 
@@ -299,6 +340,7 @@ const Page = () => {
           )}
 
           <button
+            onClick={!firstLogin ? handleSubmit(submitForm) : authenticate}
             disabled={loading || isRedirect}
             className={`mt-7 hover:bg-gradient-to-l w-full rounded-lg ${
               loading ? "flex-col flex" : "flex"
@@ -331,7 +373,7 @@ const Page = () => {
               <p className="text-blue-600">นโยบายความเป็นส่วนตัว</p>
             </span>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* username detail */}
@@ -363,13 +405,17 @@ const Page = () => {
             onClick={() => setShowPassDetail(false)}
             className="mb-2 cursor-pointer"
           />
-          <p className="font-bold text-sm">เข้าสู่ระบบครั้งแรก</p>
+          <p className="font-bold text-sm">ที่มาของรหัสผ่าน</p>
           <p className="text-sm text-gray-700 mt-1">
-            สำหรับนักศึกษา: กรอกรหัสนักศึกษา 12 หลัก
+            สำหรับอาจารย์:
+            หากเป็นการเข้าสู่ระบบครั้งแรกหรือยังไม่เคยเปลี่ยนรหัสผ่าน
+            ให้กรอกรหัสอาจารย์
           </p>
           <p className="text-sm text-gray-700 mt-1">
-            สำหรับอาจารย์: กรอกรหัสอาจารย์
+            สำหรับนักศึกษา: นักศึกษาทำการลงทะเบียนบัณฑิต
+            ดำเนินการตามขั้นตอนการลงทะเบียนเพื่อสร้างรหัสผ่าน
           </p>
+
           <p className="text-sm text-gray-700 mt-1">
             หลังจากเข้าสู่ระบบแล้วท่านสามารถเปลี่ยนหรือไม่เปลี่ยนรหัสผ่านของท่านก็ได้
             <br></br>

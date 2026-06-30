@@ -6,16 +6,20 @@ import { alerts } from "@/libs/alerts";
 import axios from "axios";
 import {
   BriefcaseBusiness,
+  ChartArea,
   ChartPie,
   CircleUser,
+  Cog,
+  GraduationCap,
   HelpCircle,
+  ListCheck,
   LogOut,
   MenuIcon,
   MessageCircle,
   Newspaper,
   Search,
   ShieldUser,
-  User,
+  UserCog,
   UserPen,
   Users,
   X,
@@ -35,6 +39,12 @@ const Menu = () => {
       icon: <ChartPie size={20} />,
       url: "/users/dashboard",
       allowed: [2, 3, 4],
+    },
+    {
+      title: "รายงาน",
+      icon: <ChartArea size={20} />,
+      url: "/users/overview",
+      allowed: [4,5],
     },
     {
       title: "โปรไฟล์",
@@ -66,16 +76,28 @@ const Menu = () => {
       url: "/users/news",
       allowed: [1, 2],
     },
+    // {
+    //   title: "ลงทะเบียนศิษย์เก่า",
+    //   icon: <ListCheck size={20} />,
+    //   url: "/alumni-president/manage-alumni-regis",
+    //   allowed: [5],
+    // },
     {
       title: "จัดการศิษย์เก่า",
-      icon: <User size={20} />,
+      icon: <GraduationCap size={20} />,
       url: "/alumni-president/alumni-manage",
       allowed: [5],
     },
     {
-      title: "จัดการบุคคลการ",
+      title: "จัดการบุคลากร",
       icon: <Users size={20} />,
       url: "/alumni-president/personels-manage",
+      allowed: [5],
+    },
+    {
+      title: "จัดการผู้ดูแล",
+      icon: <UserCog size={20} />,
+      url: "/alumni-president/admin-manage",
       allowed: [5],
     },
     {
@@ -116,7 +138,7 @@ const Menu = () => {
     const { isConfirmed } = await alerts.confirmDialog(
       "ออกจากระบบ",
       "ต้องการออกจากระบบหรือไม่?",
-      "ออกจากระบบ"
+      "ออกจากระบบ",
     );
     if (!isConfirmed) return;
 
@@ -137,9 +159,9 @@ const Menu = () => {
   return (
     <>
       <div
-        className={`p-3 lg:flex bg-white ${
+        className={`p-3 bg-linear-200 from-blue-800 to-blue-950 lg:flex bg-white ${
           showResponsive ? "flex w-[80%] absolute top-0" : "hidden"
-        } w-1/5 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-[100]`}
+        } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-20`}
       >
         <div className="w-full flex flex-col">
           <div className="flex items-center w-full gap-4 pb-3 p-1 border-b border-gray-200">
@@ -162,11 +184,9 @@ const Menu = () => {
               </Link>
             )}
 
-            <span className="flex flex-col ">
-              <p className="text-blue-400 text-sm">ยินดีต้อนรับ!</p>
-              {user?.roleId < 5 && (
-                <p className="text-gray-800">คุณ{user?.fname}</p>
-              )}
+            <span className="flex flex-col text-blue-200 text-sm">
+              <p className="">ยินดีต้อนรับ!</p>
+              <p className="">คุณ{user?.fname}</p>
             </span>
             {showResponsive && (
               <button
@@ -177,7 +197,7 @@ const Menu = () => {
               </button>
             )}
           </div>
-          <label htmlFor="" className="my-4 text-sm text-gray-500">
+          <label htmlFor="" className="my-4 text-sm text-gray-300">
             เมนู
           </label>
           {menus
@@ -186,25 +206,38 @@ const Menu = () => {
               <Link
                 onClick={() => setShowResponsive(false)}
                 key={index}
-                className={`flex items-center gap-3 transition-all  duration-300 ${
+                className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${
                   path.split("/")[2] === m.url.split("/")[2]
-                    ? "bg-gradient-to-br from-blue-500 via-sky-500 shadow-md to-blue-300 text-blue-50"
-                    : "hover:bg-blue-100 hover:shadow-xs text-gray-800"
-                }  mt-0.5 rounded-lg w-full p-3.5`}
+                    ? "border-l-4 border-l-gray-100 bg-white/25"
+                    : "hover:bg-white/15 hover:shadow-xs rounded-sm "
+                }  mt-0.5 w-full px-3.5 py-3`}
                 href={m.url}
               >
                 {m.icon}
                 {m.title}
               </Link>
             ))}
-          <label htmlFor="" className="my-4 text-sm text-gray-500">
+          <label htmlFor="" className="my-4 text-sm text-gray-300">
             ระบบ
           </label>
+          {user?.roleId == 5 && (
+            <Link
+              className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${
+                path.split("/")[2] === "setting"
+                  ? "border-l-4 border-l-gray-100 bg-white/25"
+                  : "hover:bg-white/15 hover:shadow-xs "
+              }  mt-0.5 rounded-lg w-full px-3.5 py-3`}
+              href={"/alumni-president/setting/regis"}
+            >
+              <Cog className="" size={18} />
+              <p>ตั้งค่าระบบ</p>
+            </Link>
+          )}
           <button
             onClick={logout}
-            className="flex items-center gap-3  text-gray-100 transition-all duration-300 bg-red-500 mt-1 rounded-lg w-full p-3.5"
+            className="flex items-center text-sm gap-3 shadow-sm text-red-500 bg-red/15  hover:text-gray-100 transition-all duration-300 hover:bg-red-500 mt-1 rounded-lg w-full px-3.5 py-3"
           >
-            <LogOut size={20} color="white" />
+            <LogOut size={20} />
             <p>ออกจากระบบ</p>
           </button>
         </div>

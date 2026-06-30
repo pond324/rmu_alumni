@@ -94,7 +94,7 @@ const WorkHistory = () => {
     reset({
       job_position: work?.job_position,
       company_name: work?.company_name,
-      company_place: work?.company_place,
+      company_place: work?.company_place || work?.place,
       start_date: work?.start_date,
       end_date: work?.end_date,
       job_detail: work?.job_detail,
@@ -163,6 +163,9 @@ const WorkHistory = () => {
 
       const res = await axios.post(apiConfig.rmuAPI + api, payload, {
         withCredentials: true,
+        params: {
+          std: payload.continued_study,
+        },
       });
       if (res?.data?.err) {
         return alerts.err();
@@ -200,7 +203,7 @@ const WorkHistory = () => {
     dataType = 0,
     page = 1,
     sort = JSON.stringify({ createdAt: "desc" }),
-    user
+    user,
   ) => {
     setFetching(true);
     try {
@@ -214,7 +217,7 @@ const WorkHistory = () => {
             page,
             sort,
           },
-        }
+        },
       );
       console.log(user);
       if (res.status === 200) {
@@ -413,7 +416,7 @@ const WorkHistory = () => {
                   handleEdit={handleEdit}
                   fetchWorkExprerience={() => fetchWorkExprerience(searchText)}
                 />
-              )
+              ),
             )}
           </div>
         )}
@@ -639,7 +642,7 @@ const WorkHistory = () => {
                     isSearchable
                     value={
                       (workInThai ? provinceOptions : countryOptions).find(
-                        (i) => i.value === watch("company_place")
+                        (i) => i.value === watch("company_place"),
                       ) || null
                     }
                     onChange={(option) =>
@@ -899,7 +902,7 @@ const WorkHistory = () => {
                     isSearchable
                     value={
                       (workInThai ? provinceOptions : countryOptions).find(
-                        (i) => i.value === watch("company_place")
+                        (i) => i.value === watch("company_place"),
                       ) || null
                     }
                     onChange={(option) => {

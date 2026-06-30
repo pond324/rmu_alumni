@@ -59,7 +59,7 @@ const LiveContact = () => {
         const amphures = provinces.filter((p) => p.name_th === province)[0]
           ?.districts;
         setAmphures(
-          provinces.filter((p) => p.name_th === province)[0]?.districts
+          provinces.filter((p) => p.name_th === province)[0]?.districts,
         );
         const tambonsOp = amphures?.filter((p) => p.name_th === amphure)[0]
           ?.sub_districts;
@@ -92,7 +92,7 @@ const LiveContact = () => {
       const res = await axios.post(
         apiConfig.rmuAPI + "/alumni/update-live",
         payload,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (res?.data?.err) {
@@ -113,7 +113,7 @@ const LiveContact = () => {
 
   if (load)
     return (
-      <div className="w-full flex flex-col items-center  gap-2 py-10">
+      <div className="w-full h-[400px] flex flex-col items-center justify-center  gap-2 py-10">
         <Loading type={2} />
         <p>กำลังโหลด...</p>
       </div>
@@ -121,41 +121,42 @@ const LiveContact = () => {
 
   return (
     <div className="w-full flex flex-col bg-white">
-      <span className="relative flex items-center gap-2">
-        <MapPinHouse size={30} color="blue" />
-        <p className="text-lg font-bold">ที่อยู่ที่ติดต่อได้</p>
-        {editing ? (
-          <span className="flex items-center gap-2 absolute top-0 right-2">
-            <button
-              onClick={() => {
-               fetchUserContract();
-               setEditing(false);
-              }}
-              className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-md bg-white"
-            >
-              <X size={15} color="red" />
-              <p>ยกเลิก</p>
-            </button>
-            <button
-              onClick={handleSubmit(saveData)}
-              className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-md bg-white"
-            >
-              <Check size={15} color="green" />
-              <p>{saving ? "กำลังบันทึก..." : "บันทึก"}</p>
-            </button>
-          </span>
-        ) : (
+      {editing ? (
+        <span className="flex items-center gap-2 mb-5  w-full">
+          <button
+            disabled={saving}
+            onClick={() => {
+              fetchUserContract();
+              setEditing(false);
+            }}
+            className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-sm text-sm bg-white"
+          >
+            <X size={15} color="red" />
+            <p>ยกเลิก</p>
+          </button>
+          <button
+            disabled={saving}
+            onClick={handleSubmit(saveData)}
+            className="flex items-center gap-2 p-1.5 px-2 rounded-lg border bg-blue-500 text-white border-gray-300 shadow-sm text-sm"
+          >
+            <Check size={15} />
+
+            <p>{saving ? "กำลังบันทึก..." : "บันทึก"}</p>
+          </button>
+        </span>
+      ) : (
+        <span className="flex items-center gap-2 mb-5 w-full">
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-2 absolute top-0 right-2 p-1.5 px-2 hover:bg-yellow-400 rounded-lg border border-gray-300 shadow-md bg-gray-50"
+            className="flex items-center gap-2  justify-end p-1.5 px-2.5 text-sm text-white bg-blue-500 rounded-lg border border-blue-300 shadow-md "
           >
             <Edit size={15} />
             <p>แก้ไข</p>
           </button>
-        )}
-      </span>
+        </span>
+      )}
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <Building2 size={18} color="blue" />
         <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
           <p className="text-sm text-gray-500 mb-1">ที่อยู่</p>
@@ -171,7 +172,7 @@ const LiveContact = () => {
                   type="text"
                   value={field.value || ""}
                   placeholder="รายละเอียดที่อยู่"
-                  className={`w-full ${
+                  className={`w-full text-sm ${
                     editing &&
                     " p-2 border border-gray-300 shadow-sm rounded-md px-3"
                   }`}
@@ -188,7 +189,7 @@ const LiveContact = () => {
           )}
         </div>
       </span>
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <MapPinCheck size={18} color="blue" />
         <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
           <p className="text-sm text-gray-500">จังหวัด</p>
@@ -220,11 +221,11 @@ const LiveContact = () => {
                     setZipCode("");
                     setAmphures(
                       provinces.filter((p) => p.name_th === option.value)[0]
-                        ?.districts
+                        ?.districts,
                     );
                     setValue("province", option.value);
                   }}
-                  className="mt-1 w-full"
+                  className="mt-1 text-sm w-full"
                 />
               )}
             />
@@ -238,7 +239,7 @@ const LiveContact = () => {
           )}
         </div>
       </span>
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <Map size={18} color="blue" />
         <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
           <p className="text-sm text-gray-500">อำเภอ/เขต</p>
@@ -272,11 +273,11 @@ const LiveContact = () => {
                     setZipCode("");
                     setTambons(
                       amphures?.filter((p) => p.name_th === option.value)[0]
-                        ?.sub_districts
+                        ?.sub_districts,
                     );
                   }}
                   isSearchable
-                  className="mt-1 w-full"
+                  className="mt-1 text-sm w-full"
                 />
               )}
             />
@@ -291,7 +292,7 @@ const LiveContact = () => {
         </div>
       </span>
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <MapPin size={18} color="blue" />
         <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
           <p className="text-sm text-gray-500">ตำบล/แขวง</p>
@@ -325,11 +326,11 @@ const LiveContact = () => {
                     setValue("tambon", option.value);
                     setZipCode(
                       tambons?.filter((p) => p.name_th === option.value)[0]
-                        ?.zip_code
+                        ?.zip_code,
                     );
                   }}
                   isSearchable
-                  className="mt-1 w-full"
+                  className="mt-1 text-sm w-full"
                 />
               )}
             />
@@ -344,7 +345,7 @@ const LiveContact = () => {
         </div>
       </span>
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <Mailbox size={18} color="blue" />
         <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
           <p className="text-sm text-gray-500">รหัสไปรษณีย์</p>

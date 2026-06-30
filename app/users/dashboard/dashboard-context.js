@@ -5,8 +5,8 @@ const dashbaordProvider = createContext(undefined);
 export const DashboardContext = ({ children }) => {
   const [faculty, setFaculty] = useState();
   const [department, setDepartment] = useState();
-  const [selectYearStart, setSelectYearStart] = useState();
-  const [selectYearEnd, setSelectYearEnd] = useState();
+  const [selectYearStart, setSelectYearStart] = useState("");
+  const [selectYearEnd, setSelectYearEnd] = useState("");
 
   return (
     <dashbaordProvider.Provider

@@ -47,8 +47,11 @@ import { SelectYearEnd, SelectYearStart } from "@/components/select-year-start";
 import FadeInSection from "@/components/fade-in-section";
 import LineChartComponent from "@/components/line-chart";
 import AlumniColumnChart from "@/components/column-chart";
+import { useFacultyDep } from "@/hook/useFacultyDep";
+import ExportBtn from "./export-btn";
 
 const Dashboard = () => {
+  const { faculties, departments, loadData } = useFacultyDep();
   const { user } = useGetSession();
   const {
     setFaculty,
@@ -61,8 +64,8 @@ const Dashboard = () => {
   const { setPrevPath } = useAppContext();
   const router = useRouter();
 
-  const [selectFaculty, setSelectFaculty] = useState("");
-  const [selectDepartment, setSelectDepartment] = useState("");
+  const [selectFaculty, setSelectFaculty] = useState([]);
+  const [selectDepartment, setSelectDepartment] = useState([]);
   const [selectFacultyMenus, setSelectFacultyMenus] = useState(
     faculties.map((f) => ({
       id: f.id,
@@ -72,7 +75,7 @@ const Dashboard = () => {
         setFaculty(f);
         setDepartment();
       },
-    }))
+    })),
   );
 
   const [selectDepartmentMenus, setSelectDepartmentMenus] = useState(
@@ -83,8 +86,31 @@ const Dashboard = () => {
         setSelectDepartment(d);
         setDepartment(d);
       },
-    }))
+    })),
   );
+  useEffect(() => {
+    setSelectFacultyMenus(
+      faculties.map((f) => ({
+        id: f.id,
+        title: f.name,
+        func: () => {
+          setSelectFaculty(f);
+          setFaculty(f);
+          setDepartment();
+        },
+      })),
+    );
+    setSelectDepartmentMenus(
+      departments.map((d) => ({
+        id: d.id,
+        title: d.name,
+        func: () => {
+          setSelectDepartment(d);
+          setDepartment(d);
+        },
+      })),
+    );
+  }, [faculties, departments]);
   useEffect(() => {
     if (!user || user?.roleId > 3) return;
 
@@ -92,13 +118,7 @@ const Dashboard = () => {
 
     let data = departments;
     const facSub = Number(`${facultyId}`.substring(1, 2));
-    if (facultyId < 18) {
-      data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
-    } else if (facultyId > 18) {
-      data = departments.filter((d) => `${d.id}`.substring(0, 2) == 62);
-    } else {
-      data = departments.filter((d) => `${d.id}`.substring(0, 2) == 21);
-    }
+    data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
 
     setSelectDepartmentMenus(
       data.map((d) => ({
@@ -108,7 +128,7 @@ const Dashboard = () => {
           setSelectDepartment(d);
           setDepartment(d);
         },
-      }))
+      })),
     );
   }, [user]);
 
@@ -119,13 +139,8 @@ const Dashboard = () => {
       const facId = selectFaculty.id;
       const facSub = Number(`${selectFaculty.id}`.substring(1, 2));
       let data = [];
-      if (facId < 18) {
-        data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
-      } else if (facId > 18) {
-        data = departments.filter((d) => `${d.id}`.substring(0, 2) == 62);
-      } else {
-        data = departments.filter((d) => `${d.id}`.substring(0, 2) == 21);
-      }
+      data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
+
       setSelectDepartment("");
 
       return data.map((d) => ({
@@ -146,10 +161,10 @@ const Dashboard = () => {
       title = "ทั้งหมด";
     }
 
-    if (selectFaculty) {
+    if (selectFaculty.length > 0) {
       title = selectFaculty.name + " ";
     }
-    if (selectDepartment) {
+    if (selectDepartment.length > 0) {
       title = title + "สาขาวิชา" + selectDepartment.name;
     }
 
@@ -171,7 +186,7 @@ const Dashboard = () => {
           setFaculty(d);
           setDepartment("");
         },
-      }))
+      })),
     );
     setSelectDepartmentMenus(
       departments.map((d) => ({
@@ -181,7 +196,7 @@ const Dashboard = () => {
           setSelectDepartment(d);
           setDepartment(d);
         },
-      }))
+      })),
     );
     setSelectDepartment("");
     setSelectFaculty("");
@@ -193,7 +208,7 @@ const Dashboard = () => {
     facultyId = "",
     departmentId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     setLoadAllAvg(true);
     try {
@@ -221,7 +236,9 @@ const Dashboard = () => {
   const fetchChartBarData = async (
     facultyId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
+    faculties,
+    departments,
   ) => {
     try {
       const res = await axios.get(
@@ -233,19 +250,28 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         const data = res.data;
-        const result = data.map((d) => ({
-          name:
-            user?.roleId < 3 || selectFaculty
-              ? departments.find((f) => f.id == d.id)?.name
-              : faculties.find((f) => f.id == d?.id)?.name,
-          working: d?.working,
-          unemployed: d?.unemployed,
-        }));
+        console.log("🚀 ~ fetchChartBarData ~ user?.roleId:", user?.roleId);
+
+        if (!departments || !faculties) return;
+
+        const result = data.map((d) => {
+          return {
+            name:
+              user?.roleId < 3 || selectFaculty.length > 0
+                ? departments.find((f) => Number(f?.id) === Number(d.id))
+                    ?.name || "ไม่พบรหัสสาขาวิชานี้"
+                : faculties.find((f) => Number(f?.id) === Number(d.id))?.name ||
+                  "ไม่พบรหัสคณะนี้",
+            working: d.working,
+            unemployed: d.unemployed,
+          };
+        });
         setChartbarData(result);
+        // console.log("🚀 ~ fetchChartBarData ~ result:", result)
       }
     } catch (error) {
       console.error(error);
@@ -257,7 +283,7 @@ const Dashboard = () => {
   const fetchPieData = async (
     facultyId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -269,15 +295,19 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         const data = res.data;
+        // console.log("🚀 ~ fetchPieData ~ data:", data);
         const result = data.map((d) => ({
           name:
-            user?.roleId < 4 || selectFaculty
-              ? departments.find((f) => f.id == d.departmentId)?.name
-              : faculties.find((f) => f.id == d.facultyId).name,
+            user?.roleId < 4 ||  selectFaculty.length > 0
+              ? departments.find(
+                  (f) => Number(f?.id) === Number(d.departmentId),
+                )?.name || "ไม่พบรหัสสาขาวิชานี้"
+              : faculties.find((f) => Number(f?.id) === Number(d.facultyId))
+                  ?.name || "ไม่พบรหัสคณะนี้",
           value: Math.round(d.avgSalary),
         }));
         setPieData(result);
@@ -294,7 +324,7 @@ const Dashboard = () => {
     facultyId = "",
     departmentId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -307,7 +337,7 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         setPieWorkRate(res.data.result);
@@ -324,7 +354,7 @@ const Dashboard = () => {
     facultyId = "",
     departmentId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -337,7 +367,7 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         const data = res.data;
@@ -358,7 +388,7 @@ const Dashboard = () => {
     facultyId = "",
     departmentId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -371,7 +401,7 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         setMostLivePercent(res.data);
@@ -386,7 +416,7 @@ const Dashboard = () => {
   const fetchWorkRatePercent = async (
     facultyId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -398,15 +428,17 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         const data = res.data;
         const result = data.map((d) => ({
           name:
-            user?.roleId < 3 || selectFaculty
-              ? departments.find((f) => f.id == d.id)?.name
-              : faculties.find((f) => f.id == d.id)?.name,
+            user?.roleId < 3 ||  selectFaculty.length > 0
+              ? departments.find((f) => Number(f?.id) === Number(d.id))?.name ||
+                "ไม่พบรหัสสาขาวิชานี้"
+              : faculties.find((f) => Number(f?.id) === Number(d.id))?.name ||
+                "ไม่พบรหัสคณะนี้",
           percent: Math.round(d?.percent),
         }));
         setWorkRatePercent(result);
@@ -423,7 +455,7 @@ const Dashboard = () => {
     facultyId = "",
     departmentId = "",
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     try {
       const res = await axios.get(
@@ -436,10 +468,11 @@ const Dashboard = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if (res.status === 200) {
         setNoWorkData(res.data.result);
+        // console.log("🚀 ~ fetchNoWorkData ~ res.data.result:", res.data.result);
         if (user.roleId < 3 || selectDepartment) {
           setAlumniNoWorkList(res.data.alumniNoWork);
         }
@@ -451,41 +484,56 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || loadData) return;
     fetchPageStart(
       selectFaculty?.id,
       selectDepartment?.id,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
-    fetchChartBarData(selectFaculty?.id, selectYearStart, selectYearEnd);
+    fetchChartBarData(
+      selectFaculty?.id,
+      selectYearStart,
+      selectYearEnd,
+      faculties,
+      departments,
+    );
     fetchPieData(selectFaculty?.id, selectYearStart, selectYearEnd);
     fetchMostPopular(
       selectFaculty?.id,
       selectDepartment?.id,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
     fetchMostLive(
       selectFaculty?.id,
       selectDepartment?.id,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
     fetchWorkRatePercent(selectFaculty?.id, selectYearStart, selectYearEnd);
     fetchNoWorkData(
       selectFaculty?.id,
       selectDepartment?.id,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
     fetchWorkPlaceRate(
       selectFaculty.id,
       selectDepartment.id,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
-  }, [user, selectDepartment, selectFaculty, selectYearStart, selectYearEnd]);
+  }, [
+    user,
+    selectDepartment,
+    selectFaculty,
+    selectYearStart,
+    selectYearEnd,
+    faculties,
+    departments,
+    loadData,
+  ]);
 
   if (!user)
     return (
@@ -504,16 +552,16 @@ const Dashboard = () => {
             {user?.roleId < 3
               ? departmentText(user?.departmentId) || ""
               : user?.roleId > 3
-              ? "มหาวิทยาลัยราชภัฏมหาสารคาม"
-              : facultyText(user?.facultyId) || ""}
+                ? "มหาวิทยาลัยราชภัฏมหาสารคาม"
+                : facultyText(user?.facultyId) || ""}
             {selectYearStart && ` ปีการศึกษา พ.ศ. ${selectYearStart}`}
             {selectYearEnd && selectYearStart
               ? ` - พ.ศ. ${selectYearEnd}`
               : selectYearEnd && ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`}
           </h1>
 
-          {(selectDepartment ||
-            selectFaculty ||
+          {(selectDepartment.length > 0 ||
+            selectFaculty.length > 0 ||
             selectYearStart ||
             selectYearEnd) && (
             <X
@@ -525,7 +573,7 @@ const Dashboard = () => {
           )}
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {user?.roleId > 3 && (
             <DropdownMenu
               icon={<Building size={20} />}
@@ -550,6 +598,17 @@ const Dashboard = () => {
             setSelectYearEnd={setSelectYearEnd}
             setPage={() => {}}
           />
+          <ExportBtn
+            selecetFacultyId={
+              selectFaculty?.length > 0 ? selectFaculty.map((s) => s?.id) : []
+            }
+            selectDepartmentId={
+              selectDepartment?.length > 0
+                ? selectDepartment.map((d) => d.id)
+                : []
+            }
+            selectYearStart={selectYearStart}
+          />
         </div>
       </span>
 
@@ -557,15 +616,6 @@ const Dashboard = () => {
         <div className=" p-2 pt-3.5 w-full grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-3.5">
           {/* all */}
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-3 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-blue-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/work-unemployed");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-blue-50 rounded-full border border-blue-500">
               <Users color="blue" size={30} />
             </span>
@@ -586,15 +636,6 @@ const Dashboard = () => {
 
           {/* work */}
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-green-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/work-unemployed");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 rounded-full border border-green-500 bg-green-50">
               <Check color="green" size={30} />
             </span>
@@ -617,15 +658,6 @@ const Dashboard = () => {
 
           {/* coin */}
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-yellow-500">
-            {/* <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/list-salary");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button> */}
             <span className="rounded-full border p-2 border-yellow-500 bg-yellow-50">
               <Coins color="orange" size={30} />
             </span>
@@ -638,7 +670,7 @@ const Dashboard = () => {
                   <Loading type={2} />
                 ) : headerData?.salaryAvg ? (
                   Number(
-                    Math.round(headerData?.salaryAvg || 0)
+                    Math.round(headerData?.salaryAvg || 0),
                   ).toLocaleString() || "โหลด..."
                 ) : (
                   0
@@ -652,15 +684,6 @@ const Dashboard = () => {
 
           {/* study */}
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-stone-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/work-unemployed");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 rounded-full border border-stone-500 bg-stone-50">
               <University color="brown" size={30} />
             </span>
@@ -683,15 +706,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-purple-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/master-degree-list");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-purple-50 rounded-full border border-purple-500">
               <GraduationCap color="purple" size={30} />
             </span>
@@ -713,15 +727,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-pink-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/doctoral-degree-list");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-pink-50 rounded-full border border-pink-500">
               <FaGraduationCap color="pink" size={30} />
             </span>
@@ -743,15 +748,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-gray-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/list-place");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-gray-50 rounded-full border border-gray-500">
               <BriefcaseBusiness color="black" size={30} />
             </span>
@@ -767,7 +763,7 @@ const Dashboard = () => {
               <label htmlFor="" className="text-sm text-gray-500">
                 {headerData?.countPoplationJob
                   ? Number(
-                      headerData?.countPoplationJob || 0
+                      headerData?.countPoplationJob || 0,
                     ).toLocaleString() + " คน" || "กำลังโหลด..."
                   : "ไม่พบข้อมูล"}
               </label>
@@ -775,15 +771,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-indigo-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/list-place");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-sky-50 rounded-full border border-indigo-500">
               <MapPinHouse color="blue" size={30} />
             </span>
@@ -808,15 +795,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-red-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/list-place");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-orange-50 rounded-full border border-red-500">
               <Building2 color="red" size={30} />
             </span>
@@ -834,7 +812,7 @@ const Dashboard = () => {
               <label htmlFor="" className="text-gray-500 text-sm">
                 {headerData?.workPlaceLive?._count?.alumniId
                   ? Number(
-                      headerData?.workPlaceLive?._count?.alumniId || 0
+                      headerData?.workPlaceLive?._count?.alumniId || 0,
                     ).toLocaleString() + " คน" || "กำลังโหลด..."
                   : "ไม่พบข้อมูล"}
               </label>
@@ -864,15 +842,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-amber-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/study-other-country");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-amber-50 rounded-full border border-orange-500">
               <FaMapMarked color="orange" size={30} />
             </span>
@@ -895,15 +864,6 @@ const Dashboard = () => {
           </FadeInSection>
 
           <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-cyan-500">
-            <button
-              onClick={() => {
-                setPrevPath("/users/dashboard");
-                router.push("/users/dashboard/work-other-country-list");
-              }}
-              className="absolute top-2 right-2 text-gray-700"
-            >
-              <FaEllipsisH size={15} />
-            </button>
             <span className="p-2 bg-cyan-50 rounded-full border border-indigo-500">
               <FaGlobe color="blue" size={30} />
             </span>
@@ -942,16 +902,16 @@ const Dashboard = () => {
                       ทำงาน (
                       {chartbarData.reduce(
                         (sum, current) => sum + current.working,
-                        0
+                        0,
                       ) + " คน"}
                       )
                     </p>
                     <span className="p-2 ml-2 bg-[#ff6b3e]"></span>
                     <p className="text-sm">
-                      ว่างงาน (
+                      ว่างงาน/ไม่พบข้อมูล (
                       {chartbarData.reduce(
                         (sum, current) => sum + current.unemployed,
-                        0
+                        0,
                       ) + " คน"}
                       )
                     </p>
@@ -994,7 +954,7 @@ const Dashboard = () => {
               <FadeInSection className="bg-white w-full lg:w-1/2 p-5 rounded-lg mx-2 shadow-md">
                 <span className="w-full flex items-center justify-between">
                   <label className="font-bold">
-                    สัดส่วนเงินเดือนเฉลี่ยของศิษย์เก่า
+                    สัดส่วนเงินเดือนเฉลี่ยของศิษย์เก่าในแต่ละ
                     {user?.roleId < 3 || selectFaculty ? "สาขา" : "คณะ"}
                   </label>
                 </span>
@@ -1017,8 +977,8 @@ const Dashboard = () => {
                   {user?.roleId < 3 || selectFaculty
                     ? ""
                     : user?.roleId > 3
-                    ? "แต่ละคณะ"
-                    : "แต่ละสาขา"}
+                      ? "แต่ละคณะ"
+                      : "แต่ละสาขา"}
                 </label>
                 {noWorkData?.length > 0 && (
                   <button
@@ -1089,8 +1049,14 @@ const Dashboard = () => {
                             <FadeInSection className="flex w-full flex-col gap-1">
                               <p className="text-[0.9rem] ">
                                 {user?.roleId < 3 || selectFaculty
-                                  ? departmentText(r?.departmentId)
-                                  : facultyText(r?.facultyId)}
+                                  ? departmentText(
+                                      departments,
+                                      Number(r?.departmentId),
+                                    ) || "ไม่พบข้อมูล"
+                                  : facultyText(
+                                      faculties,
+                                      Number(r?.facultyId),
+                                    ) || "ไม่พบข้อมูล"}
                               </p>
                             </FadeInSection>
                           </FadeInSection>

@@ -15,7 +15,6 @@ const TiptapEditor = dynamic(() => import("@/components/text-editor"), {
 import dynamic from "next/dynamic";
 import Select from "@/components/select";
 import { SelectYearEnd, SelectYearStart } from "@/components/select-year-start";
-import { departments, faculties } from "@/data/faculty";
 import { useEffect, useState } from "react";
 import { alerts } from "@/libs/alerts";
 import axios from "axios";
@@ -24,10 +23,11 @@ import Loading from "@/components/loading";
 import { departmentText, facultyText } from "@/components/faculty-p";
 import { v4 as uuid } from "uuid";
 import useGetSession from "@/hook/useGetSeesion";
+import { useFacultyDep } from "@/hook/useFacultyDep";
 
 const SendMessage = () => {
   const { user, checking } = useGetSession();
-
+  const { departments, faculties } = useFacultyDep();
   const {
     handleSubmit,
     reset,
@@ -82,7 +82,7 @@ const SendMessage = () => {
     facultyId,
     departmentId,
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     setLoading(true);
     try {
@@ -122,7 +122,7 @@ const SendMessage = () => {
         facultyId,
         departmentId,
         selectYearStart,
-        selectYearEnd
+        selectYearEnd,
       );
     }, 500);
 
@@ -158,14 +158,18 @@ const SendMessage = () => {
       `ต้องการส่งข้อความถึงศิษย์เก่า ${
         isSelectAll ? total : selectId.length
       }คน?`,
-      "ส่ง"
+      "ส่ง",
     );
     if (!isConfirmed) return;
     setSending(true);
     try {
       const res = await axios.post(
         apiConfig.rmuAPI + "/president/sendemail",
-        data,
+        {
+          ...data,
+          selectCategory: ["ข่าวสาร/กิจกรรม"],
+          selectAlumniId: selectId,
+        },
         {
           withCredentials: true,
           params: {
@@ -174,7 +178,7 @@ const SendMessage = () => {
             selectYearStart,
             selectYearEnd,
           },
-        }
+        },
       );
       if ((res.status = 200)) {
         alerts.success("ระบบกำลังทยอยส่งข้อความถึงศิษย์เก่า");
@@ -300,7 +304,7 @@ const SendMessage = () => {
                       label: f.name,
                       value: f.id,
                     }))
-                    .find((f) => f.value == facultyId) || null
+                    .find((f) => f?.value == facultyId) || null
                 }
                 onChange={(option) => {
                   setFacultyId(option.value);
@@ -417,7 +421,7 @@ const SendMessage = () => {
                     setSelectId((prev) =>
                       prev.includes(a?.alumni_id)
                         ? prev.filter((p) => p !== a?.alumni_id)
-                        : [...prev, a?.alumni_id]
+                        : [...prev, a?.alumni_id],
                     );
                     setIsSelectAll(false);
                   }}
@@ -445,8 +449,8 @@ const SendMessage = () => {
                     </span>
 
                     <p className="text-sm text-gray-800">
-                      {facultyText(a?.facultyId)}{" "}
-                      {departmentText(a?.departmentId)}
+                      {facultyText(faculties, a?.facultyId)}{" "}
+                      {departmentText(departments, a?.departmentId)}
                     </p>
                   </div>
                 </span>

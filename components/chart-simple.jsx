@@ -3,12 +3,10 @@ import React from "react";
 import {
   BarChart,
   Bar,
-  Rectangle,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -34,7 +32,7 @@ export default function ChartSimple({
             textAnchor="end"
             height={100}
             interval={0}
-            tick={{ fontSize: 15 }}
+            tick={{ fontSize: 13 }}
           />
           <YAxis tick={{}} domain={domain} />
           <Tooltip />
@@ -42,14 +40,16 @@ export default function ChartSimple({
             dataKey={key1}
             fill={color1 || "#8884d8"}
             // activeBar={<Rectangle fill="pink" stroke="blue" />}
-            barSize={45} // เพิ่มบรรทัดนี้
+            barSize={38} // เพิ่มบรรทัดนี้
+            radius={[8, 8, 0, 0]}
           />
           {key2 && (
             <Bar
               dataKey={key2}
               fill={color2 || "#82ca9d"}
               // activeBar={<Rectangle fill="gold" stroke="purple" />}
-              barSize={45} // เพิ่มบรรทัดนี้
+              barSize={38} // เพิ่มบรรทัดนี้
+              radius={[8, 8, 0, 0]}
             />
           )}
         </BarChart>

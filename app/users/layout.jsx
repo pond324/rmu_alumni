@@ -1,12 +1,11 @@
 "use client";
 import Menu from "@/layouts/menus";
-import Image from "next/image";
-import logo from "@/assets/images/logo_rmu.png";
 import useGetSession from "@/hook/useGetSeesion";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AppProvider } from "@/context/app.context";
 import Footer from "@/layouts/footer";
+import AppHeader from "@/layouts/header";
 
 const Layout = ({ children }) => {
   const { user, checking } = useGetSession();
@@ -15,14 +14,12 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (checking) return;
-
-    const timeout = setTimeout(() => {
-      if (!user?.id || user?.roleId > 4) {
-        router.push("/");
-      }
-    }, [500]);
-
-    return () => clearTimeout(timeout);
+    if (!user?.id) {
+      router.push("/");
+    }
+    if (user?.roleId > 4 && pathName !== "/users/overview") {
+      router.push("/");
+    }
   }, [checking, user]);
 
   return (
@@ -30,6 +27,7 @@ const Layout = ({ children }) => {
       <div className="w-screen h-screen flex items-center bg-white">
         <Menu />
         <div className="flex flex-col w-full h-full overflow-auto">
+          <AppHeader />
           {/* header */}
           {/* {pathName.split("/")[2] !== "news" && (
             <header className="mb-2 p-2 w-full flex items-center gap-2 pb-2 border-b border-gray-300">
@@ -44,7 +42,7 @@ const Layout = ({ children }) => {
           )} */}
 
           {children}
-          <Footer/>
+          <Footer />
         </div>
       </div>
     </AppProvider>

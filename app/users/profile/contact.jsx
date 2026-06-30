@@ -21,20 +21,32 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 
-const Contact = ({reload}) => {
+const Contact = () => {
   const { user } = useGetSession();
   const [editing, setEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-  const [showOtherPhone, setShowOtherPhone] = useState(true);
-  const [showOtherEmail, setShowOtherEmail] = useState(true);
+  const [showOtherPhone, setShowOtherPhone] = useState(false);
+  const [showOtherEmail, setShowOtherEmail] = useState(false);
 
-  const [phone1, setPhone1] = useState("");
-  const [phone2, setPhone2] = useState("");
-  const [email1, setEmail1] = useState("");
-  const [email2, setEmail2] = useState("");
-  const [facebook, setFacebook] = useState("");
+  const {
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    control,
+    reset,
+  } = useForm({
+    defaultValues: {
+      phone1: "",
+      phone2: "",
+      email1: "",
+      email2: "",
+      facebook: "",
+    },
+  });
 
   const [load, setLoad] = useState(false);
   const fetchUserContract = async () => {
@@ -45,18 +57,16 @@ const Contact = ({reload}) => {
       });
       if (res.status === 200) {
         const { phone1, phone2, email1, email2, facebook } = res.data;
-        setPhone1(phone1 || "");
-        setPhone2(phone2 || "");
-        setEmail1(email1 || "");
-        setEmail2(email2 || "");
-        setFacebook(facebook || "");
+        reset({
+          ...res.data,
+        });
         if (!phone1 && !phone2 && !email1 && !email2 && !facebook) {
           setEditing(true);
         }
-        if (!phone1 || !phone2) {
+        if (phone1 && phone2) {
           setShowOtherPhone(true);
         }
-        if (!email1 || !email2) {
+        if (email1 && email2) {
           setShowOtherEmail(true);
         }
       }
@@ -75,60 +85,23 @@ const Contact = ({reload}) => {
   const cancelEditing = () => {
     setEditing(false);
     fetchUserContract();
-    if (!phone2) {
-      setShowOtherPhone(false);
-    }
-    if (!email2) {
-      setShowOtherEmail(false);
-    }
   };
 
-  const updateContact = async () => {
-    if (phone1) {
-      if (!isValidThaiPhoneNumber(phone1)) {
-        return alerts.err("เบอร์โทรศัพท์ไม่ถูกต้อง");
-      }
-    }
-    if (phone2) {
-      if (!isValidThaiPhoneNumber(phone2)) {
-        return alerts.err("เบอร์โทรศัพท์ไม่ถูกต้อง");
-      }
-    }
-    if (email1) {
-      if (!isValidEmail(email1)) {
-        return alerts.err("อีเมลไม่ถูกต้อง");
-      }
-    }
-    if (email2) {
-      if (!isValidEmail(email2)) {
-        return alerts.err("อีเมลไม่ถูกต้อง");
-      }
-    }
-    if (!email1 && !email2) {
-      return alerts.err("โปรดกรอกอย่างน้อย 1 อีเมล");
-    }
-
+  const updateContact = async (payload) => {
     setUpdating(true);
     try {
-      const payload = {
-        phone1,
-        phone2,
-        email1,
-        email2,
-        facebook,
-      };
       const res = await axios.post(
         apiConfig.rmuAPI + "/alumni/update-contact",
         payload,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res?.status === 200) {
         await alerts.success();
         cancelEditing();
         fetchUserContract();
-        reload();
+        fetchUserContract();
       }
     } catch (error) {
       console.error(error);
@@ -140,157 +113,251 @@ const Contact = ({reload}) => {
 
   if (load)
     return (
-      <div className="w-full flex flex-col items-center  gap-2 py-10">
+      <div className="w-full h-[400px] flex flex-col items-center justify-center gap-2 py-10">
         <Loading type={2} />
         <p>กำลังโหลด...</p>
       </div>
     );
 
   return (
-    <div className="w-full flex flex-col bg-white">
-      <span className="relative flex items-center gap-2">
-        <Contact2 size={30} color="blue" />
-        <p className="text-lg font-bold">ช่องทางการติดต่อ</p>
-        {editing ? (
-          <span className="flex items-center gap-2 absolute top-0 right-2">
-            <button
-              disabled={updating}
-              onClick={cancelEditing}
-              className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-md bg-white"
-            >
-              <X size={15} color="red" />
-              <p>ยกเลิก</p>
-            </button>
-            <button
-              disabled={updating}
-              onClick={updateContact}
-              className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-md bg-white"
-            >
-              <Check size={15} color="green" />
+    <div className="w-full flex flex-col relative ">
+      {editing ? (
+        <span className="flex items-center gap-2 mb-5  w-full">
+          <button
+            disabled={updating}
+            onClick={cancelEditing}
+            className="flex items-center gap-2 p-1.5 px-2 rounded-lg border border-gray-300 shadow-sm text-sm bg-white"
+          >
+            <X size={15} color="red" />
+            <p>ยกเลิก</p>
+          </button>
+          <button
+            disabled={updating}
+            onClick={handleSubmit(updateContact)}
+            className="flex items-center gap-2 p-1.5 px-2 rounded-lg border bg-blue-500 text-white border-gray-300 shadow-sm text-sm"
+          >
+            <Check size={15} />
 
-              <p>{updating ? "กำลังบันทึก..." : "บันทึก"}</p>
-            </button>
-          </span>
-        ) : (
+            <p>{updating ? "กำลังบันทึก..." : "บันทึก"}</p>
+          </button>
+        </span>
+      ) : (
+        <span className="flex items-center gap-2 mb-5 w-full">
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-2 absolute top-0 right-2 p-1.5 px-2 hover:bg-yellow-400 rounded-lg border border-gray-300 shadow-md bg-gray-50"
+            className="flex items-center gap-2  justify-end p-1.5 px-2.5 text-sm text-white bg-blue-500 rounded-lg border border-blue-300 shadow-md "
           >
             <Edit size={15} />
             <p>แก้ไข</p>
           </button>
-        )}
-      </span>
+        </span>
+      )}
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <div className="w-full flex items-start gap-10">
         <Phone size={18} color="blue" />
-        <div className="w-full lg:w-1/2 flex flex-col items-start gap-0.5">
+        <div className="w-full lg:w-1/2 flex flex-col items-start gap-1.5">
           <p className="text-sm text-gray-500">เบอร์โทรศัพท์</p>
-          <input
-            disabled={!editing}
-            type="text"
-            value={formatPhoneNumber(phone1)}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value.split("-").join("").length > 10) return;
-              setPhone1(value.split("-").join(""));
+          <Controller
+            name="phone1"
+            rules={{
+              required: "กรุณากรอกเบอร์โทรศัพท์ที่ติดต่อได้",
+              validate: (value) => {
+                if (!isValidThaiPhoneNumber(value)) {
+                  return "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง";
+                }
+              },
             }}
-            placeholder="เพิ่มเบอร์โทรศัพท์ที่สามารถติดต่อได้"
-            className={`w-full ${
-              editing && " p-2 border border-gray-300 shadow-sm rounded-md px-3"
-            }`}
+            control={control}
+            render={({ field }) => (
+              <input
+                disabled={!editing}
+                {...field}
+                type="text"
+                value={formatPhoneNumber(field.value || "")}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.split("-").join("").length > 10) return;
+                  setValue("phone1", value.split("-").join(""));
+                }}
+                placeholder={`กรุณาเพิ่มเบอร์โทรศัพท์ที่สามารถติดต่อได้`}
+                className={`w-full text-sm bg-white ${!watch("phone1") && !editing && "placeholder-red-500"}  ${
+                  editing &&
+                  " p-2 border border-gray-300 shadow-sm rounded-sm px-3"
+                }`}
+              />
+            )}
           />
+          {errors.phone1 && (
+            <small className="mt-1 text-red-500">{errors.phone1.message}</small>
+          )}
+
           {showOtherPhone && (
-            <input
-              disabled={!editing}
-              type="text"
-              value={phone1 === phone2 ? "" : formatPhoneNumber(phone2)}
-              placeholder="เพิ่มเบอร์โทรศัพท์ที่สามารถติดต่อได้"
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.split("-").join("").length > 10) return;
-                setPhone2(value.split("-").join(""));
-              }}
-              className={`w-full ${
-                editing &&
-                "mt-1.5 p-2 border border-gray-300 shadow-sm rounded-md px-3"
-              }`}
-            />
+            <>
+              <Controller
+                name="phone2"
+                rules={{
+                  required:
+                    "กรุณากรอกเบอร์โทรศัพท์ที่ติดต่อได้อย่างน้อย 1 เบอร์",
+                  validate: (value) => {
+                    if (!isValidThaiPhoneNumber(value)) {
+                      return "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง";
+                    }
+                    if (value === watch("phone1"))
+                      return "ไม่สามารถกรอกเบอร์โทรศัพท์ซ้ำได้";
+                  },
+                }}
+                control={control}
+                render={({ field }) => (
+                  <input
+                    disabled={!editing}
+                    {...field}
+                    value={formatPhoneNumber(field.value || "")}
+                    type="text"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.split("-").join("").length > 10) return;
+                      setValue("phone2", value.split("-").join(""));
+                    }}
+                    placeholder={`เบอร์โทรศัพท์ที่สามารถติดต่อได้`}
+                    className={`w-full text-sm bg-white ${
+                      editing &&
+                      " p-2 border border-gray-300 shadow-sm rounded-sm px-3"
+                    }`}
+                  />
+                )}
+              />
+              {errors.phone2 && (
+                <small className="mt-1 text-red-500">
+                  {errors.phone2.message}
+                </small>
+              )}
+              {editing && (
+                <button
+                  onClick={() => setShowOtherPhone(false)}
+                  className="text-sm border border-gray-300  rounded-lg  mt-1 p-2  px-2.5 flex items-center gap-2"
+                >
+                  <X size={15} />
+                  <p>ปิด</p>
+                </button>
+              )}
+            </>
           )}
           {!showOtherPhone && editing && (
             <button
               onClick={() => setShowOtherPhone(true)}
               className="text-sm border border-gray-300 bg-blue-500 rounded-lg text-white mt-1 p-2 hover:bg-blue-600 px-2.5 flex items-center gap-2"
             >
-              <Plus size={18} color="white" />
-              <p>เพิ่ม</p>
+              <Plus size={15} color="white" />
+              <p>เพิ่มเบอร์ใหม่</p>
             </button>
           )}
         </div>
-      </span>
+      </div>
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <Mail size={18} color="blue" />
-        <div className="w-full lg:w-1/2 flex items-start flex-col gap-0.5">
+        <div className="w-full lg:w-1/2 flex items-start flex-col gap-1.5">
           <p className="text-sm text-gray-500">อีเมล</p>
-          {user?.roleId < 2 &&
-            (email1?.includes("@rmu.ac.th") ||
-              email2?.includes("@rmu.ac.th")) && (
-              <span className="flex items-center gap-2 my-1">
-                <CircleAlert color="orange" size={15} />
-                <p className="text-xs text-gray-500">
-                  อีเมลมหาลัยมีอายุการใช้งานที่จำกัด
-                </p>
-              </span>
+          <Controller
+            name="email1"
+            rules={{
+              required: "กรุณากรอกอีเมลที่สามารถติดต่อได้อย่างน้อย 1 อีเมล",
+              validate: (value) => {
+                if (!isValidEmail(value)) return "รูปแบบอีเมลไม่ถูกต้อง";
+              },
+            }}
+            control={control}
+            render={({ field }) => (
+              <input
+                disabled={!editing}
+                type="email"
+                {...field}
+                placeholder="เพิ่มอีเมล์ที่สามารถติดต่อได้"
+                className={`w-full text-sm bg-white ${!watch("email1") && !editing && "placeholder-red-500"} ${
+                  editing &&
+                  "p-2 border border-gray-300 shadow-sm rounded-md px-3"
+                }`}
+              />
             )}
-          <input
-            disabled={!editing}
-            type="email"
-            value={email1}
-            onChange={(e) => setEmail1(e.target.value)}
-            placeholder="เพิ่มอีเมล์ที่สามารถติดต่อได้"
-            className={`w-full ${
-              editing && "p-2 border border-gray-300 shadow-sm rounded-md px-3"
-            }`}
           />
+          {errors.email1 && (
+            <small className="mt-1 text-red-500">{errors.email1.message}</small>
+          )}
           {showOtherEmail && (
-            <input
-              disabled={!editing}
-              type="email"
-              value={email2 === email1 ? "" : email2}
-              placeholder="เพิ่มอีเมล์ที่สามารถติดต่อได้"
-              onChange={(e) => setEmail2(e.target.value)}
-              className={`w-full ${
-                editing &&
-                " mt-1.5 p-2 border border-gray-300 shadow-sm rounded-md px-3"
-              }`}
-            />
+            <>
+              {" "}
+              <Controller
+                name="email2"
+                rules={{
+                  required: "กรุณากรอกอีเมลที่สามารถติดต่อ",
+                  validate: (value) => {
+                    if (!isValidEmail(value)) return "รูปแบบอีเมลไม่ถูกต้อง";
+                    if (value === watch("email1"))
+                      return "ไม่สามารถกรอกอีเมลซ้ำกันได้";
+                  },
+                }}
+                control={control}
+                render={({ field }) => (
+                  <input
+                    disabled={!editing}
+                    type="email"
+                    {...field}
+                    placeholder="อีเมล์ที่สามารถติดต่อได้"
+                    className={`w-full text-sm bg-white ${
+                      editing &&
+                      "p-2 border border-gray-300 shadow-sm rounded-md px-3"
+                    }`}
+                  />
+                )}
+              />
+              {errors.email2 && (
+                <small className="mt-1 text-red-500">
+                  {errors.email2.message}
+                </small>
+              )}
+              {editing && (
+                <button
+                  onClick={() => setShowOtherEmail(false)}
+                  className="text-sm border border-gray-300 rounded-lg t-1 p-2 px-2.5 flex items-center gap-2"
+                >
+                  <X size={15} />
+                  <p>ปิด</p>
+                </button>
+              )}
+            </>
           )}
           {!showOtherEmail && editing && (
             <button
               onClick={() => setShowOtherEmail(true)}
               className="text-sm border border-gray-300 bg-blue-500 rounded-lg text-white mt-1 p-2 hover:bg-blue-600 px-2.5 flex items-center gap-2"
             >
-              <Plus size={18} color="white" />
-              <p>เพิ่ม</p>
+              <Plus size={15} color="white" />
+              <p>เพิ่มอีเมลใหม่</p>
             </button>
           )}
         </div>
       </span>
 
-      <span className="w-full mt-5 flex items-center gap-3">
+      <span className="w-full mt-5 flex items-start gap-10">
         <Facebook size={18} color="blue" />
-        <div className="w-full lg:w-1/2 flex flex-col gap-0.5">
+        <div className="w-full lg:w-1/2 flex flex-col gap-1.5">
           <p className="text-sm text-gray-500">เฟสบุ๊ค</p>
-          <input
-            disabled={!editing}
-            type="text"
-            placeholder="เฟสบุ๊คที่สามารถติดต่อได้"
-            value={facebook}
-            onChange={(e) => setFacebook(e.target.value)}
-            className={`${
-              editing && "p-2 border border-gray-300 shadow-sm rounded-md px-3"
-            }`}
+          <Controller
+            name="facebook"
+            control={control}
+            render={({ field }) => (
+              <input
+                disabled={!editing}
+                {...field}
+                value={field.value || ""}
+                type="text"
+                placeholder="เฟสบุ๊คที่สามารถติดต่อได้"
+                className={`text-sm ${
+                  editing &&
+                  "p-2 border border-gray-300 shadow-sm rounded-md px-3"
+                }`}
+              />
+            )}
           />
         </div>
       </span>

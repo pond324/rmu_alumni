@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function useGetSession() {
   const [user, setUser] = useState();
-  const [checking, setChecking] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   const checkUser = async () => {
     setChecking(true);

@@ -1,11 +1,15 @@
-import { departments, faculties } from "@/data/faculty";
-
-export const facultyText = (facId) => {
-  return `${faculties.find((f) => f.id == Number(facId))?.name}`;
+export const facultyText = (faculties, facId) => {
+  if (isNaN(Number(facId))) return facId;
+  // console.log("🚀 ~ facultyText ~ facId:", facId?.substring(1, 2));
+  // console.log("🚀 ~ facultyText ~ faculties:", faculties)
+  return `${faculties?.find((f) => String(f?.id) == String(facId))?.name || "ไม่พบรหัสคณะนี้"}`;
 };
 
-export const departmentText = (depId) => {
+export const departmentText = (departments, depId) => {
+  if (isNaN(Number(depId))) return depId;
+
   return `สาขา${
-    departments.find((dep) => Number(dep.id) === Number(depId))?.name
+    departments?.find((dep) => Number(dep?.id) === Number(depId))?.name ||
+    "ไม่พบสาขาวิชานี้"
   }`;
 };

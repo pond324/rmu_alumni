@@ -18,7 +18,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { departments, faculties } from "@/data/faculty";
 import { alerts } from "@/libs/alerts";
 import { debounce } from "lodash";
 import Loading from "@/components/loading";
@@ -38,8 +37,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SelectYearEnd, SelectYearStart } from "@/components/select-year-start";
 import { v4 as uuid } from "uuid";
+import { useFacultyDep } from "@/hook/useFacultyDep";
+import { SelectFaculty } from "@/components/select-fac-dep";
 
 const SearchPage = () => {
+  const {departments,faculties} = useFacultyDep();
   const { user } = useGetSession();
   const [showSendEmail, setSendEmail] = useState(false);
   const [search, setSearch] = useState("");
@@ -194,7 +196,7 @@ const SearchPage = () => {
                     label: f.name,
                     value: f.id,
                   }))
-                  .find((f) => Number(f.value) == faculty) || null
+                  .find((f) => Number(f?.value) == faculty) || null
               }
               onChange={(option) => setFaculty(option.value)}
             />
@@ -428,10 +430,10 @@ const SearchPage = () => {
                         {d?.fname} {d?.lname}
                       </td>
                       <td className="p-2.5 py-3 text-start">
-                        {facultyText(d?.facultyId)}
+                        {facultyText(faculties,d?.facultyId)}
                       </td>
                       <td className="p-2.5 py-3 text-start">
-                        {departmentText(d?.departmentId)}
+                        {departmentText(departments,d?.departmentId)}
                       </td>
                       <td className="p-2.5 py-3 text-start">
                         {`${d?.year_start || "ไม่พบข้อมูล"} - ${
@@ -488,7 +490,7 @@ const SearchPage = () => {
                         <GraduationCap size={15} color="gray" />
                         <p className="text-sm text-gray-500">
                           {facultyText(
-                            d?.facultyId || d?.alumni_id?.substring(3, 5)
+                            faculties,d?.facultyId || d?.alumni_id?.substring(3, 5)
                           )}
                         </p>
                       </span>
@@ -496,7 +498,7 @@ const SearchPage = () => {
                         <Book size={15} color="gray" />
                         <p className="text-sm text-gray-500">
                           {departmentText(
-                            d?.departmentId || d?.alumni_id?.substring(4, 8)
+                            departments,d?.departmentId || d?.alumni_id?.substring(4, 8)
                           )}
                         </p>
                       </span>

@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { alerts } from "@/libs/alerts";
-import { Download } from "lucide-react";
+import { Download, File } from "lucide-react";
 
 const ExportBtn = ({ data, exportname }) => {
   const handleExport = () => {
@@ -27,10 +27,10 @@ const ExportBtn = ({ data, exportname }) => {
     <button
       onClick={handleExport}
       disabled={!data}
-      className="p-2 text-white bg-blue-600 px-3.5 rounded-lg border border-gray-300 shadow-md flex justify-center items-center gap-2"
+      className="p-2 hover:text-white bg-white hover:bg-blue-600 px-3.5 rounded-lg border border-gray-300 shadow-md flex justify-center items-center gap-2"
     >
-      <Download size={17} color="white" />
-      <p className="text-sm hidden lg:inline-flex">Export</p>
+      <File size={17} />
+      <p className="text-sm">Export</p>
     </button>
   );
 };

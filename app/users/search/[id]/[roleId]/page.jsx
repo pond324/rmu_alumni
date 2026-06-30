@@ -10,7 +10,6 @@ import dayjs from "@/libs/dayjs";
 import {
   ArrowLeft,
   Award,
-  Bath,
   Book,
   BriefcaseBusiness,
   Calendar,
@@ -36,8 +35,10 @@ import { useEffect, useState } from "react";
 import useGetSession from "@/hook/useGetSeesion";
 import SendEmail from "@/components/sendEmail";
 import { useAppContext } from "@/context/app.context";
+import { useFacultyDep } from "@/hook/useFacultyDep";
 
 const UserDetail = () => {
+  const { departments, faculties } = useFacultyDep();
   const { user } = useGetSession();
   const { id, roleId } = useParams();
   const [userData, setUserData] = useState();
@@ -52,10 +53,11 @@ const UserDetail = () => {
     try {
       const res = await axios.get(
         apiConfig.rmuAPI + `/alumni/user/${id}/${roleId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res?.status === 200) {
         setUserData(res?.data);
+        console.log("🚀 ~ fetchData ~ res?.data:", res?.data);
         // console.log("🚀 ~ fetchData ~ res?.data:", res?.data)
       }
     } catch (error) {
@@ -230,7 +232,10 @@ const UserDetail = () => {
                     <GraduationCap size={18} color="blue" />
                     <p>
                       :{" "}
-                      {facultyText(userData?.facultyId || id?.substring(3, 5))}
+                      {facultyText(
+                        faculties,
+                        userData?.facultyId || id?.substring(3, 5),
+                      )}
                     </p>
                   </span>
                   <span className="flex items-center gap-2">
@@ -238,7 +243,8 @@ const UserDetail = () => {
                     <p>
                       :{" "}
                       {departmentText(
-                        userData?.departmentId || id?.substring(4, 8)
+                        departments,
+                        userData?.departmentId || id?.substring(4, 8),
                       )}
                     </p>
                   </span>
@@ -260,7 +266,7 @@ const UserDetail = () => {
                       ผู้ใช้งานปิดการมองเห็นข้อมูลส่วนนี้
                     </Link>
                   ) : userData?.work_expreriences?.find(
-                      (w) => w.continued_study && w?.isCurrent
+                      (w) => w.continued_study && w?.isCurrent,
                     ) ? (
                     <span className="flex items-center p-2.5 rounded-md bg-gradient-to-r from-green-600 to-lime-500 gap-2.5">
                       <div className="p-2 rounded-full bg-white">
@@ -271,20 +277,20 @@ const UserDetail = () => {
                           กำลังศึกษาต่อในระดับ{" "}
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w.continued_study && w?.isCurrent
+                              (w) => w.continued_study && w?.isCurrent,
                             )?.edu_level
                           }
                         </p>
                         <p className="text-white">
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w.continued_study && w?.isCurrent
+                              (w) => w.continued_study && w?.isCurrent,
                             )?.edu_dep
                           }{" "}
                           ,{" "}
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w.continued_study && w?.isCurrent
+                              (w) => w.continued_study && w?.isCurrent,
                             )?.edu_university
                           }
                         </p>
@@ -300,20 +306,20 @@ const UserDetail = () => {
                           ทำงานอยู่ที่{" "}
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w?.isCurrent
+                              (w) => w?.isCurrent,
                             )?.company_name
                           }
                         </p>
                         <p className="text-white">
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w?.isCurrent
+                              (w) => w?.isCurrent,
                             )?.job_position
                           }{" "}
                           ,{" "}
                           {
                             userData?.work_expreriences?.find(
-                              (w) => w?.isCurrent
+                              (w) => w?.isCurrent,
                             )?.company_place
                           }
                         </p>
@@ -340,9 +346,11 @@ const UserDetail = () => {
                   <div className="flex flex-col gap-0.5">
                     <p className="text-gray-600 text-sm">สังกัด</p>
                     <p className="font-bold">
-                      {facultyText(userData?.facultyId)}
+                      {facultyText(faculties, userData?.facultyId)}
                     </p>
-                    <p className="">{departmentText(userData?.departmentId)}</p>
+                    <p className="">
+                      {departmentText(departments, userData?.departmentId)}
+                    </p>
                   </div>
                 </span>
 
@@ -360,7 +368,7 @@ const UserDetail = () => {
                             <p className="">
                               {canview(
                                 userData?.user_privacy?.seeEmail,
-                                userData?.email1
+                                userData?.email1,
                               )}
                             </p>
                           )}
@@ -368,7 +376,7 @@ const UserDetail = () => {
                             <p className="">
                               {canview(
                                 userData?.user_privacy?.seeEmail,
-                                userData?.email2
+                                userData?.email2,
                               )}
                             </p>
                           )}
@@ -382,7 +390,7 @@ const UserDetail = () => {
                             <p className="">
                               {canview(
                                 userData?.user_privacy?.seePhone,
-                                formatPhoneNumber(userData?.phone1)
+                                formatPhoneNumber(userData?.phone1),
                               )}
                             </p>
                           ) : (
@@ -392,7 +400,7 @@ const UserDetail = () => {
                             <p className="">
                               {canview(
                                 userData?.user_privacy?.seePhone,
-                                formatPhoneNumber(userData?.phone2)
+                                formatPhoneNumber(userData?.phone2),
                               )}
                             </p>
                           )}
@@ -418,7 +426,7 @@ const UserDetail = () => {
                                   userData?.province
                                     ? "จังหวัด" + userData?.province
                                     : ""
-                                } ${userData?.zipcode || ""}`
+                                } ${userData?.zipcode || ""}`,
                               ) || "ไม่ระบุ"}
                             </p>
                           ) : (
@@ -441,7 +449,7 @@ const UserDetail = () => {
                           <p className="text-sm">
                             {canview(
                               userData?.user_privacy?.seeFacebook,
-                              userData?.facebook
+                              userData?.facebook,
                             )}
                           </p>
                         ) : (
@@ -493,7 +501,7 @@ const UserDetail = () => {
                         <p className="text-sm">
                           {canview(
                             userData?.user_privacy?.seeEmail,
-                            userData?.email1
+                            userData?.email1,
                           )}
                         </p>
                       </div>
@@ -508,7 +516,7 @@ const UserDetail = () => {
                         <p className="text-sm">
                           {canview(
                             userData?.user_privacy?.seeEmail,
-                            userData?.email2
+                            userData?.email2,
                           )}
                         </p>
                       </div>
@@ -522,7 +530,7 @@ const UserDetail = () => {
                         <p className="text-sm">
                           {canview(
                             userData?.user_privacy?.seePhone,
-                            formatPhoneNumber(userData?.phone1)
+                            formatPhoneNumber(userData?.phone1),
                           )}
                         </p>
                       </div>
@@ -537,7 +545,7 @@ const UserDetail = () => {
                         <p className="text-sm">
                           {canview(
                             userData?.user_privacy?.seePhone,
-                            formatPhoneNumber(userData?.phone2)
+                            formatPhoneNumber(userData?.phone2),
                           )}
                         </p>
                       </div>
@@ -558,7 +566,7 @@ const UserDetail = () => {
                             userData?.province
                               ? "จังหวัด" + userData?.province
                               : ""
-                          } ${userData?.zipcode || ""}`
+                          } ${userData?.zipcode || ""}`,
                         )}
                       </p>
                     </div>
@@ -575,7 +583,7 @@ const UserDetail = () => {
                       <p className="text-sm">
                         {canview(
                           userData?.user_privacy?.seeFacebook,
-                          userData?.facebook
+                          userData?.facebook,
                         )}
                       </p>
                     </div>
@@ -601,68 +609,136 @@ const UserDetail = () => {
                       ผู้ใช้งานปิดการมองเห็นข้อมูลส่วนนี้
                     </Link>
                   ) : userData?.work_expreriences?.length > 0 ? (
-                    userData?.work_expreriences?.map((w, index) =>
-                      w?.continued_study ? (
-                        <div
-                          key={index}
-                          className="cursor-pointer text-sm lg:text-md hover:bg-green-50 p-2 transition-all duration-300 relative px-5 border-l-4 border-green-600 w-full flex flex-col my-2"
-                        >
-                          {w?.isCurrent && (
-                            <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-green-500">
-                              กำลังศึกษาอยู่ในปัจจุบัน
-                            </span>
-                          )}
-                          <GraduationCap color="green" size={20} />
-                          <p className="text-sm lg:text-lg font-bold mt-2">
-                            {w?.edu_level} ,{w?.edu_dep}
-                          </p>
-                          <p className="text-green-600">
-                            {w?.edu_university + " "},{" " + w?.company_place}
-                          </p>
-                          <p className="text-gray-600">
-                            {"พ.ศ. " + w?.year_start} -{" "}
-                            {w?.isCurrent ? "ปัจจุบัน" : "พ.ศ. " + w?.year_end}
-                          </p>
-                          <p className="mt-2 text-gray-600">
-                            {w?.edu_performance}
-                          </p>
-                        </div>
-                      ) : (
-                        <div
-                          key={index}
-                          className="cursor-pointer text-sm lg:text-md hover:bg-blue-50 transition-all duration-300 relative p-2 px-5 border-l-4 border-blue-600 w-full flex flex-col my-4"
-                        >
-                          {w?.isCurrent && (
-                            <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-blue-500">
-                              ปัจจุบัน
-                            </span>
-                          )}
-                          <BriefcaseBusiness color="blue" size={18} />
-                          <p className="text-sm lg:text-lg font-bold mt-2">
-                            {w?.job_position}
-                          </p>
-                          <p className="text-blue-600">{w?.company_name}</p>
-                          <span className="flex items-center gap-2 my-0.5">
-                            <Map size={18} color="gray" />
-                            <p>{w?.company_place}</p>
-                          </span>
-                          <p className="text-gray-600">
-                            {dayjs(w?.start_date).format(`D MMMM BBBB`)} -{" "}
-                            {w?.isCurrent
-                              ? "ปัจจุบัน"
-                              : dayjs(w?.start_date).format(`D MMMM BBBB`)}
-                          </p>
-                          <p className="text-gray-600 mt-1.5">
-                            {w?.job_detail}
-                          </p>
-                          {w?.remark && (
-                            <p className="mt-2 text-sm bg-blue-50 p-2">
-                              หมายเหตุ : {w?.remark}
+                    <>
+                      {userData?.work_expreriences?.map((w, index) =>
+                        w?.continued_study ? (
+                          <div
+                            key={index}
+                            className="cursor-pointer text-sm lg:text-md hover:bg-green-50 p-2 transition-all duration-300 relative px-5 border-l-4 border-green-600 w-full flex flex-col my-2"
+                          >
+                            {w?.isCurrent && (
+                              <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-green-500">
+                                กำลังศึกษาอยู่ในปัจจุบัน
+                              </span>
+                            )}
+                            <GraduationCap color="green" size={20} />
+                            <p className="text-sm lg:text-lg font-bold mt-2">
+                              {w?.edu_level} ,{w?.edu_dep}
                             </p>
-                          )}
-                        </div>
-                      )
-                    )
+                            <p className="text-green-600">
+                              {w?.edu_university + " "},{" " + w?.company_place}
+                            </p>
+                            <p className="text-gray-600">
+                              {"พ.ศ. " + w?.year_start} -{" "}
+                              {w?.isCurrent
+                                ? "ปัจจุบัน"
+                                : "พ.ศ. " + w?.year_end}
+                            </p>
+                            <p className="mt-2 text-gray-600">
+                              {w?.edu_performance}
+                            </p>
+                          </div>
+                        ) : (
+                          <div
+                            key={index}
+                            className="cursor-pointer text-sm lg:text-md hover:bg-blue-50 transition-all duration-300 relative p-2 px-5 border-l-4 border-blue-600 w-full flex flex-col my-4"
+                          >
+                            {w?.isCurrent && (
+                              <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-blue-500">
+                                ปัจจุบัน
+                              </span>
+                            )}
+                            <BriefcaseBusiness color="blue" size={18} />
+                            <p className="text-sm lg:text-lg font-bold mt-2">
+                              {w?.job_position}
+                            </p>
+                            <p className="text-blue-600">{w?.company_name}</p>
+                            <span className="flex items-center gap-2 my-0.5">
+                              <Map size={18} color="gray" />
+                              <p>{w?.company_place}</p>
+                            </span>
+                            <p className="text-gray-600">
+                              {dayjs(w?.start_date).format(`D MMMM BBBB`)} -{" "}
+                              {w?.isCurrent
+                                ? "ปัจจุบัน"
+                                : dayjs(w?.start_date).format(`D MMMM BBBB`)}
+                            </p>
+                            <p className="text-gray-600 mt-1.5">
+                              {w?.job_detail}
+                            </p>
+                            {w?.remark && (
+                              <p className="mt-2 text-sm bg-blue-50 p-2">
+                                หมายเหตุ : {w?.remark}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                      {userData?.study_expreriences?.map((w, index) =>
+                        w?.continued_study ? (
+                          <div
+                            key={index}
+                            className="cursor-pointer text-sm lg:text-md hover:bg-green-50 p-2 transition-all duration-300 relative px-5 border-l-4 border-green-600 w-full flex flex-col my-2"
+                          >
+                            {w?.isCurrent && (
+                              <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-green-500">
+                                กำลังศึกษาอยู่ในปัจจุบัน
+                              </span>
+                            )}
+                            <GraduationCap color="green" size={20} />
+                            <p className="text-sm lg:text-lg font-bold mt-2">
+                              {w?.edu_level} ,{w?.edu_dep}
+                            </p>
+                            <p className="text-green-600">
+                              {w?.edu_university + " "},{" " + w?.place}
+                            </p>
+                            <p className="text-gray-600">
+                              {"พ.ศ. " + w?.year_start} -{" "}
+                              {w?.isCurrent
+                                ? "ปัจจุบัน"
+                                : "พ.ศ. " + w?.year_end}
+                            </p>
+                            <p className="mt-2 text-gray-600">
+                              {w?.edu_performance}
+                            </p>
+                          </div>
+                        ) : (
+                          <div
+                            key={index}
+                            className="cursor-pointer text-sm lg:text-md hover:bg-blue-50 transition-all duration-300 relative p-2 px-5 border-l-4 border-blue-600 w-full flex flex-col my-4"
+                          >
+                            {w?.isCurrent && (
+                              <span className="absolute top-2 right-10 p-1 px-2.5 rounded-full text-xs lg:text-sm text-white bg-blue-500">
+                                ปัจจุบัน
+                              </span>
+                            )}
+                            <BriefcaseBusiness color="blue" size={18} />
+                            <p className="text-sm lg:text-lg font-bold mt-2">
+                              {w?.job_position}
+                            </p>
+                            <p className="text-blue-600">{w?.company_name}</p>
+                            <span className="flex items-center gap-2 my-0.5">
+                              <Map size={18} color="gray" />
+                              <p>{w?.company_place}</p>
+                            </span>
+                            <p className="text-gray-600">
+                              {dayjs(w?.start_date).format(`D MMMM BBBB`)} -{" "}
+                              {w?.isCurrent
+                                ? "ปัจจุบัน"
+                                : dayjs(w?.start_date).format(`D MMMM BBBB`)}
+                            </p>
+                            <p className="text-gray-600 mt-1.5">
+                              {w?.job_detail}
+                            </p>
+                            {w?.remark && (
+                              <p className="mt-2 text-sm bg-blue-50 p-2">
+                                หมายเหตุ : {w?.remark}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </>
                   ) : (
                     <p>ไม่พบประวัติการทำงานของศิษย์เก่า</p>
                   )}

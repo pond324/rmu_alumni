@@ -1,8 +1,6 @@
 "use client";
 import {
   ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
   ChevronsUpDown,
   List,
   RotateCcw,
@@ -11,15 +9,18 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import ExportBtn from "./export-btn";
 import { useDashboardContext } from "@/app/users/dashboard/dashboard-context";
-import { departmentText, facultyText } from "./faculty-p";
-import { useRouter } from "next/navigation";
-import Select from "./select";
-import { departments, faculties } from "@/data/faculty";
+import { usePathname, useRouter } from "next/navigation";
 import { debounce } from "lodash";
-import Modal from "./modal";
 import useGetSession from "@/hook/useGetSeesion";
 import { useAppContext } from "@/context/app.context";
 import { SelectYearEnd, SelectYearStart } from "./select-year-start";
+import ImportAlumniData from "../app/alumni-president/alumni-manage/import-alumni-data";
+import { useFacultyDep } from "@/hook/useFacultyDep";
+import PaginationBtn from "./pageination-btn";
+import { SelectDepartment, SelectFaculty } from "./select-fac-dep";
+import ImportHistoryData from "@/app/alumni-president/alumni-manage/import-history-btn";
+import ExportDataSelection from "./export-data-selection";
+import ExportAlumniData from "@/app/alumni-president/alumni-manage/export-alumni-data";
 
 const TablePage = ({
   header,
@@ -51,7 +52,9 @@ const TablePage = ({
   setExtraFilter,
   showExportBtn = true, // ✅ optional filter
 }) => {
+  const pathName = usePathname();
   const { user } = useGetSession();
+  const { faculties, departments, loadData } = useFacultyDep();
   const { faculty, department, setFaculty, setDepartment } =
     useDashboardContext();
   const { setPrevPath } = useAppContext();
@@ -64,12 +67,14 @@ const TablePage = ({
   useEffect(() => {
     let desc = "ภายใน";
     if (facultyId) {
-      desc += facultyText(faculty?.id || faculty?.value || facultyId);
+      const facultyName = faculties.find((f) => f.id === facultyId)?.name;
+      desc += facultyName ? ` ${facultyName}` : "";
     }
     if (departmentId) {
-      desc +=
-        " " +
-        departmentText(department?.id || department?.value || departmentId);
+      const departmentName = departments.find(
+        (d) => d.id === departmentId,
+      )?.name;
+      desc += departmentName ? ` ${departmentName}` : "";
     }
     desc += " มหาวิทยาลัยราชภัฏมหาสารคาม";
     setDescription(desc);
@@ -107,7 +112,7 @@ const TablePage = ({
       sort,
       selectYearStart,
       selectYearEnd,
-      extraFilter
+      extraFilter,
     );
   }, [
     page,
@@ -122,7 +127,7 @@ const TablePage = ({
   ]);
   return (
     <>
-      <div className="w-full h-full items-start flex flex-col px-5 pt-3">
+      <div className="w-full h-auto items-start flex flex-col bg-gray-50 px-5 py-3">
         {user?.roleId < 5 && (
           <button
             onClick={() => {
@@ -147,13 +152,23 @@ const TablePage = ({
               selectYearEnd && selectYearStart
                 ? ` - พ.ศ. ${selectYearEnd}`
                 : selectYearEnd
-                ? ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`
-                : ""
+                  ? ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`
+                  : ""
             }`}{" "}
               ({total} คน)
             </p>
           </div>
-          <div className="lg:w-1/3 col-span-5 p-2 px-3 rounded-lg border border-gray-300 shadow-sm flex items-center gap-2">
+          {pathName === "/alumni-president/alumni-manage" && (
+            <div className="flex items-center gap-2.5">
+              <ImportAlumniData fetchData={fetchData} />
+              <ImportHistoryData fetchAlumni={fetchData}/>
+              <ExportAlumniData />
+            </div>
+          )}
+        </span>
+
+        <div className="gap-2.5 w-full flex-wrap flex items-center my-2.5">
+          <div className="lg:w-1/6 w-full md:w-1/3 bg-white col-span-5 p-2 px-3 rounded-lg border border-gray-300 shadow-sm flex items-center gap-2">
             <Search size={18} />
             <input
               value={search}
@@ -168,73 +183,22 @@ const TablePage = ({
               className="text-[0.9rem] w-[90%]"
             />
           </div>
-        </span>
-
-        <div className="gap-2.5 w-full lg:flex items-center grid grid-cols-5 my-2.5">
           {user?.roleId > 3 && (
-            <Select
-              placeholder="ค้นหาคณะ"
-              className="z-50 lg:w-1/6 col-span-5 text-sm"
-              options={faculties.map((f) => ({
-                label: f.name,
-                value: f.id,
-              }))}
-              value={
-                faculties
-                  .map((f) => ({
-                    label: f.name,
-                    value: f.id,
-                  }))
-                  .find((f) => f.value == facultyId) || null
-              }
-              onChange={(option) => {
-                setFacultyId(option.value);
-                setDepartmentId("");
-                setDepartment();
-                setFaculty(option);
-              }}
+            <SelectFaculty
+              facultyId={facultyId}
+              loadData={loadData}
+              setDepartmentId={setDepartmentId}
+              setFacultyId={setFacultyId}
+              setFaculty={setFaculty}
             />
           )}
           {user?.roleId > 2 && (
-            <Select
-              placeholder="ค้นหาสาขาวิชา"
-              className="z-50 lg:w-1/6 col-span-5 text-sm"
-              options={
-                facultyId
-                  ? departments
-                      .filter((d) => {
-                        if (Number(facultyId) < 18) {
-                          return (
-                            `${d.id}`.substring(0, 1) ==
-                            facultyId?.substring(1, 2)
-                          );
-                        } else if (Number(facultyId) > 18) {
-                          return `${d.id}`.substring(0, 1) == 62;
-                        } else {
-                          return `${d.id}`.substring(0, 1) == 21;
-                        }
-                      })
-                      .map((d) => ({
-                        label: d.name,
-                        value: d.id,
-                      }))
-                  : departments.map((d) => ({
-                      label: d.name,
-                      value: d.id,
-                    }))
-              }
-              value={
-                departments
-                  .map((f) => ({
-                    label: f.name,
-                    value: f.id,
-                  }))
-                  .find((f) => f.value == departmentId) || null
-              }
-              onChange={(option) => {
-                setDepartmentId(option.value);
-                setDepartment(option);
-              }}
+            <SelectDepartment
+              departmentId={departmentId}
+              faculty={faculty}
+              facultyId={facultyId}
+              loadData={loadData}
+              setDepartmentId={setDepartmentId}
             />
           )}
 
@@ -250,15 +214,6 @@ const TablePage = ({
           />
 
           {filterBtn}
-
-          <button
-            title="ล้างการค้นหา"
-            onClick={resetData}
-            className="p-2 px-3.5 justify-center rounded-lg border border-gray-300 shadow-md flex items-center gap-2"
-          >
-            <RotateCcw size={17} />
-            <p className="text-sm hidden lg:inline-flex">รีเซ็ต</p>
-          </button>
 
           <div
             title="เลือกจำนวนที่ต้องการแสดง"
@@ -287,10 +242,10 @@ const TablePage = ({
             </select>
             <label
               htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="p-2 px-3.5 rounded-lg border bg-white border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <List size={17} />
-              <p className="text-sm hidden lg:inline-flex">{take}</p>
+              <p className="text-sm ">แสดง {take} แถว</p>
             </label>
           </div>
 
@@ -318,34 +273,44 @@ const TablePage = ({
             </select>
             <label
               htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="p-2 px-3.5 rounded-lg bg-white border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <ChevronsUpDown size={17} />
-              <p className="text-sm hidden lg:inline-flex">เรียง</p>
+              <p className="text-sm ">เรียง</p>
             </label>
           </div>
-
-          {showExportBtn && <ExportBtn exportname={header} data={exportData} />}
+          <button
+            title="ล้างการค้นหา"
+            onClick={resetData}
+            className="p-2 bg-white px-3.5 justify-center rounded-lg border border-gray-300 shadow-md flex items-center gap-2"
+          >
+            <RotateCcw size={17} />
+            <p className="text-sm ">ล้างการค้นหา</p>
+          </button>
+          {totalPage > 1 && (
+            <PaginationBtn
+              forwardPage={forwardPage}
+              page={page}
+              totalPage={totalPage}
+              prevPage={prevPage}
+            />
+          )}
         </div>
 
-        <div className="lg:w-full w-auto overflow-x-auto h-auto overflow-y-auto rounded-tl pb-3">
-          <table className="lg:w-full w-auto">
+        <div className="w-full rounded-tl-lg rounded-tr-lg overflow-x-auto h-[600px] bg-white overflow-y-auto pb-3">
+          <table className="min-w-max w-full">
             <thead>
-              <tr className="sticky top-0 bg-white z-30">
-                {[
-                  "ที่",
-                  "ชื่อ - นามสกุล",
-                  "คณะ",
-                  "สาขา",
-                  "ปีการศึกษา(พ.ศ.)",
-                ].map((h, index) => (
-                  <th
-                    key={index}
-                    className="text-start p-2.5 text-[0.9rem] bg-sky-100 font-normal"
-                  >
-                    {h}
-                  </th>
-                ))}
+              <tr className="sticky top-0 bg-white z-10">
+                {["ชื่อ - นามสกุล", "คณะ/สาขา", "ปีการศึกษา (พ.ศ.)"].map(
+                  (h, index) => (
+                    <th
+                      key={index}
+                      className={`text-start p-2.5 text-[0.9rem] bg-sky-100 font-normal`}
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
                 {theads?.map((t, index) => (
                   <th
                     className="text-start p-2.5 text-[0.9rem] bg-sky-100 font-normal"
@@ -356,31 +321,10 @@ const TablePage = ({
                 ))}
               </tr>
             </thead>
-            <tbody>{children}</tbody>
+            <tbody className="bg-white">{children}</tbody>
           </table>
         </div>
-
-        {totalPage > 1 && (
-          <div className="w-full justify-end flex items-center my-3.5 gap-4">
-            <button
-              onClick={prevPage}
-              className="p-2 rounded-full shadow-md text-sm text-white bg-blue-500 hover:bg-blue-600"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <p>
-              หน้า {page} จาก {totalPage}
-            </p>
-            <button
-              onClick={forwardPage}
-              className="p-2 rounded-full shadow-md text-sm text-white bg-blue-500 hover:bg-blue-600"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
       </div>
-      <Modal></Modal>
     </>
   );
 };
