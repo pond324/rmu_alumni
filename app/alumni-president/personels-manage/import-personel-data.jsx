@@ -16,6 +16,7 @@ import { useDropzone } from "react-dropzone";
 import ViewFaculty from "../alumni-manage/view-facultyid";
 import ViewDepartment from "../alumni-manage/view-departmentid";
 import * as XLSX from "xlsx";
+import Papa from "papaparse";
 import { alerts } from "@/libs/alerts";
 import ViewProfessorData from "./view-professor-ex-btn";
 import ViewUniversityPosition from "./view-university-position-btn";
