@@ -101,6 +101,7 @@ const ImportAlumniData = ({ fetchData }) => {
           const data = result.data;
 
           const corruptedColumns = new Set();
+
           data.forEach((row) => {
             Object.entries(row).forEach(([key, value]) => {
               if (/^-?\d+(\.\d+)?[eE][+-]?\d+$/.test(String(value ?? ""))) {
@@ -115,6 +116,39 @@ const ImportAlumniData = ({ fetchData }) => {
             );
             setFile(null);
             return;
+          }
+
+          // จำกัดจำนวนแถว
+          if (data.length > 5000) {
+            alerts.warning("ขนาดไฟล์ต้องไม่เกิน 5000 แถว");
+            setFile(null);
+            return;
+          }
+
+          const fixed = data.map((row) => ({
+            ...row,
+            alumni_id: String(row.alumni_id ?? ""),
+          }));
+
+          const header = Object.keys(fixed[0] || []);
+
+          setJson(fixed);
+          setRows(fixed);
+          setHeaders(header);
+          setTotalPage(Math.max(1, Math.ceil(fixed.length / 100)));
+
+          const missing = ALUMNI_DATA_HEADER_COLUNM.filter(
+            (col) => !header.includes(col),
+          );
+
+          const extra = header.filter(
+            (col) => !ALUMNI_DATA_HEADER_COLUNM.includes(col),
+          );
+
+          if (missing.length > 0 || extra.length > 0) {
+            setError(
+              `คอลัมน์ไม่ถูกต้อง\nคอลัมน์ที่ต้องการ: ${missing.join(", ")}\nคอลัมน์เกิน: ${extra.join(", ")}`,
+            );
           } else {
             setError(null);
           }

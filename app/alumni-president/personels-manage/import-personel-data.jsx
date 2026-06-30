@@ -35,7 +35,7 @@ const PERSONEL_HEADER_COLUMN = [
   "university_position",
 ];
 
-const ImportPersonelData = ({fetchData}) => {
+const ImportPersonelData = ({ fetchData }) => {
   const [showModal, setShowModal] = useState(false);
   const [file, setFile] = useState();
   const [error, setError] = useState();
@@ -89,6 +89,7 @@ const ImportPersonelData = ({fetchData}) => {
           const data = result.data;
 
           const corruptedColumns = new Set();
+
           data.forEach((row) => {
             Object.entries(row).forEach(([key, value]) => {
               if (/^-?\d+(\.\d+)?[eE][+-]?\d+$/.test(String(value ?? ""))) {
@@ -103,6 +104,39 @@ const ImportPersonelData = ({fetchData}) => {
             );
             setFile(null);
             return;
+          }
+
+          // จำกัดจำนวนแถว
+          if (data.length > 5000) {
+            alerts.warning("ขนาดไฟล์ต้องไม่เกิน 5000 แถว");
+            setFile(null);
+            return;
+          }
+
+          const fixed = data.map((row) => ({
+            ...row,
+            alumni_id: String(row.alumni_id ?? ""),
+          }));
+
+          const header = Object.keys(fixed[0] || []);
+
+          setJson(fixed);
+          setRows(fixed);
+          setHeaders(header);
+          setTotalPage(Math.max(1, Math.ceil(fixed.length / 100)));
+
+          const missing = PERSONEL_HEADER_COLUMN.filter(
+            (col) => !header.includes(col),
+          );
+
+          const extra = header.filter(
+            (col) => !PERSONEL_HEADER_COLUMN.includes(col),
+          );
+
+          if (missing.length > 0 || extra.length > 0) {
+            setError(
+              `คอลัมน์ไม่ถูกต้อง\nคอลัมน์ที่ต้องการ: ${missing.join(", ")}\nคอลัมน์เกิน: ${extra.join(", ")}`,
+            );
           } else {
             setError(null);
           }
