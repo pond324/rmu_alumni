@@ -120,7 +120,7 @@ const SettingRegis = () => {
       const api = id
         ? `/president/setting-edit-qrcode-payment/${id}`
         : "/president/setting-upload-qrcode-payment";
-      const res = await axios.post(apiConfig.rmuAPI + api, formData, {
+      const res = await axios.post(apiConfig.rmuAPI + `/president/setting-edit-qrcode-payment/${id}`, formData, {
         withCredentials: true,
       });
       if (res.status === 200) {
