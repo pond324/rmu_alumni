@@ -20,7 +20,7 @@ const SETTING_MENU = [
   {
     icon: <Building2 size={18} />,
     title: "คณะ/สาขา",
-    url: "/alumni-president/setting/fac-dep",
+    url: "/alumni-president/setting/fac-dep-setting",
   },
   {
     icon: <User size={18} />,

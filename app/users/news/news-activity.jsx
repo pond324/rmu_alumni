@@ -22,6 +22,7 @@ const NewsAvtivity = ({ item, screenWidth, fetchData }) => {
   const router = useRouter();
 
   const updateView = async (id) => {
+    console.log("🚀 ~ updateView ~ id:", id)
     try {
       axios.put(
         apiConfig.rmuAPI + `/president/update-news-view/${id}`,

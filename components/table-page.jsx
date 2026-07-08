@@ -21,6 +21,7 @@ import { SelectDepartment, SelectFaculty } from "./select-fac-dep";
 import ImportHistoryData from "@/app/alumni-president/alumni-manage/import-history-btn";
 import ExportDataSelection from "./export-data-selection";
 import ExportAlumniData from "@/app/alumni-president/alumni-manage/export-alumni-data";
+import SelectEduLevel from "./select-edu-level";
 
 const TablePage = ({
   header,
@@ -50,7 +51,9 @@ const TablePage = ({
   selectYearEnd,
   extraFilter = {},
   setExtraFilter,
-  showExportBtn = true, // ✅ optional filter
+  showExportBtn = true, // ✅ optional filter,
+  selectEduLevel,
+  setSelectEduLevel,
 }) => {
   const pathName = usePathname();
   const { user } = useGetSession();
@@ -99,6 +102,7 @@ const TablePage = ({
     setExtraFilter({});
     setSelectYearEnd("");
     setSelectYearStart("");
+    setSelectEduLevel("");
   };
 
   // ✅ โหลดข้อมูลทุกครั้งที่ state เปลี่ยน
@@ -113,6 +117,7 @@ const TablePage = ({
       selectYearStart,
       selectYearEnd,
       extraFilter,
+      selectEduLevel,
     );
   }, [
     page,
@@ -124,6 +129,7 @@ const TablePage = ({
     extraFilter,
     selectYearEnd,
     selectYearStart,
+    selectEduLevel,
   ]);
   return (
     <>
@@ -161,7 +167,7 @@ const TablePage = ({
           {pathName === "/alumni-president/alumni-manage" && (
             <div className="flex items-center gap-2.5">
               <ImportAlumniData fetchData={fetchData} />
-              <ImportHistoryData fetchAlumni={fetchData}/>
+              <ImportHistoryData fetchAlumni={fetchData} />
               <ExportAlumniData />
             </div>
           )}
@@ -201,7 +207,10 @@ const TablePage = ({
               setDepartmentId={setDepartmentId}
             />
           )}
-
+          <SelectEduLevel
+            selectEduLevel={selectEduLevel}
+            setSelectEduLevel={setSelectEduLevel}
+          />
           <SelectYearStart
             setSelectYearStart={setSelectYearStart}
             selectYearStart={selectYearStart}

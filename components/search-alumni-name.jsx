@@ -28,6 +28,7 @@ import { departmentText, facultyText } from "./faculty-p";
 import NoDataFound from "./no-data-found";
 import EditSlipRegis from "./edit-slip-regis";
 import { SelectDepartment, SelectFaculty } from "./select-fac-dep";
+import SelectEduLevel from "./select-edu-level";
 
 const SearchAlumniName = () => {
   const { faculties, departments, loadData } = useFacultyDep();
@@ -44,6 +45,7 @@ const SearchAlumniName = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPage, setTotalPage] = useState(1);
+  const [selectEduLevel, setSelectEduLevel] = useState("");
   const forwardPage = () => {
     if (page < totalPage) {
       setPage(page + 1);
@@ -67,6 +69,7 @@ const SearchAlumniName = () => {
     sort,
     page,
     regis_status,
+    selectEduLevel,
   ) => {
     setLoad(true);
     try {
@@ -83,6 +86,7 @@ const SearchAlumniName = () => {
             sort,
             page,
             regis_status,
+            selectEduLevel,
           },
         },
       );
@@ -115,6 +119,7 @@ const SearchAlumniName = () => {
       sort,
       page,
       regisStatus,
+      selectEduLevel,
     );
   }, [
     facultyId,
@@ -127,6 +132,7 @@ const SearchAlumniName = () => {
     page,
     regisStatus,
     showModal,
+    selectEduLevel,
   ]);
   const [showSearchMenu, setShowSearchMenu] = useState(true);
   const resetSearch = () => {
@@ -139,6 +145,7 @@ const SearchAlumniName = () => {
     setTake(10);
     setSort(JSON.stringify({ year_start: "desc" }));
     setPage(1);
+    setSelectEduLevel("");
   };
 
   return (
@@ -224,6 +231,10 @@ const SearchAlumniName = () => {
               facultyId={facultyId}
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
+            />
+            <SelectEduLevel
+              selectEduLevel={selectEduLevel}
+              setSelectEduLevel={setSelectEduLevel}
             />
 
             <SelectYearStart

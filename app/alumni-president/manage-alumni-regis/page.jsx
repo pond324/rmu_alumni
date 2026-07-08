@@ -32,9 +32,11 @@ import { useEffect, useMemo, useState } from "react";
 import ManageBtn from "./manage-btn";
 import { SelectDepartment, SelectFaculty } from "@/components/select-fac-dep";
 import ExportRegisAlumniBtn from "./export-btn";
+import SelectEduLevel from "@/components/select-edu-level";
 
 const ManageAlumniRegis = () => {
   const { departments, faculties, loadData } = useFacultyDep();
+  const [selectEduLevel, setSelectEduLevel] = useState("");
   const [regisStatus, setRegisStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -70,6 +72,7 @@ const ManageAlumniRegis = () => {
     sort,
     page,
     regis_status,
+    selectEduLevel,
   ) => {
     setLoad(true);
     try {
@@ -86,6 +89,7 @@ const ManageAlumniRegis = () => {
             sort,
             page,
             regis_status,
+            selectEduLevel,
           },
         },
       );
@@ -117,6 +121,7 @@ const ManageAlumniRegis = () => {
       sort,
       page,
       regisStatus,
+      selectEduLevel,
     );
   }, [
     facultyId,
@@ -128,6 +133,7 @@ const ManageAlumniRegis = () => {
     sort,
     page,
     regisStatus,
+    selectEduLevel,
   ]);
 
   const resetSearch = () => {
@@ -139,6 +145,7 @@ const ManageAlumniRegis = () => {
     setTake(10);
     setSort(JSON.stringify({ year_start: "desc" }));
     setPage(1);
+    setSelectEduLevel("");
   };
 
   const [stats, setStats] = useState(null);
@@ -390,7 +397,10 @@ const ManageAlumniRegis = () => {
             loadData={loadData}
             setDepartmentId={setDepartmentId}
           />
-
+          <SelectEduLevel
+            selectEduLevel={selectEduLevel}
+            setSelectEduLevel={setSelectEduLevel}
+          />
           <SelectYearStart
             setSelectYearStart={setSelectYearStart}
             selectYearStart={selectYearStart}

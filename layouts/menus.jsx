@@ -76,12 +76,12 @@ const Menu = () => {
       url: "/users/news",
       allowed: [1, 2],
     },
-    // {
-    //   title: "ลงทะเบียนศิษย์เก่า",
-    //   icon: <ListCheck size={20} />,
-    //   url: "/alumni-president/manage-alumni-regis",
-    //   allowed: [5],
-    // },
+    {
+      title: "ลงทะเบียนศิษย์เก่า",
+      icon: <ListCheck size={20} />,
+      url: "/alumni-president/manage-alumni-regis",
+      allowed: [5],
+    },
     {
       title: "จัดการศิษย์เก่า",
       icon: <GraduationCap size={20} />,

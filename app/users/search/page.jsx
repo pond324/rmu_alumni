@@ -39,9 +39,10 @@ import { SelectYearEnd, SelectYearStart } from "@/components/select-year-start";
 import { v4 as uuid } from "uuid";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import { SelectFaculty } from "@/components/select-fac-dep";
+import SelectEduLevel from "@/components/select-edu-level";
 
 const SearchPage = () => {
-  const {departments,faculties} = useFacultyDep();
+  const { departments, faculties } = useFacultyDep();
   const { user } = useGetSession();
   const [showSendEmail, setSendEmail] = useState(false);
   const [search, setSearch] = useState("");
@@ -53,6 +54,7 @@ const SearchPage = () => {
   const [resultLenth, setResultLength] = useState("");
   const { setPrevPath } = useAppContext();
   const router = useRouter();
+  const [selectEduLevel, setSelectEduLevel] = useState("");
 
   const [dataList, setDataList] = useState([]);
   const [sort, setSort] = useState(JSON.stringify({ year_start: "desc" }));
@@ -69,7 +71,7 @@ const SearchPage = () => {
     sort,
     take,
     selectYearStart,
-    selectYearEnd
+    selectYearEnd,
   ) => {
     setLoading(true);
     try {
@@ -111,7 +113,7 @@ const SearchPage = () => {
       sort,
       take,
       selectYearStart,
-      selectYearEnd
+      selectYearEnd,
     );
   }, [
     search,
@@ -132,6 +134,7 @@ const SearchPage = () => {
     setSelectYearEnd("");
     setSelectYearStart("");
     setTake(10);
+    setSelectEduLevel("");
   };
 
   const [sendToData, setSendToData] = useState();
@@ -216,6 +219,10 @@ const SearchPage = () => {
                   .find((f) => Number(f.value) == department) || null
               }
               onChange={(option) => setDepartment(option.value)}
+            />
+            <SelectEduLevel
+              selectEduLevel={selectEduLevel}
+              setSelectEduLevel={setSelectEduLevel}
             />
           </div>
 
@@ -430,10 +437,10 @@ const SearchPage = () => {
                         {d?.fname} {d?.lname}
                       </td>
                       <td className="p-2.5 py-3 text-start">
-                        {facultyText(faculties,d?.facultyId)}
+                        {facultyText(faculties, d?.facultyId)}
                       </td>
                       <td className="p-2.5 py-3 text-start">
-                        {departmentText(departments,d?.departmentId)}
+                        {departmentText(departments, d?.departmentId)}
                       </td>
                       <td className="p-2.5 py-3 text-start">
                         {`${d?.year_start || "ไม่พบข้อมูล"} - ${
@@ -490,7 +497,8 @@ const SearchPage = () => {
                         <GraduationCap size={15} color="gray" />
                         <p className="text-sm text-gray-500">
                           {facultyText(
-                            faculties,d?.facultyId || d?.alumni_id?.substring(3, 5)
+                            faculties,
+                            d?.facultyId || d?.alumni_id?.substring(3, 5),
                           )}
                         </p>
                       </span>
@@ -498,7 +506,8 @@ const SearchPage = () => {
                         <Book size={15} color="gray" />
                         <p className="text-sm text-gray-500">
                           {departmentText(
-                            departments,d?.departmentId || d?.alumni_id?.substring(4, 8)
+                            departments,
+                            d?.departmentId || d?.alumni_id?.substring(4, 8),
                           )}
                         </p>
                       </span>
@@ -527,7 +536,7 @@ const SearchPage = () => {
                         router.push(
                           `/users/search/${
                             type < 2 ? d?.alumni_id : d?.professor_id
-                          }/${type}`
+                          }/${type}`,
                         );
                       }}
                       className="w-1/2 p-2 border border-gray-400 hover:bg-yellow-300 rounded-md flex justify-center items-center gap-2"

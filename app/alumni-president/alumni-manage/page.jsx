@@ -35,6 +35,7 @@ const Page = () => {
   const [filterWork, setFilterWork] = useState({});
   const [selectYearStart, setSelectYearStart] = useState("");
   const [selectYearEnd, setSelectYearEnd] = useState("");
+  const [selectEduLevel, setSelectEduLevel] = useState("");
 
   useEffect(() => {
     setFacultyId(user?.roleId <= 3 ? `${user?.facultyId}` : "");
@@ -53,6 +54,7 @@ const Page = () => {
     selectYearStart,
     selectYearEnd,
     current = {},
+    selectEduLevel
   ) => {
     setLoading(true);
     try {
@@ -68,6 +70,7 @@ const Page = () => {
           selectYearStart,
           selectYearEnd,
           current,
+          selectEduLevel
         },
       });
       if (res.status === 200) {
@@ -167,7 +170,9 @@ const Page = () => {
         selectYearEnd={selectYearEnd}
         selectYearStart={selectYearStart}
         setSelectYearEnd={setSelectYearEnd}
-        setSelectYearStart={setSelectYearStart} // ✅ optional filter
+        setSelectYearStart={setSelectYearStart}
+        selectEduLevel={selectEduLevel}
+        setSelectEduLevel={setSelectEduLevel} // ✅ optional filter
       >
         {loading ? (
           <RowLoader numcol={7} />
@@ -209,18 +214,7 @@ const Page = () => {
                 {d?.year_start || "ไม่พบข้อมูล"} -{" "}
                 {d?.year_end || "ไม่พบข้อมูล"}
               </td>
-              <td className="p-2 text-start text-xs">
-                <div className="flex flex-col w-fit">
-                  {" "}
-                  <p className="p-1.5 px-2 rounded-full shadow-xs bg-blue-50">
-                    {new Date(d?.createtAt).toLocaleDateString("th-TH", {
-                      day: "numeric",
-                      month: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </td>
+
               <td className="p-2">
                 {d?.regis_alumni?.isApproved === "pending" ? (
                   <span className="w-fit bg-orange-100 text-orange-800 px-2 py-1.5 rounded-full text-xs font-semibold">
