@@ -1,10 +1,38 @@
 import { BookUser, GraduationCap, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { eduLevels } from "@/data/faculty";
 import Modal from "@/components/modal";
+import axios from "axios";
+import { apiConfig } from "@/config/api.config";
+import { alerts } from "@/libs/alerts";
+import RowLoader from "@/components/row-loader";
+import RowDataNotFound from "@/components/row-data-notfound";
 
 const ViewEduLevel = () => {
   const [showModal, setShowModal] = useState(false);
+  const [load, setLoad] = useState(true);
+  const [eduLevel, setedulevelList] = useState([]);
+  const getEduList = async (search, page) => {
+    setLoad(true);
+    try {
+      const res = await axios.get(
+        apiConfig.rmuAPI + "/president/get-edulevels",
+        { params: { search, page, isOptions: true } },
+      );
+      if (res.status === 200) {
+        setedulevelList(res.data.data || []);
+        console.log("🚀 ~ getEduList ~ res.data.data:", res.data.data)
+      }
+    } catch (error) {
+      console.error(error);
+      alerts.err();
+    } finally {
+      setLoad(false);
+    }
+  };
+  useEffect(() => {
+    getEduList();
+  }, []);
 
   return (
     <>
@@ -17,7 +45,7 @@ const ViewEduLevel = () => {
           <p>ดูรหัสระดับการศึกษา</p>
         </button>
         <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-          <div className="w-full lg:w-1/2  rounded-lg z-50 bg-white flex flex-col">
+          <div className="w-full lg:w-1/2 h-[550px] overflow-auto rounded-lg z-50 bg-white flex flex-col">
             <div className="w-full flex p-5 items-start justify-between">
               <span className="flex flex-col">
                 <p className="font-semibold">รหัสระดับการศึกษา</p>
@@ -34,7 +62,7 @@ const ViewEduLevel = () => {
             </div>
             <div className="p-5 pt-5 border-t border-gray-300 w-full">
               <p className="mt-2 text-sm text-gray-600">
-                ทั้งหมด {eduLevels.length} ระดับการศึกษา
+                ทั้งหมด {eduLevel.length} ระดับการศึกษา
               </p>
               <div className="w-full h-[300px] lg:h-[400px] mt-2.5 overflow-auto ">
                 {" "}
@@ -50,16 +78,22 @@ const ViewEduLevel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {eduLevels?.map((f, index) => (
-                      <tr key={index} className="border-b border-gray-300">
-                        <td className="p-2.5 pb-3 text-start text-sm border-r border-gray-300">
-                          {f?.id}
-                        </td>
-                        <td className="p-2.5 pb-3 text-start text-sm">
-                          {f?.name}
-                        </td>
-                      </tr>
-                    ))}
+                    {load ? (
+                      <RowLoader numcol={2} />
+                    ) : eduLevel.length < 1 ? (
+                      <RowDataNotFound numCol={2} />
+                    ) : (
+                      eduLevel?.map((f, index) => (
+                        <tr key={index} className="border-b border-gray-300">
+                          <td className="p-2.5 pb-3 text-start text-sm border-r border-gray-300">
+                            {f?.edu_levelId}
+                          </td>
+                          <td className="p-2.5 pb-3 text-start text-sm">
+                            {f?.edu_level_name}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

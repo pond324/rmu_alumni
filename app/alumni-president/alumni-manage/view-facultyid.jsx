@@ -34,7 +34,7 @@ const ViewFaculty = () => {
           </div>
           <div className="p-5 pt-5 border-t border-gray-300 w-full">
             <p className="text-sm text-gray-600">
-              ทั้งหมด {faculties.length - 1} รายการ
+              ทั้งหมด {faculties.length} รายการ
             </p>
             <table className="w-full mt-2">
               <thead>
@@ -54,10 +54,10 @@ const ViewFaculty = () => {
                   faculties?.map((f, index) => (
                     <tr key={index} className="border-b border-gray-300">
                       <td className="p-2.5 pb-3 text-start text-sm border-r border-gray-300">
-                        {f?.id}
+                        {f?.value}
                       </td>
                       <td className="p-2.5 pb-3 text-start text-sm">
-                        {f?.name}
+                        {f?.label}
                       </td>
                     </tr>
                   ))

@@ -37,12 +37,6 @@ export const useFacultyDep = () => {
           value: f?.faculty_id,
         })),
       );
-      console.log(
-        response.data?.data?.map((f) => ({
-          label: f?.faculty_name,
-          value: f?.faculty_id,
-        })),
-      );
     } catch (error) {
       console.error("Error fetching faculty data:", error);
     }
@@ -63,13 +57,7 @@ export const useFacultyDep = () => {
           value: d?.department_id,
         })),
       );
-      console.log(
-        response.data?.data?.map((d) => ({
-          faculty_id: d?.faculty?.faculty_id,
-          label: d?.department_name,
-          value: d?.department_id,
-        })),
-      );
+    
     } catch (error) {
       console.error("Error fetching department data:", error);
     } finally {
