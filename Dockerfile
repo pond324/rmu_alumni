@@ -17,7 +17,7 @@ RUN cd /temp/prod && bun install --production
 FROM base AS build
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
-RUN bun --bun run build
+RUN bun run build
 
 # Final production image
 FROM base AS release
