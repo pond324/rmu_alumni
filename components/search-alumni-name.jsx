@@ -403,9 +403,9 @@ const SearchAlumniName = () => {
                     <th className="text-start px-2.5 pb-3 text-sm font-normal text-gray-700">
                       ปีที่จบการศึกษา
                     </th>
-                    {/* <th className="text-start px-2.5 pb-3 text-sm font-normal text-gray-700">
+                    <th className="text-start px-2.5 pb-3 text-sm font-normal text-gray-700">
                       สถานะ
-                    </th> */}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -449,7 +449,7 @@ const SearchAlumniName = () => {
                         <td className="text-sm text-gray-700 px-2.5 py-3">
                           {r?.year_end || "ไม่พบข้อมูล"}
                         </td>
-                        {/* <td className="text-sm text-gray-700 px-2.5 py-3">
+                        <td className="text-sm text-gray-700 px-2.5 py-3">
                           {r?.regis_alumni?.isApproved === "pending" ? (
                             <div className="flex flex-col gap-1">
                               <span className="w-fit bg-orange-100 text-orange-800 px-2 py-1.5 rounded-full text-xs font-semibold">
@@ -473,7 +473,7 @@ const SearchAlumniName = () => {
                               ยังไม่ลงทะเบียน
                             </span>
                           )}
-                        </td> */}
+                        </td>
                       </tr>
                     ))
                   )}
