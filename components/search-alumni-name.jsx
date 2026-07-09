@@ -520,7 +520,7 @@ const SearchAlumniName = () => {
 
                       <span className="flex items-center gap-2 pb-3 border-b border-gray-300 text-blue-600">
                         <IdCard size={16} />
-                        <p className="text-sm ">663170010324</p>
+                        <p className="text-sm ">{r?.alumni_id}</p>
                       </span>
 
                       <div className="flex flex-col text-sm p-3 mt-3 rounded-lg bg-blue-50">
