@@ -54,7 +54,7 @@ const Page = () => {
     selectYearStart,
     selectYearEnd,
     current = {},
-    selectEduLevel
+    selectEduLevel,
   ) => {
     setLoading(true);
     try {
@@ -70,7 +70,7 @@ const Page = () => {
           selectYearStart,
           selectYearEnd,
           current,
-          selectEduLevel
+          selectEduLevel,
         },
       });
       if (res.status === 200) {
@@ -213,6 +213,16 @@ const Page = () => {
               <td className="p-2  text-start text-sm">
                 {d?.year_start || "ไม่พบข้อมูล"} -{" "}
                 {d?.year_end || "ไม่พบข้อมูล"}
+              </td>
+              <td className="p-2  text-start text-sm">
+                <p className="p-1.5 w-fit px-2 rounded-full bg-blue-50 shadow-xs text-xs">
+                  {" "}
+                  {new Date(d?.createdAt).toLocaleDateString("th-TH", {
+                    day: "numeric",
+                    month: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
               </td>
 
               <td className="p-2">

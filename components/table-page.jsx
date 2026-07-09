@@ -161,7 +161,7 @@ const TablePage = ({
                   ? ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`
                   : ""
             }`}{" "}
-              ({total} คน)
+              ({total?.toLocaleString() || 0} คน)
             </p>
           </div>
           {pathName === "/alumni-president/alumni-manage" && (
