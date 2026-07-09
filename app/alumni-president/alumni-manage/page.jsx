@@ -217,7 +217,7 @@ const Page = () => {
               <td className="p-2  text-start text-sm">
                 <p className="p-1.5 w-fit px-2 rounded-full bg-blue-50 shadow-xs text-xs">
                   {" "}
-                  {new Date(d?.createdAt).toLocaleDateString("th-TH", {
+                  {new Date(d?.createtAt).toLocaleDateString("th-TH", {
                     day: "numeric",
                     month: "numeric",
                     year: "numeric",
