@@ -1,5 +1,5 @@
 "use client";
-import { Check, Loader, Loader2, QrCode, Trash2, Wallet } from "lucide-react";
+import { Check, Loader2, QrCode, Trash2 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { useCallback, useEffect, useState } from "react";
 import { alerts } from "@/libs/alerts";
@@ -21,13 +21,13 @@ const paymentMethods = [
 
 const SettingRegis = () => {
   const [id, setId] = useState();
-  const [regisPayment, setRegisPayment] = useState(0);
-  const [file, setFile] = useState();
+  const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
-  const [error, setError] = useState();
+  const [generating, setGenerating] = useState(false);
+
   const onDrop = useCallback(async (acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+    const droppedFile = acceptedFiles[0];
+    if (!droppedFile) return;
 
     const allowedTypes = [
       "image/jpeg",
@@ -37,33 +37,26 @@ const SettingRegis = () => {
       "image/gif",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(droppedFile.type)) {
       alerts.warning("อนุญาตเฉพาะไฟล์รูปภาพ (JPG, PNG, WEBP, GIF)");
       return;
     }
 
-    setError(null);
-    setPreview(URL.createObjectURL(file));
-    setFile(file);
-
-    // แสดง preview
-    const previewUrl = URL.createObjectURL(file);
-    console.log(previewUrl);
+    setPreview(URL.createObjectURL(droppedFile));
+    setFile(droppedFile);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive, fileRejections } =
-    useDropzone({
-      onDrop,
-      accept: {
-        "image/*": [".jpg", ".jpeg", ".png", ".webp", ".gif"],
-      },
-      maxSize: 5 * 1024 * 1024, // 5MB
-    });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+    },
+    maxSize: 5 * 1024 * 1024, // 5MB
+  });
 
   const handleDelete = () => {
     setFile(null);
     setPreview("");
-    setError("");
   };
 
   const [load, setLoad] = useState(true);
@@ -74,11 +67,21 @@ const SettingRegis = () => {
         apiConfig.rmuAPI + "/president/get-setting-data",
         { withCredentials: true },
       );
-      if (res.status === 200) {
-        setId(res?.data?.id);
-        setPreview(apiConfig.imgAPI + res?.data?.regis_payment_qrcode);
+      if (res.status === 200 && res.data) {
+        setId(res.data.id);
+        if (res.data.regis_payment_qrcode) {
+          setPreview(apiConfig.imgAPI + res.data.regis_payment_qrcode);
+        } else {
+          setPreview("");
+        }
+        setFile(null);
         reset({
-          ...res?.data,
+          regis_payment: res.data.regis_payment ?? "",
+          regis_payment_account_name: res.data.regis_payment_account_name ?? "",
+          regis_payment_account_number:
+            res.data.regis_payment_account_number ?? "",
+          regis_payment_account_back:
+            res.data.regis_payment_account_back ?? "",
         });
       }
     } catch (error) {
@@ -88,6 +91,7 @@ const SettingRegis = () => {
       setLoad(false);
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
@@ -107,25 +111,33 @@ const SettingRegis = () => {
       regis_payment_account_back: "",
     },
   });
+
   const [uploading, setUploading] = useState(false);
   const handleSaveRegisPaymentQRcode = async (data) => {
-    if (!file) return alerts.warning("กรุณาอัปโหลดรูปภาพ");
+    if (!file && !preview) {
+      return alerts.warning("กรุณาอัปโหลดรูปภาพหรือสร้างคิวอาร์โค้ด");
+    }
     setUploading(true);
     try {
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
-        formData.append(key, data[key]);
+        if (data[key] !== undefined && data[key] !== null) {
+          formData.append(key, data[key]);
+        }
       });
-      formData.append("file", file);
-      const api = id
-        ? `/president/setting-edit-qrcode-payment/${id}`
-        : "/president/setting-upload-qrcode-payment";
-      const res = await axios.post(apiConfig.rmuAPI + `/president/setting-edit-qrcode-payment/${id}`, formData, {
-        withCredentials: true,
-      });
+      if (file) {
+        formData.append("file", file);
+      }
+      const targetId = id || "default";
+      const res = await axios.post(
+        apiConfig.rmuAPI + `/president/setting-edit-qrcode-payment/${targetId}`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      );
       if (res.status === 200) {
         alerts.success("บันทึกสำเร็จ");
-        handleDelete();
         getData();
       }
     } catch (error) {
@@ -137,12 +149,25 @@ const SettingRegis = () => {
   };
 
   const handleGenerateQrCode = async () => {
-    const file = await generateQrcode(
-      watch("regis_payment_account_number", Number(watch("regis_payment"))),
-    );
-    setPreview(URL.createObjectURL(file));
-    setFile(file);
-    alerts.success("สร้างคิวอาร์โค้ดแล้ว");
+    const accountNumber = watch("regis_payment_account_number");
+    const amount = Number(watch("regis_payment"));
+    if (!accountNumber) {
+      return alerts.warning("กรุณาระบุเลขพร้อมเพย์");
+    }
+    setGenerating(true);
+    try {
+      const generatedFile = await generateQrcode(accountNumber, amount);
+      if (generatedFile) {
+        setPreview(URL.createObjectURL(generatedFile));
+        setFile(generatedFile);
+        alerts.success("สร้างคิวอาร์โค้ดแล้ว");
+      }
+    } catch (error) {
+      console.error(error);
+      alerts.err("ไม่สามารถสร้างคิวอาร์โค้ดได้");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -171,7 +196,7 @@ const SettingRegis = () => {
                   {...getRootProps()}
                   className={`
     w-full h-75
-    rounded-lg border-2 overflow-auto border-dashed
+    rounded-lg border-2 overflow-hidden border-dashed
     flex flex-col items-center justify-center gap-1.5
     cursor-pointer
     transition-all duration-300 ease-in-out
@@ -180,29 +205,24 @@ const SettingRegis = () => {
     ${isDragActive ? "bg-blue-50 border-blue-500 scale-105" : ""}
   `}
                 >
-                  <input
-                    {...getInputProps()}
-                    //   type="file"
-                    className="hidden"
-                    name=""
-                    //   id="file-picker"
-                  />
-                  <>
-                    {preview ? (
-                      <img
-                        className="w-full h-full object-cover"
-                        src={preview}
-                      />
-                    ) : (
-                      <>
-                        <QrCode size={50} className="text-gray-600" />
-                        <p>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวาง</p>
-                        <p className="text-sm text-gray-700">
-                          รองรับไฟล์ .jpg,jpeg,png,webp,gif
-                        </p>
-                      </>
-                    )}
-                  </>
+                  <input {...getInputProps()} className="hidden" />
+                  {preview ? (
+                    <img
+                      className="w-full h-full object-contain p-2"
+                      src={preview}
+                      alt="QR Code"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-4 text-center">
+                      <QrCode size={50} className="text-gray-400 mb-2" />
+                      <p className="text-sm font-medium text-gray-700">
+                        คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวาง
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        รองรับไฟล์ .jpg, .jpeg, .png, .webp, .gif
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {watch("regis_payment_account_back") ===
@@ -210,21 +230,28 @@ const SettingRegis = () => {
                   Number(watch("regis_payment")) > 0 &&
                   watch("regis_payment_account_number") && (
                     <button
+                      type="button"
+                      disabled={generating}
                       onClick={handleGenerateQrCode}
-                      className="w-full p-2.5 text-sm shadow-sm rounded-lg flex items-center gap-2 justify-center bg-gray-50 hover:text-white hover:bg-linear-90 from-blue-600 to-sky-300 mt-2"
+                      className="w-full p-2.5 text-sm shadow-sm rounded-lg flex items-center gap-2 justify-center bg-gray-50 hover:text-white hover:bg-gradient-to-r from-blue-600 to-sky-400 mt-2 transition-colors cursor-pointer"
                     >
-                      <QrCode size={18} />
+                      {generating ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <QrCode size={18} />
+                      )}
                       <p>สร้างคิวอาร์โค้ดอัตโนมัติ</p>
                     </button>
                   )}
                 <div className="w-full mt-1.5 flex items-center justify-center">
-                  {file && (
+                  {(file || preview) && (
                     <button
+                      type="button"
                       onClick={handleDelete}
-                      className="p-2 px-3 text-sm rounded-lg flex items-center gap-2 shadow-sm text-red-500 hover:bg-red-500 hover:text-white"
+                      className="p-2 px-3 text-sm rounded-lg flex items-center gap-2 shadow-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
                     >
                       <Trash2 size={18} />
-                      <p>ลบ</p>
+                      <p>ลบรูปภาพ</p>
                     </button>
                   )}
                 </div>
@@ -241,7 +268,7 @@ const SettingRegis = () => {
                       type="text"
                       value={field.value || ""}
                       {...field}
-                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm"
+                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm outline-none"
                       placeholder="เช่น สมาคมศิษย์เก่ามหาวิทยาลัยราชภัฏมหาสารคาม"
                     />
                   )}
@@ -261,7 +288,7 @@ const SettingRegis = () => {
                       type="text"
                       value={field.value || ""}
                       {...field}
-                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm"
+                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm outline-none"
                       placeholder="เช่น 0-1234-56789-01-2"
                     />
                   )}
@@ -281,7 +308,7 @@ const SettingRegis = () => {
                       type="number"
                       value={field.value || ""}
                       {...field}
-                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm"
+                      className="w-full md:w-1/2 lg:w-2/3 focus:border-blue-500 p-2 px-3 rounded-lg text-sm border border-gray-300 mt-1.5 shadow-sm outline-none"
                       placeholder="เช่น 1000"
                     />
                   )}
@@ -306,18 +333,19 @@ const SettingRegis = () => {
                         null
                       }
                       onChange={(option) => {
-                        if(option.value !== "PromptPay(พร้อมเพย์)"){
-                          setPreview("");
-                          setFile(null);
-                        }
-                        setValue("regis_payment_account_back", option?.value);
+                        setValue(
+                          "regis_payment_account_back",
+                          option?.value || "",
+                          { shouldValidate: true },
+                        );
                       }}
                       styles={{
                         control: (base, state) => ({
                           ...base,
-                          width: "410px",
+                          width: "100%",
+                          maxWidth: "410px",
                           minHeight: "40px",
-                          borderRadius: "12px",
+                          borderRadius: "8px",
                           border: state.isFocused
                             ? "1px solid #3B82F6"
                             : "1px solid #D1D5DB",
@@ -352,7 +380,7 @@ const SettingRegis = () => {
                         }),
                         menu: (base) => ({
                           ...base,
-                          borderRadius: "12px",
+                          borderRadius: "8px",
                           overflow: "hidden",
                           zIndex: 9999,
                         }),
@@ -369,18 +397,18 @@ const SettingRegis = () => {
             </div>
             <div className="w-full flex items-center p-5 rounded-bl-lg rounded-br-lg border border-gray-200 justify-end border-t-0">
               <button
+                type="button"
                 disabled={uploading}
                 onClick={handleSubmit(handleSaveRegisPaymentQRcode)}
-                className="p-2 px-3 text-sm rounded-lg flex items-center gap-2 shadow-sm bg-blue-50 hover:bg-blue-500 hover:text-white"
+                className="p-2 px-3 text-sm rounded-lg flex items-center gap-2 shadow-sm bg-blue-500 hover:bg-blue-600 text-white cursor-pointer transition-colors"
               >
                 {uploading ? (
                   <>
-                    <Loader2 className="animate-spin" />
+                    <Loader2 className="animate-spin" size={18} />
                     <p>กำลังบันทึก...</p>
                   </>
                 ) : (
                   <>
-                    {" "}
                     <Check size={18} />
                     <p>บันทึก</p>
                   </>
