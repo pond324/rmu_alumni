@@ -152,20 +152,19 @@ const TablePage = ({
             <p className="text-[0.9rem] text-gray-700">
               {description +
                 `${selectYearStart ? ` ปีการศึกษา พ.ศ. ${selectYearStart}` : ""}
-            ${
-              selectYearEnd && selectYearStart
-                ? ` - พ.ศ. ${selectYearEnd}`
-                : selectYearEnd
-                  ? ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`
-                  : ""
-            }`}{" "}
+            ${selectYearEnd && selectYearStart
+                  ? ` - พ.ศ. ${selectYearEnd}`
+                  : selectYearEnd
+                    ? ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`
+                    : ""
+                }`}{" "}
               ({total?.toLocaleString() || 0} คน)
             </p>
           </div>
           {pathName === "/alumni-president/alumni-manage" && (
             <div className="flex items-center gap-2.5">
-              {/* <ImportAlumniData fetchData={fetchData} /> */}
-              {/* <ImportHistoryData fetchAlumni={fetchData} /> */}
+              <ImportAlumniData fetchData={fetchData} />
+              <ImportHistoryData fetchAlumni={fetchData} />
               <ExportAlumniData />
             </div>
           )}

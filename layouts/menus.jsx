@@ -44,7 +44,7 @@ const Menu = () => {
       title: "รายงาน",
       icon: <ChartArea size={20} />,
       url: "/users/overview",
-      allowed: [4,5],
+      allowed: [4, 5],
     },
     {
       title: "โปรไฟล์",
@@ -159,9 +159,8 @@ const Menu = () => {
   return (
     <>
       <div
-        className={`p-3 bg-linear-200 from-blue-800 to-blue-950 lg:flex bg-white ${
-          showResponsive ? "flex w-[80%] absolute top-0" : "hidden"
-        } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-40`}
+        className={`p-3 bg-linear-200 from-blue-800 to-blue-950 lg:flex bg-white ${showResponsive ? "flex w-[80%] absolute top-0" : "hidden"
+          } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-40`}
       >
         <div className="w-full flex flex-col">
           <div className="flex items-center w-full gap-4 pb-3 p-1 border-b border-gray-200">
@@ -206,11 +205,10 @@ const Menu = () => {
               <Link
                 onClick={() => setShowResponsive(false)}
                 key={index}
-                className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${
-                  path.split("/")[2] === m.url.split("/")[2]
+                className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${path.split("/")[2] === m.url.split("/")[2]
                     ? "border-l-4 border-l-gray-100 bg-white/25"
                     : "hover:bg-white/15 hover:shadow-xs rounded-sm "
-                }  mt-0.5 w-full px-3.5 py-3`}
+                  }  mt-0.5 w-full px-3.5 py-3`}
                 href={m.url}
               >
                 {m.icon}
@@ -220,19 +218,18 @@ const Menu = () => {
           <label htmlFor="" className="my-4 text-sm text-gray-300">
             ระบบ
           </label>
-          {/* {user?.roleId == 5 && (
+          {user?.roleId == 5 && (
             <Link
-              className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${
-                path.split("/")[2] === "setting"
+              className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${path.split("/")[2] === "setting"
                   ? "border-l-4 border-l-gray-100 bg-white/25"
                   : "hover:bg-white/15 hover:shadow-xs "
-              }  mt-0.5 rounded-lg w-full px-3.5 py-3`}
+                }  mt-0.5 rounded-lg w-full px-3.5 py-3`}
               href={"/alumni-president/setting/regis"}
             >
               <Cog className="" size={18} />
               <p>ตั้งค่าระบบ</p>
             </Link>
-          )} */}
+          )}
           <button
             onClick={logout}
             className="flex items-center text-sm gap-3 shadow-sm text-red-500 bg-red/15  hover:text-gray-100 transition-all duration-300 hover:bg-red-500 mt-1 rounded-lg w-full px-3.5 py-3"

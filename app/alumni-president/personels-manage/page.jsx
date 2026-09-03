@@ -141,7 +141,7 @@ const TablePage = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {/* <ImportPersonelData
+            <ImportPersonelData
               fetchData={() =>
                 fetchData(
                   page,
@@ -167,7 +167,7 @@ const TablePage = () => {
                 )
               }
               type="personel"
-            /> */}
+            />
             <ExportPersonelBtn />
           </div>
         </span>
