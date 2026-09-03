@@ -25,25 +25,27 @@ const UserListAndAcconutCanUse = () => {
   }, []);
 
   return (
-    <FadeInSection className="w-full lg:w-1/2 p-5 rounded-lg bg-white flex flex-col shadow-sm border border-gray-300">
+    <FadeInSection className="w-full lg:w-1/2 min-w-0 p-4 sm:p-5 rounded-lg bg-white flex flex-col shadow-sm border border-gray-300">
       <p className="font-semibold">สรุปบัญชีระบบ</p>
       <p className="text-sm text-gray-700 mb-3.5">ภาพรวมการเปิด/ปิดใช้งานบัญชี</p>
-      {data?.map((d, index) => (
-        <div key={index} className="w-full flex flex-col text-sm my-2">
-          <span className="w-full flex items-center justify-between">
-            <p>{d?.name}</p>
-            <p className="text-gray-600">
-              {d?.canUse?.toLocaleString() || 0}/{d?.all?.toLocaleString() || 0}
-            </p>
-          </span>
-          <div className="p-1 relative rounded-lg w-full bg-blue-100 mt-1.5">
-            <div
-              style={{ width: `${d?.percent || 0}%` }}
-              className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
-            ></div>
+      <div className="flex flex-col gap-3 my-auto">
+        {data?.map((d, index) => (
+          <div key={index} className="w-full flex flex-col text-sm">
+            <span className="w-full flex items-center justify-between text-xs sm:text-sm">
+              <p className="font-medium">{d?.name}</p>
+              <p className="text-gray-600">
+                {d?.canUse?.toLocaleString() || 0}/{d?.all?.toLocaleString() || 0}
+              </p>
+            </span>
+            <div className="h-2.5 w-full bg-blue-100 rounded-full overflow-hidden mt-1.5 relative">
+              <div
+                style={{ width: `${d?.percent || 0}%` }}
+                className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              ></div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </FadeInSection>
   );
 };

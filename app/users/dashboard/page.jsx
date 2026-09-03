@@ -1,27 +1,34 @@
 "use client";
+import React, { useEffect, useState, useMemo } from "react";
 import PieChartComponent from "@/components/chart-pie";
 import ChartSimple from "@/components/chart-simple";
-import DropdownMenu from "@/components/dropdown-menu";
+import Select from "react-select";
 import {
-  BookCopy,
-  BriefcaseBusiness,
-  Building,
-  Building2,
-  Check,
-  CheckCircle,
-  CircleDollarSign,
-  Coins,
-  Eye,
-  GraduationCap,
-  MapPin,
-  MapPinHouse,
-  Menu,
-  University,
   Users,
+  Briefcase,
+  GraduationCap,
+  Award,
+  Globe,
+  Building2,
+  TrendingUp,
+  Sparkles,
+  MapPin,
+  Calendar,
   X,
+  RefreshCw,
+  Layers,
+  DollarSign,
+  Filter,
+  ArrowUpRight,
+  Check,
+  CheckCircle2,
+  AlertCircle,
+  BookOpen,
+  MapPinHouse,
+  ChevronRight,
+  UserX,
+  Coins,
 } from "lucide-react";
-import { faculties, departments } from "@/data/faculty";
-import { useEffect, useState } from "react";
 import useGetSession from "@/hook/useGetSeesion";
 import { departmentText, facultyText } from "@/components/faculty-p";
 import { alerts } from "@/libs/alerts";
@@ -41,6 +48,7 @@ import {
   FaGlobe,
   FaGraduationCap,
   FaMapMarked,
+  FaPlaneDeparture,
 } from "react-icons/fa";
 import WorkPlaceRatePieChartComponent from "./work-place-rate";
 import { SelectYearEnd, SelectYearStart } from "@/components/select-year-start";
@@ -49,6 +57,30 @@ import LineChartComponent from "@/components/line-chart";
 import AlumniColumnChart from "@/components/column-chart";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import ExportBtn from "./export-btn";
+
+const StatCardSkeleton = () => (
+  <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm animate-pulse flex flex-col justify-between h-[128px]">
+    <div className="flex justify-between items-start">
+      <div className="h-4 bg-slate-200 rounded w-24"></div>
+      <div className="w-10 h-10 bg-slate-200 rounded-xl"></div>
+    </div>
+    <div className="h-7 bg-slate-200 rounded w-32"></div>
+    <div className="h-3 bg-slate-100 rounded w-20"></div>
+  </div>
+);
+
+const ChartSkeleton = ({ height = 350 }) => (
+  <div
+    style={{ height }}
+    className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm animate-pulse flex flex-col gap-4"
+  >
+    <div className="flex justify-between items-center">
+      <div className="h-5 bg-slate-200 rounded w-48"></div>
+      <div className="h-4 bg-slate-100 rounded w-24"></div>
+    </div>
+    <div className="flex-1 bg-slate-100 rounded-xl"></div>
+  </div>
+);
 
 const Dashboard = () => {
   const { faculties, departments, loadData } = useFacultyDep();
@@ -64,466 +96,349 @@ const Dashboard = () => {
   const { setPrevPath } = useAppContext();
   const router = useRouter();
 
-  const [selectFaculty, setSelectFaculty] = useState([]);
-  const [selectDepartment, setSelectDepartment] = useState([]);
-  const [selectFacultyMenus, setSelectFacultyMenus] = useState(
-    faculties.map((f) => ({
-      id: f.id,
-      title: f.name,
-      func: () => {
-        setSelectFaculty(f);
-        setFaculty(f);
-        setDepartment();
-      },
-    })),
-  );
+  // Selected filters (null or { id, name })
+  const [selectFaculty, setSelectFacultyState] = useState(null);
+  const [selectDepartment, setSelectDepartmentState] = useState(null);
 
-  const [selectDepartmentMenus, setSelectDepartmentMenus] = useState(
-    departments.map((d) => ({
-      id: d.id,
-      title: d.name,
-      func: () => {
-        setSelectDepartment(d);
-        setDepartment(d);
-      },
-    })),
-  );
-  useEffect(() => {
-    setSelectFacultyMenus(
-      faculties.map((f) => ({
-        id: f.id,
-        title: f.name,
-        func: () => {
-          setSelectFaculty(f);
-          setFaculty(f);
-          setDepartment();
-        },
-      })),
+  // Loading states
+  const [loadingOverview, setLoadingOverview] = useState(true);
+  const [loadingCharts, setLoadingCharts] = useState(true);
+
+  // Data states
+  const [headerData, setHeaderData] = useState(null);
+  const [chartbarData, setChartbarData] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [pieWorkRate, setPieWorkRate] = useState([]);
+  const [otherCountryList, setOtherCountryList] = useState([]);
+  const [populationJob, setPopulationJob] = useState([]);
+  const [mostLiverPercent, setMostLivePercent] = useState({ result: [] });
+  const [workRatePercent, setWorkRatePercent] = useState([]);
+  const [noWorkData, setNoWorkData] = useState([]);
+  const [alumniNoWorkList, setAlumniNoWorkList] = useState([]);
+
+  // Helper to resolve faculty name by ID
+  const getFacultyName = (id) => {
+    if (!id) return "ไม่ระบุคณะ";
+    const found = (faculties || []).find(
+      (f) =>
+        String(f?.value) === String(id) ||
+        String(f?.id) === String(id) ||
+        String(f?.faculty_id) === String(id)
     );
-    setSelectDepartmentMenus(
-      departments.map((d) => ({
-        id: d.id,
-        title: d.name,
-        func: () => {
-          setSelectDepartment(d);
-          setDepartment(d);
-        },
-      })),
-    );
-  }, [faculties, departments]);
-  useEffect(() => {
-    if (!user || user?.roleId > 3) return;
-
-    const { facultyId } = user;
-
-    let data = departments;
-    const facSub = Number(`${facultyId}`.substring(1, 2));
-    data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
-
-    setSelectDepartmentMenus(
-      data.map((d) => ({
-        id: d.id,
-        title: d.name,
-        func: () => {
-          setSelectDepartment(d);
-          setDepartment(d);
-        },
-      })),
-    );
-  }, [user]);
-
-  useEffect(() => {
-    if (!selectFaculty) return;
-
-    setSelectDepartmentMenus(() => {
-      const facId = selectFaculty.id;
-      const facSub = Number(`${selectFaculty.id}`.substring(1, 2));
-      let data = [];
-      data = departments.filter((d) => `${d.id}`.substring(0, 1) == facSub);
-
-      setSelectDepartment("");
-
-      return data.map((d) => ({
-        id: d.id,
-        title: d.name,
-        func: () => {
-          setSelectDepartment(d);
-          setDepartment(d);
-        },
-      }));
-    });
-  }, [selectFaculty]);
-
-  const [headerTitle, setHeaderTitle] = useState("");
-  const titleText = () => {
-    let title = "";
-    if (!selectDepartment && !selectFaculty) {
-      title = "ทั้งหมด";
-    }
-
-    if (selectFaculty.length > 0) {
-      title = selectFaculty.name + " ";
-    }
-    if (selectDepartment.length > 0) {
-      title = title + "สาขาวิชา" + selectDepartment.name;
-    }
-
-    setHeaderTitle(title);
+    return found?.label || found?.name || found?.faculty_name || `คณะ (${id})`;
   };
-  useEffect(() => {
-    titleText();
-  }, [selectDepartment, selectFaculty]);
 
+  // Helper to resolve department name by ID
+  const getDepartmentName = (id) => {
+    if (!id) return "ไม่ระบุสาขา";
+    const found = (departments || []).find(
+      (d) =>
+        String(d?.value) === String(id) ||
+        String(d?.id) === String(id) ||
+        String(d?.department_id) === String(id)
+    );
+    return found?.label || found?.name || found?.department_name || `สาขา (${id})`;
+  };
+
+  // Faculty dropdown menu items
+  const selectFacultyMenus = useMemo(() => {
+    return (faculties || []).map((f) => {
+      const id = f.value ?? f.id ?? f.faculty_id;
+      const title = f.label ?? f.name ?? f.faculty_name;
+      return {
+        id,
+        title,
+        func: () => {
+          const facObj = { id, name: title, value: id, label: title };
+          setSelectFacultyState(facObj);
+          setFaculty(facObj);
+          setSelectDepartmentState(null);
+          setDepartment(null);
+        },
+      };
+    });
+  }, [faculties, setFaculty, setDepartment]);
+
+  // Department dropdown menu items
+  const selectDepartmentMenus = useMemo(() => {
+    let list = departments || [];
+    const targetFacId =
+      selectFaculty?.id ||
+      selectFaculty?.value ||
+      (user?.roleId <= 3 ? user?.facultyId : null);
+
+    if (targetFacId) {
+      const facSub =
+        String(targetFacId).length >= 2
+          ? String(targetFacId).substring(1, 2)
+          : String(targetFacId);
+
+      list = list.filter((d) => {
+        const depIdStr = String(d.value ?? d.id ?? d.department_id);
+        const depFacId = d.faculty_id ? String(d.faculty_id) : null;
+        return (
+          (depFacId && depFacId === String(targetFacId)) ||
+          depIdStr.substring(0, 1) === facSub ||
+          depIdStr.startsWith(String(targetFacId))
+        );
+      });
+    }
+
+    return list.map((d) => {
+      const id = d.value ?? d.id ?? d.department_id;
+      const title = d.label ?? d.name ?? d.department_name;
+      return {
+        id,
+        title,
+        func: () => {
+          const deptObj = { id, name: title, value: id, label: title };
+          setSelectDepartmentState(deptObj);
+          setDepartment(deptObj);
+        },
+      };
+    });
+  }, [departments, user, selectFaculty, setDepartment]);
+
+  // Clear all filters
   const clearQuery = () => {
     setSelectYearStart("");
     setSelectYearEnd("");
-    setSelectFacultyMenus(
-      faculties.map((d) => ({
-        id: d.id,
-        title: d.name,
-        func: () => {
-          setSelectFaculty(d);
-          setFaculty(d);
-          setDepartment("");
-        },
-      })),
-    );
-    setSelectDepartmentMenus(
-      departments.map((d) => ({
-        id: d.id,
-        title: d.name,
-        func: () => {
-          setSelectDepartment(d);
-          setDepartment(d);
-        },
-      })),
-    );
-    setSelectDepartment("");
-    setSelectFaculty("");
+    setSelectFacultyState(null);
+    setSelectDepartmentState(null);
+    setFaculty(null);
+    setDepartment(null);
   };
 
-  const [loadAllAvg, setLoadAllAvg] = useState(false);
-  const [headerData, setHeaderData] = useState();
-  const fetchPageStart = async (
-    facultyId = "",
-    departmentId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
-    setLoadAllAvg(true);
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectFaculty) count++;
+    if (selectDepartment) count++;
+    if (selectYearStart) count++;
+    if (selectYearEnd) count++;
+    return count;
+  }, [selectFaculty, selectDepartment, selectYearStart, selectYearEnd]);
+
+  // Fetch KPI stats
+  const fetchPageStart = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+    setLoadingOverview(true);
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/all-avg", {
         withCredentials: true,
         params: {
-          facultyId,
-          departmentId,
-          selectYearStart,
-          selectYearEnd,
+          facultyId: facId || undefined,
+          departmentId: deptId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
       });
       if (res.status === 200) {
-        setHeaderData(res?.data);
+        setHeaderData(res.data);
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchPageStart error:", error);
+      alerts.err("ไม่สามารถโหลดข้อมูลสถิติภาพรวมได้");
     } finally {
-      setLoadAllAvg(false);
+      setLoadingOverview(false);
     }
   };
 
-  const [chartbarData, setChartbarData] = useState([]);
-  const fetchChartBarData = async (
-    facultyId = "",
-    selectYearStart,
-    selectYearEnd,
-    faculties,
-    departments,
-  ) => {
+  // Fetch bar chart data (Employed vs Unemployed)
+  const fetchChartBarData = async (facId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/chart-bar-data",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/chart-bar-data", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        const data = res.data;
-        console.log("🚀 ~ fetchChartBarData ~ user?.roleId:", user?.roleId);
-
-        if (!departments || !faculties) return;
-
+        const data = res.data || [];
+        const isDeptLevel = (user?.roleId && user.roleId < 3) || Boolean(selectFaculty);
         const result = data.map((d) => {
+          const name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
           return {
-            name:
-              user?.roleId < 3 || selectFaculty.length > 0
-                ? departments.find((f) => Number(f?.id) === Number(d.id))
-                    ?.name || "ไม่พบรหัสสาขาวิชานี้"
-                : faculties.find((f) => Number(f?.id) === Number(d.id))?.name ||
-                  "ไม่พบรหัสคณะนี้",
-            working: d.working,
-            unemployed: d.unemployed,
+            name,
+            working: Number(d.working) || 0,
+            unemployed: Number(d.unemployed) || 0,
           };
         });
         setChartbarData(result);
-        // console.log("🚀 ~ fetchChartBarData ~ result:", result)
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchChartBarData error:", error);
     }
   };
 
-  const [pieData, setPieData] = useState([]);
-  const fetchPieData = async (
-    facultyId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch average salary per faculty/dept
+  const fetchPieData = async (facId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/pie-chart-data",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/pie-chart-data", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        const data = res.data;
-        // console.log("🚀 ~ fetchPieData ~ data:", data);
-        const result = data.map((d) => ({
-          name:
-            user?.roleId < 4 ||  selectFaculty.length > 0
-              ? departments.find(
-                  (f) => Number(f?.id) === Number(d.departmentId),
-                )?.name || "ไม่พบรหัสสาขาวิชานี้"
-              : faculties.find((f) => Number(f?.id) === Number(d.facultyId))
-                  ?.name || "ไม่พบรหัสคณะนี้",
-          value: Math.round(d.avgSalary),
-        }));
+        const data = res.data || [];
+        const isDeptLevel = (user?.roleId && user.roleId < 4) || Boolean(selectFaculty);
+        const result = data.map((d) => {
+          const name =
+            isDeptLevel && d.departmentId
+              ? getDepartmentName(d.departmentId)
+              : getFacultyName(d.facultyId);
+          return {
+            name,
+            value: Math.round(Number(d.avgSalary) || 0),
+          };
+        });
         setPieData(result);
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchPieData error:", error);
     }
   };
 
-  const [pieWorkRate, setPieWorkRate] = useState([]);
-  const [otherCountryList, setOtherCountryList] = useState([]);
-  const fetchWorkPlaceRate = async (
-    facultyId = "",
-    departmentId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch Work Place Rate (In Thailand vs Abroad)
+  const fetchWorkPlaceRate = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/work-place-rate",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            departmentId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/work-place-rate", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          departmentId: deptId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        setPieWorkRate(res.data.result);
-        setOtherCountryList(res?.data?.countryList);
+        setPieWorkRate(res.data?.result || []);
+        setOtherCountryList(res.data?.countryList || []);
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchWorkPlaceRate error:", error);
     }
   };
 
-  const [populationJob, setPopulationJob] = useState([]);
-  const fetchMostPopular = async (
-    facultyId = "",
-    departmentId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch Most Popular Jobs
+  const fetchMostPopular = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/population-job",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            departmentId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/population-job", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          departmentId: deptId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        const data = res.data;
+        const data = res.data || [];
         const result = data.map((d) => ({
-          name: d?.job_position,
-          count: d?._count?.alumniId,
+          name: d?.job_position || "ไม่ระบุตำแหน่ง",
+          count: Number(d?._count?.alumniId) || 0,
         }));
         setPopulationJob(result);
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchMostPopular error:", error);
     }
   };
 
-  const [mostLiverPercent, setMostLivePercent] = useState([]);
-  const fetchMostLive = async (
-    facultyId = "",
-    departmentId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch Top Provinces
+  const fetchMostLive = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/most-live-province",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            departmentId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/most-live-province", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          departmentId: deptId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        setMostLivePercent(res.data);
+        setMostLivePercent(res.data || { result: [] });
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchMostLive error:", error);
     }
   };
 
-  const [workRatePercent, setWorkRatePercent] = useState([]);
-  const fetchWorkRatePercent = async (
-    facultyId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch Work Rate Percent
+  const fetchWorkRatePercent = async (facId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/workrate-percent",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/workrate-percent", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        const data = res.data;
-        const result = data.map((d) => ({
-          name:
-            user?.roleId < 3 ||  selectFaculty.length > 0
-              ? departments.find((f) => Number(f?.id) === Number(d.id))?.name ||
-                "ไม่พบรหัสสาขาวิชานี้"
-              : faculties.find((f) => Number(f?.id) === Number(d.id))?.name ||
-                "ไม่พบรหัสคณะนี้",
-          percent: Math.round(d?.percent),
-        }));
+        const data = res.data || [];
+        const isDeptLevel = (user?.roleId && user.roleId < 3) || Boolean(selectFaculty);
+        const result = data.map((d) => {
+          const name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
+          return {
+            name,
+            percent: Math.round(Number(d?.percent) || 0),
+          };
+        });
         setWorkRatePercent(result);
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchWorkRatePercent error:", error);
     }
   };
 
-  const [noWorkData, setNoWorkData] = useState([]);
-  const [alumniNoWorkList, setAlumniNoWorkList] = useState([]);
-  const fetchNoWorkData = async (
-    facultyId = "",
-    departmentId = "",
-    selectYearStart,
-    selectYearEnd,
-  ) => {
+  // Fetch No Work Data
+  const fetchNoWorkData = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
     try {
-      const res = await axios.get(
-        apiConfig.rmuAPI + "/dashboard/no-work-data",
-        {
-          withCredentials: true,
-          params: {
-            facultyId,
-            departmentId,
-            selectYearStart,
-            selectYearEnd,
-          },
+      const res = await axios.get(apiConfig.rmuAPI + "/dashboard/no-work-data", {
+        withCredentials: true,
+        params: {
+          facultyId: facId || undefined,
+          departmentId: deptId || undefined,
+          selectYearStart: yrStart || undefined,
+          selectYearEnd: yrEnd || undefined,
         },
-      );
+      });
       if (res.status === 200) {
-        setNoWorkData(res.data.result);
-        // console.log("🚀 ~ fetchNoWorkData ~ res.data.result:", res.data.result);
-        if (user.roleId < 3 || selectDepartment) {
-          setAlumniNoWorkList(res.data.alumniNoWork);
+        setNoWorkData(res.data?.result || []);
+        if ((user?.roleId && user.roleId < 3) || selectDepartment) {
+          setAlumniNoWorkList(res.data?.alumniNoWork || []);
         }
       }
     } catch (error) {
-      console.error(error);
-      alerts.err();
+      console.error("fetchNoWorkData error:", error);
     }
   };
 
+  // Trigger all fetches
   useEffect(() => {
     if (!user || loadData) return;
-    fetchPageStart(
-      selectFaculty?.id,
-      selectDepartment?.id,
-      selectYearStart,
-      selectYearEnd,
-    );
-    fetchChartBarData(
-      selectFaculty?.id,
-      selectYearStart,
-      selectYearEnd,
-      faculties,
-      departments,
-    );
-    fetchPieData(selectFaculty?.id, selectYearStart, selectYearEnd);
-    fetchMostPopular(
-      selectFaculty?.id,
-      selectDepartment?.id,
-      selectYearStart,
-      selectYearEnd,
-    );
-    fetchMostLive(
-      selectFaculty?.id,
-      selectDepartment?.id,
-      selectYearStart,
-      selectYearEnd,
-    );
-    fetchWorkRatePercent(selectFaculty?.id, selectYearStart, selectYearEnd);
-    fetchNoWorkData(
-      selectFaculty?.id,
-      selectDepartment?.id,
-      selectYearStart,
-      selectYearEnd,
-    );
-    fetchWorkPlaceRate(
-      selectFaculty.id,
-      selectDepartment.id,
-      selectYearStart,
-      selectYearEnd,
-    );
+    setLoadingCharts(true);
+
+    const facId = selectFaculty?.id || "";
+    const deptId = selectDepartment?.id || "";
+
+    Promise.all([
+      fetchPageStart(facId, deptId, selectYearStart, selectYearEnd),
+      fetchChartBarData(facId, selectYearStart, selectYearEnd),
+      fetchPieData(facId, selectYearStart, selectYearEnd),
+      fetchMostPopular(facId, deptId, selectYearStart, selectYearEnd),
+      fetchMostLive(facId, deptId, selectYearStart, selectYearEnd),
+      fetchWorkRatePercent(facId, selectYearStart, selectYearEnd),
+      fetchNoWorkData(facId, deptId, selectYearStart, selectYearEnd),
+      fetchWorkPlaceRate(facId, deptId, selectYearStart, selectYearEnd),
+    ]).finally(() => {
+      setLoadingCharts(false);
+    });
   }, [
     user,
     selectDepartment,
@@ -535,471 +450,632 @@ const Dashboard = () => {
     loadData,
   ]);
 
-  if (!user)
+  if (!user) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+      <div className="w-full h-96 flex flex-col items-center justify-center gap-3 text-slate-500">
         <Loading type={2} />
-        <p>กำลังโหลด...</p>
+        <p className="text-sm font-medium">กำลังเตรียมข้อมูลระบบ...</p>
       </div>
     );
+  }
+
+  // Scope label for current view
+  const scopeLabel = () => {
+    let parts = [];
+    if (selectFaculty) parts.push(selectFaculty.name || selectFaculty.label);
+    if (selectDepartment) parts.push(`สาขาวิชา${selectDepartment.name || selectDepartment.label}`);
+    if (parts.length === 0) {
+      if (user?.roleId < 3) parts.push(getDepartmentName(user?.departmentId));
+      else if (user?.roleId === 3) parts.push(getFacultyName(user?.facultyId));
+      else parts.push("มหาวิทยาลัยราชภัฏมหาสารคาม (ทุกคณะ)");
+    }
+    return parts.join(" • ");
+  };
+
+  const employmentPercentage =
+    headerData?.allAlumni && headerData.allAlumni > 0
+      ? ((Number(headerData?.alumniWorking || 0) / Number(headerData.allAlumni)) * 100).toFixed(1)
+      : 0;
 
   return (
-    <div className="w-full h-auto">
-      <span className="w-full flex md:flex-row flex-col gap-1 px-5 sticky top-0 bg-white z-50 shadow-md py-3 border-b border-blue-200 items-center justify-between">
-        <span className="flex items-center gap-2 text-wrap">
-          <h1 className="">
-            ภาพรวมสรุปข้อมูลของศิษย์เก่า {headerTitle} ภายใน
-            {user?.roleId < 3
-              ? departmentText(user?.departmentId) || ""
-              : user?.roleId > 3
-                ? "มหาวิทยาลัยราชภัฏมหาสารคาม"
-                : facultyText(user?.facultyId) || ""}
-            {selectYearStart && ` ปีการศึกษา พ.ศ. ${selectYearStart}`}
-            {selectYearEnd && selectYearStart
-              ? ` - พ.ศ. ${selectYearEnd}`
-              : selectYearEnd && ` ปีที่สำเร็จการศึกษา พ.ศ. ${selectYearEnd}`}
-          </h1>
+    <div className="w-full flex-1 flex flex-col bg-slate-100 pb-16 font-sans">
+      {/* ================= TOP HEADER BAR ================= */}
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-xs px-4 sm:px-8 py-3 transition-all flex flex-col gap-2.5">
+        {/* Main Row: Title & Action Buttons (Matches Image 2) */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Title */}
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-gray-800 tracking-tight">
+              ภาพรวมสรุปข้อมูลของศิษย์เก่า ภายใน
+              {selectFaculty
+                ? selectFaculty.name
+                : "มหาวิทยาลัยราชภัฏมหาสารคาม"}
+            </h1>
+          </div>
 
-          {(selectDepartment.length > 0 ||
-            selectFaculty.length > 0 ||
-            selectYearStart ||
-            selectYearEnd) && (
-            <X
-              color="red"
-              onClick={clearQuery}
-              size={18}
-              className="cursor-pointer"
+          {/* Action Toolbar */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Year Start Picker */}
+            <SelectYearStart
+              selectYearStart={selectYearStart}
+              setSelectYearStart={setSelectYearStart}
+              setPage={() => {}}
             />
-          )}
-        </span>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {user?.roleId > 3 && (
-            <DropdownMenu
-              icon={<Building size={20} />}
-              menus={selectFacultyMenus}
-              buttonTitle="เลือกคณะ"
+            {/* Year End Picker */}
+            <SelectYearEnd
+              selectYearEnd={selectYearEnd}
+              setSelectYearEnd={setSelectYearEnd}
+              setPage={() => {}}
             />
-          )}
-          {user?.roleId > 2 && (
-            <DropdownMenu
-              icon={<BookCopy size={20} />}
-              buttonTitle="เลือกสาขา"
-              menus={selectDepartmentMenus}
+
+            {/* Export PDF / Report Button */}
+            <ExportBtn
+              selecetFacultyId={
+                selectFaculty?.id ||
+                (user?.roleId <= 3 ? user?.facultyId : "")
+              }
+              selectDepartmentId={
+                selectDepartment?.id ||
+                (user?.roleId < 3 ? user?.departmentId : "")
+              }
+              selectYearStart={selectYearStart}
+              selectYearEnd={selectYearEnd}
             />
-          )}
-          <SelectYearStart
-            selectYearStart={selectYearStart}
-            setSelectYearStart={setSelectYearStart}
-            setPage={() => {}}
-          />
-          <SelectYearEnd
-            selectYearEnd={selectYearEnd}
-            setSelectYearEnd={setSelectYearEnd}
-            setPage={() => {}}
-          />
-          <ExportBtn
-            selecetFacultyId={
-              selectFaculty?.length > 0 ? selectFaculty.map((s) => s?.id) : []
-            }
-            selectDepartmentId={
-              selectDepartment?.length > 0
-                ? selectDepartment.map((d) => d.id)
-                : []
-            }
-            selectYearStart={selectYearStart}
-          />
+          </div>
         </div>
-      </span>
 
-      <div className="w-full flex flex-col h-auto bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 pt-2 px-8">
-        <div className=" p-2 pt-3.5 w-full grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-3.5">
-          {/* all */}
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-3 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-blue-500">
-            <span className="p-2 bg-blue-50 rounded-full border border-blue-500">
-              <Users color="blue" size={30} />
+        {/* Secondary Filter Row (Faculty & Department for Admins/Executives) */}
+        {user?.roleId > 2 && (
+          <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-gray-100">
+            <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+              <Filter size={13} /> ตัวกรอง:
             </span>
-            <div className="flex flex-col">
-              <label className="text-gray-500  text-sm">ศิษย์เก่าทั้งหมด</label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.allAlumni || 0).toLocaleString() || 0
-                )}
+
+            {/* Faculty React-Select */}
+            {user?.roleId > 3 && (
+              <div className="w-[200px] sm:w-[220px]">
+                <Select
+                  instanceId="select-faculty"
+                  placeholder="เลือกคณะ..."
+                  isClearable
+                  isSearchable
+                  options={faculties.map((f) => ({
+                    value: f.value ?? f.id,
+                    label: f.label ?? f.name,
+                  }))}
+                  value={
+                    selectFaculty
+                      ? { value: selectFaculty.id, label: selectFaculty.name }
+                      : null
+                  }
+                  onChange={(opt) => {
+                    if (!opt) {
+                      setSelectFacultyState(null);
+                      setFaculty(null);
+                      setSelectDepartmentState(null);
+                      setDepartment(null);
+                    } else {
+                      const facObj = {
+                        id: opt.value,
+                        name: opt.label,
+                        value: opt.value,
+                        label: opt.label,
+                      };
+                      setSelectFacultyState(facObj);
+                      setFaculty(facObj);
+                      setSelectDepartmentState(null);
+                      setDepartment(null);
+                    }
+                  }}
+                  styles={{
+                    control: (base, state) => ({
+                      ...base,
+                      borderRadius: "0.5rem",
+                      borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+                      boxShadow: state.isFocused
+                        ? "0 0 0 1px #3b82f6"
+                        : "0 1px 2px 0 rgba(0,0,0,0.05)",
+                      backgroundColor: "#ffffff",
+                      minHeight: "36px",
+                      height: "36px",
+                      fontSize: "0.8125rem",
+                      cursor: "pointer",
+                      "&:hover": { borderColor: "#9ca3af" },
+                    }),
+                    placeholder: (base) => ({
+                      ...base,
+                      color: "#6b7280",
+                      fontSize: "0.8125rem",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: "#1f2937",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: "36px",
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 50,
+                      borderRadius: "0.5rem",
+                    }),
+                  }}
+                />
               </div>
-              <label htmlFor="" className="text-gray-500  text-sm">
-                คน
-              </label>
-            </div>
-          </FadeInSection>
+            )}
 
-          {/* work */}
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-green-500">
-            <span className="p-2 rounded-full border border-green-500 bg-green-50">
-              <Check color="green" size={30} />
-            </span>
+            {/* Department React-Select */}
+            <div className="w-[200px] sm:w-[240px]">
+              <Select
+                instanceId="select-department"
+                placeholder="เลือกสาขาวิชา..."
+                isClearable
+                isSearchable
+                isDisabled={user?.roleId > 3 && !selectFaculty}
+                options={(() => {
+                  let list = departments || [];
+                  const targetFacId =
+                    selectFaculty?.id ||
+                    selectFaculty?.value ||
+                    (user?.roleId <= 3 ? user?.facultyId : null);
+                  if (targetFacId) {
+                    const facSub =
+                      String(targetFacId).length >= 2
+                        ? String(targetFacId).substring(1, 2)
+                        : String(targetFacId);
+                    list = list.filter((d) => {
+                      const depIdStr = String(d.value ?? d.id);
+                      const depFacId = d.faculty_id
+                        ? String(d.faculty_id)
+                        : null;
+                      return (
+                        (depFacId && depFacId === String(targetFacId)) ||
+                        depIdStr.substring(0, 1) === facSub ||
+                        depIdStr.startsWith(String(targetFacId))
+                      );
+                    });
+                  }
+                  return list.map((d) => ({
+                    value: d.value ?? d.id,
+                    label: d.label ?? d.name,
+                  }));
+                })()}
+                value={
+                  selectDepartment
+                    ? {
+                        value: selectDepartment.id,
+                        label: selectDepartment.name,
+                      }
+                    : null
+                }
+                onChange={(opt) => {
+                  if (!opt) {
+                    setSelectDepartmentState(null);
+                    setDepartment(null);
+                  } else {
+                    const deptObj = {
+                      id: opt.value,
+                      name: opt.label,
+                      value: opt.value,
+                      label: opt.label,
+                    };
+                    setSelectDepartmentState(deptObj);
+                    setDepartment(deptObj);
+                  }
+                }}
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    borderRadius: "0.5rem",
+                    borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+                    boxShadow: state.isFocused
+                      ? "0 0 0 1px #3b82f6"
+                      : "0 1px 2px 0 rgba(0,0,0,0.05)",
+                    backgroundColor: state.isDisabled
+                      ? "#f3f4f6"
+                      : "#ffffff",
+                    minHeight: "36px",
+                    height: "36px",
+                    fontSize: "0.8125rem",
+                    cursor: state.isDisabled ? "not-allowed" : "pointer",
+                    "&:hover": {
+                      borderColor: state.isDisabled ? "#d1d5db" : "#9ca3af",
+                    },
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "#6b7280",
+                    fontSize: "0.8125rem",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: "#1f2937",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                  }),
+                  indicatorsContainer: (base) => ({
+                    ...base,
+                    height: "36px",
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    zIndex: 50,
+                    borderRadius: "0.5rem",
+                  }),
+                }}
+              />
+            </div>
+
+            {/* Clear Filters Button (if active) */}
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearQuery}
+                title="ล้างตัวกรองทั้งหมด"
+                className="h-[36px] px-3 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <X size={14} />
+                <span>ล้างตัวกรอง ({activeFilterCount})</span>
+              </button>
+            )}
+          </div>
+        )}
+      </header>
+
+      {/* ================= MAIN DASHBOARD BODY ================= */}
+      <main className="w-full px-4 sm:px-8 pt-6 flex flex-col gap-6">
+        {/* ================= 12 STATS CARDS ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: ศิษย์เก่าทั้งหมด */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-blue-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium">
+                ศิษย์เก่าทั้งหมด
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.allAlumni || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
+            </div>
+            <div className="w-11 h-11 rounded-full border border-blue-400 bg-blue-50/50 flex items-center justify-center text-blue-500 shrink-0">
+              <Users size={20} />
+            </div>
+          </div>
+
+          {/* Card 2: ศิษย์เก่าปัจจุบันมีงานทำ */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-emerald-500 shadow-xs flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าปัจจุบันมีงานทำ
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.alumniWorking || 0).toLocaleString() || 0
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.alumniWorking || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-emerald-400 bg-emerald-50/50 flex items-center justify-center text-emerald-500 shrink-0">
+              <Check size={20} />
+            </div>
+          </div>
 
-          {/* coin */}
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-yellow-500">
-            <span className="rounded-full border p-2 border-yellow-500 bg-yellow-50">
-              <Coins color="orange" size={30} />
-            </span>
+          {/* Card 3: เงินเดือนเฉลี่ยในปัจจุบันของศิษย์เก่า */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-amber-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium">
                 เงินเดือนเฉลี่ยในปัจจุบันของศิษย์เก่า
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : headerData?.salaryAvg ? (
-                  Number(
-                    Math.round(headerData?.salaryAvg || 0),
-                  ).toLocaleString() || "โหลด..."
-                ) : (
-                  0
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                บาท
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(
+                  Math.round(headerData?.salaryAvg || 0),
+                ).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">บาท</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-amber-400 bg-amber-50/50 flex items-center justify-center text-amber-500 shrink-0">
+              <Coins size={20} />
+            </div>
+          </div>
 
-          {/* study */}
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-stone-500">
-            <span className="p-2 rounded-full border border-stone-500 bg-stone-50">
-              <University color="brown" size={30} />
-            </span>
+          {/* Card 4: ศิษย์เก่าที่ปัจจุบันกำลังศึกษาต่อ */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-stone-600 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าที่ปัจจุบันกำลังศึกษาต่อ
-              </label>
-              <div className="font-bold text-xl ">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.currentStudy || 0).toLocaleString() ||
-                  "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {(
+                  Number(headerData?.alumniStudy || 0) +
+                  Number(headerData?.alumniStudyMax || 0)
+                ).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-rose-900/40 bg-rose-50/50 flex items-center justify-center text-rose-900 shrink-0">
+              <Building2 size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-purple-500">
-            <span className="p-2 bg-purple-50 rounded-full border border-purple-500">
-              <GraduationCap color="purple" size={30} />
-            </span>
+          {/* Card 5: ศิษย์เก่าที่เข้าศึกษาต่อในระดับปริญญาโท */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-purple-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าที่เข้าศึกษาต่อในระดับปริญญาโท
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.alumniStudy || 0).toLocaleString() || 0
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.alumniStudy || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-purple-400 bg-purple-50/50 flex items-center justify-center text-purple-500 shrink-0">
+              <GraduationCap size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-pink-500">
-            <span className="p-2 bg-pink-50 rounded-full border border-pink-500">
-              <FaGraduationCap color="pink" size={30} />
-            </span>
+          {/* Card 6: ศิษย์เก่าที่เข้าศึกษาต่อในระดับปริญญาเอก */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-pink-400 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าที่เข้าศึกษาต่อในระดับปริญญาเอก
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.alumniStudyMax || 0).toLocaleString() || 0
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.alumniStudyMax || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-pink-300 bg-pink-50/50 flex items-center justify-center text-pink-400 shrink-0">
+              <GraduationCap size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-gray-500">
-            <span className="p-2 bg-gray-50 rounded-full border border-gray-500">
-              <BriefcaseBusiness color="black" size={30} />
-            </span>
+          {/* Card 7: อาชีพยอดนิยม */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-slate-700 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-500">อาชีพยอดนิยม</label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  headerData?.mostPopulationJob || "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-sm text-gray-500">
-                {headerData?.countPoplationJob
-                  ? Number(
-                      headerData?.countPoplationJob || 0,
-                    ).toLocaleString() + " คน" || "กำลังโหลด..."
+              <p className="text-xs text-gray-500 font-medium">
+                อาชีพยอดนิยม
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 mt-1 truncate max-w-[170px]">
+                {populationJob?.[0]?.name ||
+                  headerData?.mostPopularJob ||
+                  "ไม่พบข้อมูล"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {populationJob?.[0]?.name
+                  ? `${populationJob?.[0]?.count} คน`
                   : "ไม่พบข้อมูล"}
-              </label>
+              </p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-slate-700 bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
+              <Briefcase size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-indigo-500">
-            <span className="p-2 bg-sky-50 rounded-full border border-indigo-500">
-              <MapPinHouse color="blue" size={30} />
-            </span>
+          {/* Card 8: จังหวัดที่ศิษย์เก่าอยู่มากที่สุด */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-indigo-600 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-gray-500 text-sm">
+              <p className="text-xs text-gray-500 font-medium">
                 จังหวัดที่ศิษย์เก่าอยู่มากที่สุด
-              </label>
-              <div className="font-bold text-xl ">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  headerData?.mostLiveProvince || "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-gray-500 text-sm">
-                {headerData?.countMostLive
-                  ? Number(headerData?.countMostLive || 0).toLocaleString() +
-                      " คน" || "กำลังโหลด..."
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 mt-1 truncate max-w-[170px]">
+                {mostLiverPercent?.result?.[0]?.company_place ||
+                  mostLiverPercent?.result?.[0]?.name ||
+                  headerData?.mostLiveProvince ||
+                  "ไม่พบข้อมูล"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {mostLiverPercent?.result?.[0]?.percent
+                  ? `${mostLiverPercent?.result?.[0]?.percent}%`
                   : "ไม่พบข้อมูล"}
-              </label>
+              </p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-indigo-400 bg-indigo-50/50 flex items-center justify-center text-indigo-600 shrink-0">
+              <MapPinHouse size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-red-500">
-            <span className="p-2 bg-orange-50 rounded-full border border-red-500">
-              <Building2 color="red" size={30} />
-            </span>
+          {/* Card 9: จังหวัดที่ศิษย์เก่าทำงานมากที่สุด */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-red-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-gray-500 text-sm">
+              <p className="text-xs text-gray-500 font-medium">
                 จังหวัดที่ศิษย์เก่าทำงานมากที่สุด
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  headerData?.workPlaceLive?.company_place || "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-gray-500 text-sm">
-                {headerData?.workPlaceLive?._count?.alumniId
-                  ? Number(
-                      headerData?.workPlaceLive?._count?.alumniId || 0,
-                    ).toLocaleString() + " คน" || "กำลังโหลด..."
+              </p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 mt-1 truncate max-w-[170px]">
+                {mostLiverPercent?.result?.[0]?.company_place ||
+                  mostLiverPercent?.result?.[0]?.name ||
+                  headerData?.mostWorkProvince ||
+                  "ไม่พบข้อมูล"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {mostLiverPercent?.result?.[0]?.percent
+                  ? `${mostLiverPercent?.result?.[0]?.percent}%`
                   : "ไม่พบข้อมูล"}
-              </label>
+              </p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-red-400 bg-red-50/50 flex items-center justify-center text-red-500 shrink-0">
+              <Building2 size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-teal-500">
-            <span className="p-2 bg-lime-50 rounded-full border border-lime-500">
-              <CircleDollarSign color="green" size={30} />
-            </span>
+          {/* Card 10: รับเงินเดือนสูงที่สุดในปัจจุบัน */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-emerald-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-gray-500 text-sm">
+              <p className="text-xs text-gray-500 font-medium">
                 รับเงินเดือนสูงที่สุดในปัจจุบัน
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.mostSalary || 0).toLocaleString() ||
-                  "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-gray-500 text-sm">
-                บาท
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(
+                  Math.round(headerData?.mostSalary || 0),
+                ).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">บาท</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-emerald-400 bg-emerald-50/50 flex items-center justify-center text-emerald-500 shrink-0">
+              <DollarSign size={20} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-amber-500">
-            <span className="p-2 bg-amber-50 rounded-full border border-orange-500">
-              <FaMapMarked color="orange" size={30} />
-            </span>
+          {/* Card 11: ศิษย์เก่าที่ไปศึกษาต่อที่ต่างประเทศ */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-amber-500 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-gray-500 text-sm">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าที่ไปศึกษาต่อที่ต่างประเทศ
-              </label>
-              <div className="font-bold text-xl">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.studyOtherCountry || 0).toLocaleString() ||
-                  "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-gray-500 text-sm">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.studyOtherCountry || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-amber-400 bg-amber-50/50 flex items-center justify-center text-amber-500 shrink-0">
+              <FaPlaneDeparture size={18} />
+            </div>
+          </div>
 
-          <FadeInSection className="cursor-pointer bg-white border border-gray-200 hover:shadow-gray-400 transition-all duration-300 relative flex items-center justify-center gap-6 p-2.5 px-5 rounded-lg shadow-md border-l-6 flex-row-reverse border-l-cyan-500">
-            <span className="p-2 bg-cyan-50 rounded-full border border-indigo-500">
-              <FaGlobe color="blue" size={30} />
-            </span>
+          {/* Card 12: ศิษย์เก่าที่เคยทำงานอยู่ต่างประเทศ */}
+          <div className="bg-white p-4 rounded-xl border border-gray-200 border-l-4 border-l-blue-600 shadow-xs flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="text-gray-500 text-sm">
+              <p className="text-xs text-gray-500 font-medium">
                 ศิษย์เก่าที่เคยทำงานอยู่ต่างประเทศ
-              </label>
-              <div className="font-bold text-xl ">
-                {loadAllAvg ? (
-                  <Loading type={2} />
-                ) : (
-                  Number(headerData?.countryWork || 0).toLocaleString() ||
-                  "ไม่พบข้อมูล"
-                )}
-              </div>
-              <label htmlFor="" className="text-gray-500 text-sm">
-                คน
-              </label>
+              </p>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {Number(headerData?.countryWork || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">คน</p>
             </div>
-          </FadeInSection>
+            <div className="w-11 h-11 rounded-full border border-blue-400 bg-blue-50/50 flex items-center justify-center text-blue-600 shrink-0">
+              <Globe size={20} />
+            </div>
+          </div>
         </div>
-        {user?.roleId < 3 ||
-          (!selectDepartment && (
-            <>
-              {" "}
-              <FadeInSection className="relative bg-white p-5 rounded-lg border  border-gray-300 mx-2 shadow-md mt-6">
-                <div className="w-full flex flex-col lg:flex-row gap-2 lg:items-center justify-between">
-                  <label className="font-bold ">
-                    แผนภูมิแท่งแสดงภาพรวมการมีงานทำของแต่ละ
-                    {user?.roleId < 3 || selectFaculty ? "สาขา" : "คณะ"}
-                  </label>
 
-                  <div className="flex items-center gap-2">
-                    <span className="p-2 bg-[#007dff]"></span>
-                    <p className="text-sm">
-                      ทำงาน (
-                      {chartbarData.reduce(
-                        (sum, current) => sum + current.working,
-                        0,
-                      ) + " คน"}
-                      )
-                    </p>
-                    <span className="p-2 ml-2 bg-[#ff6b3e]"></span>
-                    <p className="text-sm">
-                      ว่างงาน/ไม่พบข้อมูล (
-                      {chartbarData.reduce(
-                        (sum, current) => sum + current.unemployed,
-                        0,
-                      ) + " คน"}
-                      )
-                    </p>
-                  </div>
-                </div>
+        {/* ================= EMPLOYMENT BAR CHART ================= */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-5 flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
+            <h3 className="font-bold text-gray-800 text-sm md:text-base">
+              แผนภูมิแท่งแสดงภาพรวมการมีงานทำของแต่ละ
+              {selectFaculty ? "สาขา" : "คณะ"}
+            </h3>
 
-                <ChartSimple
-                  data={chartbarData}
-                  key1={"working"}
-                  color1={"#007dff"}
-                  color2={"#ff6b3e"}
-                  key2={"unemployed"}
-                />
-              </FadeInSection>
-              <FadeInSection className="p-5 rounded-lg bg-white mx-2 shadow-md mt-6">
-                <div className="w-full flex flex-col lg:flex-row gap-2 lg:items-center justify-between">
-                  <label className="font-bold">
-                    อัตราการมีงานทำของแต่ละ
-                    {user?.roleId < 3 || selectFaculty ? "สาขา" : "คณะ"} (%)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="p-2 bg-[#4ECDC4]"></span>
-                    <p>เปอร์เซ็น</p>
-                  </div>
-                </div>
-
-                <ChartSimple
-                  domain={[0, 100]}
-                  color1={"#4ECDC4"}
-                  data={workRatePercent}
-                  key1={"percent"}
-                />
-              </FadeInSection>
-            </>
-          ))}
-
-        <FadeInSection className="w-full flex lg:flex-row flex-col gap-4 mt-8">
-          {user?.roleId < 3 ||
-            (!selectDepartment && (
-              <FadeInSection className="bg-white w-full lg:w-1/2 p-5 rounded-lg mx-2 shadow-md">
-                <span className="w-full flex items-center justify-between">
-                  <label className="font-bold">
-                    สัดส่วนเงินเดือนเฉลี่ยของศิษย์เก่าในแต่ละ
-                    {user?.roleId < 3 || selectFaculty ? "สาขา" : "คณะ"}
-                  </label>
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3.5 h-3.5 rounded-xs bg-[#0284C7]" />
+                <span className="text-gray-700">
+                  ทำงาน (
+                  {Number(headerData?.alumniWorking || 0).toLocaleString()}{" "}
+                  คน)
                 </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3.5 h-3.5 rounded-xs bg-[#F97316]" />
+                <span className="text-gray-700">
+                  ว่างงาน/ไม่พบข้อมูล (
+                  {Math.max(
+                    0,
+                    Number(headerData?.allAlumni || 0) -
+                      Number(headerData?.alumniWorking || 0),
+                  ).toLocaleString()}{" "}
+                  คน)
+                </span>
+              </div>
+            </div>
+          </div>
 
-                <PieChartComponent openToolTip={true} data={pieData} />
-              </FadeInSection>
-            ))}
+          <div className="pt-4">
+            {loadingCharts ? (
+              <ChartSkeleton height={360} />
+            ) : (
+              <ChartSimple
+                data={chartbarData}
+                key1="working"
+                color1="#0284C7"
+                key2="unemployed"
+                color2="#F97316"
+                height={360}
+              />
+            )}
+          </div>
+        </div>
 
-          <FadeInSection
-            className={`w-full flex ${
-              user?.roleId == 2 || selectDepartment
-                ? "flex-row lg:w-full"
-                : "flex-col lg:w-1/2"
-            } gap-3`}
-          >
-            <FadeInSection className="w-full rounded-lg bg-white p-5 shadow-md">
-              <span className="w-full flex items-center justify-between">
-                <label htmlFor="" className="font-bold">
-                  ศิษย์เก่าที่ไม่พบข้อมูลประวัติการทำงาน
-                  {user?.roleId < 3 || selectFaculty
-                    ? ""
-                    : user?.roleId > 3
-                      ? "แต่ละคณะ"
-                      : "แต่ละสาขา"}
-                </label>
+        {/* ================= 3. SALARY & PROFILE COMPLETENESS ================= */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Donut Chart: Salary Distribution */}
+          {(!selectDepartment || user?.roleId >= 3) && (
+            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+              <div className="pb-3 border-b border-slate-100 mb-2">
+                <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                  สัดส่วนเงินเดือนเฉลี่ย
+                </h3>
+                <p className="text-xs text-slate-400">
+                  เปรียบเทียบในแต่ละ{selectFaculty ? "สาขาวิชา" : "คณะ"}
+                </p>
+              </div>
+
+              {loadingCharts ? (
+                <ChartSkeleton height={320} />
+              ) : (
+                <PieChartComponent data={pieData} openToolTip={true} />
+              )}
+            </FadeInSection>
+          )}
+
+          {/* Donut Chart: Domestic vs International Work */}
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+            <div className="pb-3 border-b border-slate-100 mb-2">
+              <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                สัดส่วนการทำงานใน/ต่างประเทศ
+              </h3>
+              <p className="text-xs text-slate-400">การกระจายตัวของศิษย์เก่าที่มีงานทำ</p>
+            </div>
+
+            {loadingCharts ? (
+              <ChartSkeleton height={320} />
+            ) : (
+              <WorkPlaceRatePieChartComponent
+                data={pieWorkRate}
+                openToolTip={true}
+              />
+            )}
+          </FadeInSection>
+
+          {/* Incomplete Profiles / Missing Work Data List */}
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                    ยังไม่พบข้อมูลการทำงาน
+                  </h3>
+                  <p className="text-xs text-slate-400">ศิษย์เก่าที่ยังไม่ได้ระบุสถานะงาน</p>
+                </div>
+
                 {noWorkData?.length > 0 && (
                   <button
-                    title="ดูรายชื่อ"
                     onClick={() => {
                       setPrevPath("/users/dashboard");
                       router.push("/users/dashboard/list-no-data");
                     }}
+                    title="ดูรายชื่อทั้งหมด"
+                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1"
                   >
-                    <FaEllipsisH
-                      color="gray"
-                      size={20}
-                      className="cursor-pointer"
-                    />
+                    <span>ดูทั้งหมด</span>
+                    <ChevronRight size={15} />
                   </button>
                 )}
-              </span>
+              </div>
 
-              <FadeInSection className="w-full flex flex-col gap-2.5 h-[200px] mt-3 overflow-y-auto pb-3 ">
+              {/* List container */}
+              <div className="w-full flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
                 {headerData?.allAlumni < 1 ? (
-                  <NoData bg={2} />
+                  <div className="py-12 text-center text-slate-400 text-xs">
+                    <NoData bg={2} />
+                  </div>
                 ) : noWorkData.length > 0 ? (
                   user?.roleId < 3 || selectDepartment ? (
                     alumniNoWorkList.map((a, index) => (
@@ -1009,130 +1085,170 @@ const Dashboard = () => {
                           router.push(`/users/search/${a?.alumni_id}/1`);
                         }}
                         key={index}
-                        className="flex items-center p-2.5 border-b border-gray-200 cursor-pointer gap-2.5 transition-all duration-200 hover:bg-blue-100"
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/60 transition-all text-left group cursor-pointer"
                       >
-                        <FadeInSection className="rounded-full bg-blue-500 w-[50px] h-[50px] overflow-hidden">
-                          <Image
-                            alt="profile"
-                            width={50}
-                            height={50}
-                            priority
-                            src={
-                              a?.profile
-                                ? apiConfig.imgAPI + a?.profile
-                                : NO_PROFILE_IMG
-                            }
-                            className="w-full h-full object-cover"
-                          />
-                        </FadeInSection>
-                        <FadeInSection className="flex flex-col gap-0.5">
-                          <p className="">
-                            {a?.prefix}
-                            {a?.fname} {a?.lname}
-                          </p>
-                          <p className="ml-0.5 text-sm ">
-                            ปีที่เข้าศึกษา : พ.ศ.{" "}
-                            {25 + `${a?.alumni_id}`.substring(0, 2)}
-                          </p>
-                        </FadeInSection>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200">
+                            <Image
+                              alt="profile"
+                              width={40}
+                              height={40}
+                              src={
+                                a?.profile
+                                  ? apiConfig.imgAPI + a?.profile
+                                  : NO_PROFILE_IMG
+                              }
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                              {a?.prefix}
+                              {a?.fname} {a?.lname}
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              รหัสนักศึกษา: {a?.alumni_id}
+                            </span>
+                          </div>
+                        </div>
+                        <ArrowUpRight
+                          size={14}
+                          className="text-slate-300 group-hover:text-blue-500 transition-colors"
+                        />
                       </button>
                     ))
                   ) : (
-                    noWorkData?.map((r, index) => {
+                    noWorkData.map((r, index) => {
+                      const name =
+                        user?.roleId < 3 || selectFaculty
+                          ? getDepartmentName(r?.departmentId)
+                          : getFacultyName(r?.facultyId);
                       return (
-                        <span
+                        <div
                           key={index}
-                          className="w-full flex items-center justify-between"
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
                         >
-                          <FadeInSection className="flex items-center  w-4/5 gap-3">
-                            <BriefcaseBusiness size={18} color="red" />
-                            <FadeInSection className="flex w-full flex-col gap-1">
-                              <p className="text-[0.9rem] ">
-                                {user?.roleId < 3 || selectFaculty
-                                  ? departmentText(
-                                      departments,
-                                      Number(r?.departmentId),
-                                    ) || "ไม่พบข้อมูล"
-                                  : facultyText(
-                                      faculties,
-                                      Number(r?.facultyId),
-                                    ) || "ไม่พบข้อมูล"}
-                              </p>
-                            </FadeInSection>
-                          </FadeInSection>
-                          <p className="">{r?._count?.alumni_id} คน</p>
-                        </span>
+                          <div className="flex items-center gap-2 truncate pr-2">
+                            <UserX size={14} className="text-slate-400 shrink-0" />
+                            <span className="truncate text-slate-700 font-medium">
+                              {name}
+                            </span>
+                          </div>
+                          <span className="font-bold text-amber-600 shrink-0">
+                            {r?._count?.alumni_id} คน
+                          </span>
+                        </div>
                       );
                     })
                   )
                 ) : (
-                  <FadeInSection className="w-full flex flex-col mt-10 items-center justify-center gap-2">
-                    <CheckCircle size={80} color="#87D068" />
-                    <p className="text-sm">ศิษย์เก่ากรอกข้อมูลทุกคนแล้ว</p>
-                  </FadeInSection>
+                  <div className="py-12 flex flex-col items-center justify-center text-center gap-2 text-emerald-600">
+                    <CheckCircle2 size={42} className="text-emerald-500" />
+                    <p className="text-xs font-bold text-slate-700">
+                      ศิษย์เก่าทุกคนกรอกข้อมูลครบถ้วน
+                    </p>
+                  </div>
                 )}
-              </FadeInSection>
-            </FadeInSection>
-            <FadeInSection className="bg-white w-full p-5 rounded-lg border border-gray-300 shadow-md">
-              <span className="w-full flex items-center justify-between">
-                <label className="font-bold ">
-                  สัดส่วนศิษย์เก่าที่ทำงานอยู่ในและต่างประเทศ
-                </label>
-              </span>
+              </div>
+            </div>
+          </FadeInSection>
+        </section>
 
-              {pieWorkRate
-                .map((p) => p.value)
-                .reduce((total, p) => (total += p), 0) > 0 ? (
-                <WorkPlaceRatePieChartComponent
-                  data={pieWorkRate}
-                  openToolTip={true}
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col text-sm text-gray-500 items-center justify-center gap-1">
-                  <FaFolderOpen size={30} />
-                  <p>ไม่พบข้อมูล</p>
+        {/* ================= 4. GEOGRAPHIC & CAREER PATHS ================= */}
+        <section className="flex flex-col gap-6">
+          <div>
+            <h2 className="text-base md:text-lg font-bold text-slate-800">
+              การกระจายตัวเชิงพื้นที่และอาชีพยอดนิยม (Geographic & Careers)
+            </h2>
+            <p className="text-xs text-slate-500">
+              พื้นที่การทำงาน แหล่งจ้างงาน และสายอาชีพที่ศิษย์เก่าปฏิบัติงานมากที่สุด
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top Employment Provinces Area Chart */}
+            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                    10 อันดับจังหวัดที่ศิษย์เก่าทำงานมากที่สุด
+                  </h3>
+                  <p className="text-xs text-slate-400">เรียงตามจำนวนศิษย์เก่าในแต่ละจังหวัด</p>
                 </div>
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                  <MapPin size={16} />
+                </div>
+              </div>
+
+              {loadingCharts ? (
+                <ChartSkeleton height={320} />
+              ) : (
+                <LineChartComponent
+                  data={(mostLiverPercent?.result || []).map((d) => ({
+                    company_place: d?.company_place || "ไม่ระบุ",
+                    value: Number(d?._count?.alumniId) || 0,
+                  }))}
+                />
               )}
             </FadeInSection>
-          </FadeInSection>
-        </FadeInSection>
-        <FadeInSection className="p-5 rounded-lg bg-white mx-2 shadow-md mt-6">
-          <LineChartComponent
-            data={mostLiverPercent?.result?.map((d) => ({
-              company_place: d?.company_place,
-              value: d?._count?.alumniId,
-            }))}
-          />
-        </FadeInSection>
 
-        <FadeInSection className="bg-white mt-5 w-ful p-5 rounded-lg border border-gray-300 mx-2 shadow-md">
-          <FadeInSection className="w-full flex flex-col gap-3.5 mt-3 overflow-y-auto">
-            <AlumniColumnChart rawData={otherCountryList} />
-          </FadeInSection>
-        </FadeInSection>
+            {/* Top International Destinations Column Chart */}
+            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                    ประเทศที่ศิษย์เก่าไปทำงานมากที่สุด
+                  </h3>
+                  <p className="text-xs text-slate-400">สถิติการทำงานในต่างประเทศ</p>
+                </div>
+                <div className="p-2 bg-teal-50 text-teal-600 rounded-lg">
+                  <Globe size={16} />
+                </div>
+              </div>
 
-        <FadeInSection className="mt-8 mx-2 p-5 bg-white rounded-lg border border-gray-200 md:col-span-2 shadow-sm flex-col flex">
-          <div className="w-full flex items-center justify-between">
-            <label className="font-bold ">อาชีพยอดนิยมของศิษย์เก่า (คน)</label>
-            <span className="flex items-center gap-2">
-              <div className="p-2.5 bg-[#FFBB28]"></div>
-              <p className="text-sm">จำนวนศิษย์เก่า(คน)</p>
-            </span>
+              {loadingCharts ? (
+                <ChartSkeleton height={320} />
+              ) : (
+                <AlumniColumnChart rawData={otherCountryList} />
+              )}
+            </FadeInSection>
           </div>
-          {populationJob.length > 0 ? (
-            <ChartSimple
-              color1={"#FFBB28"}
-              key1={"count"}
-              data={populationJob}
-            />
-          ) : (
-            <div className="w-full flex items-center justify-center py-36">
-              <NoData bg={2} />
+
+          {/* Top Popular Job Positions Bar Chart */}
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100 mb-2">
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                  10 อันดับตำแหน่งงานและสายอาชีพยอดนิยม
+                </h3>
+                <p className="text-xs text-slate-400">ตำแหน่งงานที่ศิษย์เก่าประกอบอาชีพในปัจจุบัน</p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="w-3 h-3 rounded-md bg-[#F59E0B]" />
+                <span className="text-slate-600 font-medium">จำนวนศิษย์เก่า (คน)</span>
+              </div>
             </div>
-          )}
-        </FadeInSection>
-      </div>
+
+            {loadingCharts ? (
+              <ChartSkeleton height={360} />
+            ) : populationJob.length > 0 ? (
+              <ChartSimple
+                color1="#F59E0B"
+                key1="count"
+                data={populationJob}
+                height={360}
+              />
+            ) : (
+              <div className="w-full h-72 flex flex-col items-center justify-center text-slate-400 gap-2">
+                <FaFolderOpen size={36} className="opacity-40" />
+                <p className="text-sm font-medium">ยังไม่มีข้อมูลอาชีพยอดนิยม</p>
+              </div>
+            )}
+          </FadeInSection>
+        </section>
+      </main>
     </div>
   );
 };
+
 export default Dashboard;

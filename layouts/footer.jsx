@@ -1,19 +1,18 @@
-import { FaCopyright } from "react-icons/fa";
+import React from "react";
 
 const Footer = () => {
   return (
-    <div className="w-full pt-5 border-t border-blue-100 mt-10 mb-5 text-gray-800 flex flex-col items-center gap-0.5 text-xs">
-      <p>&copy;. All rights reserved.</p>
+    <footer className="w-full mt-auto shrink-0 pt-6 pb-6 border-t border-slate-200 bg-white text-slate-500 flex flex-col items-center gap-1 text-xs">
+      <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
       <span className="flex items-center gap-1">
         <p>พัฒนาโดย</p>{" "}
-        <p className="text-blue-600">มหาวิทยาลัยราชภัฏมหาสารคาม</p>
+        <p className="text-blue-600 font-medium">มหาวิทยาลัยราชภัฏมหาสารคาม</p>
       </span>
-      <p className="text-center">
-        เลขที่ 80 ถนนนครสวรรค์ ตำบลตลาด อำเภอเมือง จังหวัดมหาสารคาม 44000
-        โทรศัพท์ 0-43722118-9
+      <p className="text-center text-slate-400">
+        เลขที่ 80 ถนนนครสวรรค์ ตำบลตลาด อำเภอเมือง จังหวัดมหาสารคาม 44000 โทรศัพท์ 0-43722118-9
       </p>
-      <p>นายปฐมพร วงสุวรรณ ผู้พัฒนา</p>
-    </div>
+      <p className="text-slate-400">นายปฐมพร วงสุวรรณ ผู้พัฒนา</p>
+    </footer>
   );
 };
 export default Footer;

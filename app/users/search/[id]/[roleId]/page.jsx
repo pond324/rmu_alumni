@@ -170,7 +170,7 @@ const UserDetail = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-sky-50 via-green-50 to-blue-200 w-full flex flex-col p-8">
+      <div className="bg-gradient-to-br from-sky-50 via-green-50 to-blue-200 w-full flex flex-col p-3 sm:p-6 lg:p-8">
         <button
           onClick={() => {
             router.push(prevPath || "/users/search");

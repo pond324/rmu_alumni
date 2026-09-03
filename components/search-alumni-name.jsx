@@ -218,13 +218,16 @@ const SearchAlumniName = () => {
               />
             </div>
 
-            <SelectFaculty
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-              setFacultyId={setFacultyId}
-              setFaculty={setFaculty}
-              facultyId={facultyId}
-            />
+            <div className="w-full lg:w-1/4 z-30">
+              <SelectFaculty
+                loadData={loadData}
+                setDepartmentId={setDepartmentId}
+                setFacultyId={setFacultyId}
+                setFaculty={setFaculty}
+                facultyId={facultyId}
+              />
+            </div>
+
             <SelectDepartment
               loadData={loadData}
               faculty={faculty}

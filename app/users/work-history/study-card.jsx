@@ -4,8 +4,9 @@ import { alerts } from "@/libs/alerts";
 import axios from "axios";
 import { Book, Calendar, Edit, GraduationCap, Map, Trash } from "lucide-react";
 
-const StudyCard = ({ e, handleEdit, fetchWorkExprerience }) => {
-  const { user } = useGetSession();
+const StudyCard = ({ e, handleEdit, fetchWorkExprerience, currentUser }) => {
+  const { user: sessionUser } = useGetSession();
+  const user = currentUser || sessionUser;
 
   const deleteWork = async (id) => {
     const { isConfirmed } = await alerts.confirmDialog(

@@ -199,7 +199,7 @@ const RegisterAlumni = () => {
       );
       if (res.status === 200) {
         setRegisData(res?.data);
-        console.log("🚀 ~ getData ~ res?.data:", res?.data);
+        // console.log("🚀 ~ getData ~ res?.data:", res?.data);
       }
     } catch (error) {
       console.error(error);

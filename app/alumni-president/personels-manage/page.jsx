@@ -141,7 +141,7 @@ const TablePage = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <ImportPersonelData
+            {/* <ImportPersonelData
               fetchData={() =>
                 fetchData(
                   page,
@@ -167,14 +167,15 @@ const TablePage = () => {
                 )
               }
               type="personel"
-            />
+            /> */}
             <ExportPersonelBtn />
           </div>
         </span>
 
-        <div className="gap-2.5 w-full flex items-center flex-wrap my-2.5">
-          <div className="lg:w-1/4 w-full p-2 px-3 bg-white rounded-lg border border-gray-300 shadow-sm flex items-center gap-2">
-            <Search size={18} />
+        <div className="w-full flex flex-wrap items-center gap-2.5 my-3">
+          {/* Search Box */}
+          <div className="flex-1 min-w-[200px] sm:min-w-[240px] max-w-full sm:max-w-xs h-[38px] px-3 bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+            <Search size={17} className="text-gray-400 shrink-0" />
             <input
               value={search}
               onChange={(e) => {
@@ -184,38 +185,52 @@ const TablePage = () => {
                 }
               }}
               type="text"
-              placeholder="พิมพ์ค้นหา"
-              className="text-[0.9rem] w-[90%]"
+              placeholder="พิมพ์ค้นหาชื่อ หรือข้อมูลบุคลากร"
+              className="text-sm w-full bg-transparent outline-none"
             />
           </div>
 
+          {/* Faculty Dropdown */}
           {user?.roleId > 3 && (
-            <SelectFaculty
-              facultyId={facultyId}
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-              setFacultyId={setFacultyId}
-              setFaculty={setFaculty}
-            />
+            <div className="w-full sm:w-[200px] md:w-[220px]">
+              <SelectFaculty
+                facultyId={facultyId}
+                loadData={loadData}
+                setDepartmentId={setDepartmentId}
+                setFacultyId={setFacultyId}
+                setFaculty={setFaculty}
+                width="w-full"
+              />
+            </div>
           )}
+
+          {/* Department Dropdown */}
           {user?.roleId > 2 && (
-            <SelectDepartment
-              departmentId={departmentId}
-              faculty={faculty}
-              facultyId={facultyId}
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-            />
+            <div className="w-full sm:w-[200px] md:w-[220px]">
+              <SelectDepartment
+                departmentId={departmentId}
+                faculty={faculty}
+                facultyId={facultyId}
+                loadData={loadData}
+                setDepartmentId={setDepartmentId}
+                width="w-full"
+              />
+            </div>
           )}
-          <div title="กรอง" className="relative inline-block">
+
+          {/* Position Filter */}
+          <div title="กรองตามตำแหน่ง" className="relative">
             <select
-              onChange={(e) => setFilter(e.target.value)}
-              name=""
-              id="select-row"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setPage(1);
+              }}
+              value={filter || ""}
+              id="select-position"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             >
               <option value="" className="text-sm">
-                ทั้งหมด
+                ทุกตำแหน่ง
               </option>
               <option
                 value={JSON.stringify({
@@ -260,17 +275,18 @@ const TablePage = () => {
             </select>
 
             <label
-              htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg bg-white border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              htmlFor="select-position"
+              className="h-[38px] px-3.5 rounded-lg bg-white border border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
             >
-              <Filter size={17} />
+              <Filter size={16} className="text-gray-500" />
               <p className="text-sm">{displayFilterText(filter)}</p>
             </label>
           </div>
 
+          {/* Rows per page */}
           <div
             title="เลือกจำนวนที่ต้องการแสดง"
-            className="relative inline-block"
+            className="relative"
           >
             <select
               onChange={(e) => {
@@ -278,7 +294,8 @@ const TablePage = () => {
                 setPage(1);
               }}
               value={take}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              id="select-take"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             >
               <option value={10} className="text-sm">
                 10
@@ -294,22 +311,24 @@ const TablePage = () => {
               </option>
             </select>
             <label
-              htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg border bg-white border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              htmlFor="select-take"
+              className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
             >
-              <List size={17} />
-              <p className="text-sm ">แสดง {take} แถว</p>
+              <List size={16} className="text-gray-500" />
+              <p className="text-sm">แสดง {take} แถว</p>
             </label>
           </div>
 
-          <div title="เรียงตาม" className="relative inline-block">
+          {/* Sort */}
+          <div title="เรียงตาม" className="relative">
             <select
               onChange={(e) => {
                 setSort(e.target.value);
                 setPage(1);
               }}
               value={sort}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              id="select-sort"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             >
               <option
                 value={JSON.stringify({ createdAt: "desc" })}
@@ -325,28 +344,34 @@ const TablePage = () => {
               </option>
             </select>
             <label
-              htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg border bg-white border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              htmlFor="select-sort"
+              className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
             >
-              <ChevronsUpDown size={17} />
+              <ChevronsUpDown size={16} className="text-gray-500" />
               <p className="text-sm">เรียง</p>
             </label>
           </div>
 
+          {/* Reset */}
           <button
+            type="button"
             title="ล้างการค้นหา"
             onClick={resetData}
-            className="p-2 px-3.5 justify-center bg-white rounded-lg border border-gray-300 shadow-md flex items-center gap-2"
+            className="h-[38px] px-3.5 justify-center bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
           >
-            <RotateCcw size={17} />
-            <p className="text-sm ">ล้าง</p>
+            <RotateCcw size={16} className="text-gray-500" />
+            <p className="text-sm">ล้าง</p>
           </button>
-          <PaginationBtn
-            forwardPage={forwardPage}
-            page={page}
-            prevPage={prevPage}
-            totalPage={totalPage}
-          />
+
+          {/* Pagination */}
+          <div className="ml-auto flex items-center">
+            <PaginationBtn
+              forwardPage={forwardPage}
+              page={page}
+              prevPage={prevPage}
+              totalPage={totalPage}
+            />
+          </div>
         </div>
 
         <div className="w-full overflow-x-auto bg-white h-[600px] overflow-y-auto rounded-tl pb-3">

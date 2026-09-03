@@ -15,8 +15,9 @@ import {
   X,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-const WorkCard = ({ e, handleEdit, fetchWorkExprerience }) => {
-  const { user } = useGetSession();
+const WorkCard = ({ e, handleEdit, fetchWorkExprerience, currentUser }) => {
+  const { user: sessionUser } = useGetSession();
+  const user = currentUser || sessionUser;
   const pathName = usePathname();
 
   const deleteWork = async (id) => {

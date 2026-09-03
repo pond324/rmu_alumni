@@ -35,6 +35,10 @@ export const useFacultyDep = () => {
         response.data?.data?.map((f) => ({
           label: f?.faculty_name,
           value: f?.faculty_id,
+          id: f?.faculty_id,
+          name: f?.faculty_name,
+          faculty_id: f?.faculty_id,
+          faculty_name: f?.faculty_name,
         })),
       );
     } catch (error) {
@@ -52,9 +56,13 @@ export const useFacultyDep = () => {
       );
       setDepartments(
         response.data?.data?.map((d) => ({
-          faculty_id: d?.faculty?.faculty_id,
+          faculty_id: d?.faculty?.faculty_id || d?.faculty_id,
           label: d?.department_name,
           value: d?.department_id,
+          id: d?.department_id,
+          name: d?.department_name,
+          department_id: d?.department_id,
+          department_name: d?.department_name,
         })),
       );
     

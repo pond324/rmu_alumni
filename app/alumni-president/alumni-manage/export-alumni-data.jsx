@@ -52,38 +52,27 @@ const ExportAlumniData = () => {
     if (!faculties || !departments) return;
     setDepartmentList(departments || []);
     setFacultyList(faculties || []);
-    setSelectFacultyId(faculties.map((f) => f?.id));
-    setSelectDepartmentId(departments.map((d) => d?.id));
+    setSelectFacultyId(faculties.map((f) => f?.value));
+    setSelectDepartmentId(departments.map((d) => d?.value));
   }, [faculties, departments]);
   useEffect(() => {
     if (!departments || !facultyId) return;
     let normalizedData = departmentList;
     if (facultyId) {
-      normalizedData = departments.filter((d) =>
-        [62, 28].includes(Number(facultyId))
-          ? d?.id?.startsWith(facultyId)
-          : Number(facultyId) === 16
-            ? d?.id?.startsWith("61")
-            : Number(facultyId) === 12
-              ? Number(d?.id.substring(0, 4)) > 2000 &&
-                Number(d?.id.substring(0, 4)) < 2029
-              : Number(facultyId) === 21
-                ? Number(d?.id.substring(0, 4)) > 2028 &&
-                  Number(d?.id.substring(0, 4)) < 3000
-                : d?.id?.substring(1, 2) == 0 &&
-                  d?.id?.substring(0, 1) == String(facultyId)?.substring(1, 2),
+      normalizedData = departments.filter(
+        (d) => d?.value?.substring(0, 1) == String(facultyId)?.substring(1, 2),
       );
     }
     if (departmentId) {
       normalizedData = normalizedData.filter(
-        (d) => d?.id === departmentId || d?.value === departmentId,
+        (d) => d?.value === departmentId || d?.value === departmentId,
       );
     }
     setDepartmentList(normalizedData);
   }, [facultyId, departmentId]);
   useEffect(() => {
     if (!facultyId) return;
-    setFacultyList(faculties.filter((d) => d?.id === facultyId));
+    setFacultyList(faculties.filter((d) => d?.value === facultyId));
   }, [facultyId]);
   useEffect(() => {
     setSelectYearEnd(yearEndOptions.map((y) => y));
@@ -203,7 +192,7 @@ const ExportAlumniData = () => {
       if (res.status === 200) {
         if (selectFileType == 1) {
           const normalize = res?.data?.map((d) => ({
-             ...(d?.prefix && { คำนำหน้า: d?.prefix }),
+            ...(d?.prefix && { คำนำหน้า: d?.prefix }),
             ...(d?.alumni_id && { รหัสนักศึกษา: d?.alumni_id }),
             ...(d?.fname && { ชื่อ: d?.fname }),
             ...(d?.lname && { นามสกุล: d?.lname }),
@@ -219,11 +208,21 @@ const ExportAlumniData = () => {
               ตำบล: d?.alumni_contract?.tambon,
               รหัสไปษณีย์: d?.alumni_contract?.zipcode,
             }),
-            ...(d?.alumni_contract?.phone1 && { เบอร์โทรศัพท์: d?.alumni_contract?.phone1 }),
-            ...(d?.alumni_contract?.phone2 && { เบอร์โทรศัพท์: d?.alumni_contract?.phone2 }),
-            ...(d?.alumni_contract?.email1 && { อีเมล: d?.alumni_contract?.email1 }),
-            ...(d?.alumni_contract?.email2 && { อีเมล: d?.alumni_contract?.email2 }),
-            ...(d?.alumni_contract?.facebook && { เฟสบุ๊ค: d?.alumni_contract?.facebook }),
+            ...(d?.alumni_contract?.phone1 && {
+              เบอร์โทรศัพท์: d?.alumni_contract?.phone1,
+            }),
+            ...(d?.alumni_contract?.phone2 && {
+              เบอร์โทรศัพท์: d?.alumni_contract?.phone2,
+            }),
+            ...(d?.alumni_contract?.email1 && {
+              อีเมล: d?.alumni_contract?.email1,
+            }),
+            ...(d?.alumni_contract?.email2 && {
+              อีเมล: d?.alumni_contract?.email2,
+            }),
+            ...(d?.alumni_contract?.facebook && {
+              เฟสบุ๊ค: d?.alumni_contract?.facebook,
+            }),
           }));
 
           ExportExcel(normalize, fileName);

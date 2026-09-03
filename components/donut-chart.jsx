@@ -79,11 +79,11 @@ const renderActiveShape = ({
       {/* Text ภายในโดนัท */}
       <text
         x={x}
-        y={y - 10}
+        y={y - 8}
         textAnchor="middle"
         dominantBaseline="middle"
         fill="#333"
-        fontSize={14}
+        fontSize={13}
         fontWeight={600}
       >
         {value?.toLocaleString() || 0} คน
@@ -95,9 +95,9 @@ const renderActiveShape = ({
         textAnchor="middle"
         dominantBaseline="middle"
         fill="#999"
-        fontSize={12}
+        fontSize={11}
       >
-        ( {((percent ?? 0) * 100).toFixed(2)}%)
+        ( {((percent ?? 0) * 100).toFixed(1)}%)
       </text>
 
       <text
@@ -106,10 +106,12 @@ const renderActiveShape = ({
         textAnchor="middle"
         dominantBaseline="middle"
         fill={fill}
-        fontSize={14}
+        fontSize={13}
         fontWeight={500}
       >
-        {payload.name}
+        {payload?.name && payload.name.length > 14
+          ? `${payload.name.substring(0, 13)}...`
+          : payload?.name}
       </text>
     </g>
   );
@@ -122,25 +124,27 @@ export default function CustomActiveShapePieChart({
   color = BLUE_WHITE_15,
 }) {
   return (
-   <ResponsiveContainer width="90%" aspect={1}>
-      <PieChart>
-        <Pie
-          activeShape={renderActiveShape}
-          data={data}
-          cx="50%"
-          cy="50%"
-          innerRadius="60%"
-          outerRadius="80%"
-          fill="#8884d8"
-          dataKey="value"
-          isAnimationActive={isAnimationActive}
-        >
-          {data.map((_, index) => (
-            <Cell key={index} fill={color[index % color.length]} />
-          ))}
-        </Pie>
-        <Tooltip content={() => null} defaultIndex={defaultIndex} />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="w-full h-[240px] sm:h-[260px] flex items-center justify-center min-w-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            activeShape={renderActiveShape}
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius="58%"
+            outerRadius="78%"
+            fill="#8884d8"
+            dataKey="value"
+            isAnimationActive={isAnimationActive}
+          >
+            {data.map((_, index) => (
+              <Cell key={index} fill={color[index % color.length]} />
+            ))}
+          </Pie>
+          <Tooltip content={() => null} defaultIndex={defaultIndex} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

@@ -147,278 +147,395 @@ const SearchPage = () => {
 
   return (
     <>
-      <div
-        className={`w-full flex flex-col p-5 ${
-          showAstTableFormat
-            ? " bg-white"
-            : "bg-gradient-to-r from-blue-50 via-yellow-50 to-green-50"
-        }`}
-      >
-        <span className="flex items-end gap-2 pb-2 w-full border-b border-gray-300">
-          <h1 className="text-2xl font-bold">ค้นหาศิษย์เก่า</h1>
-          <p className="text-gray-600 text-[0.9rem]">
-            ค้นหาและติดต่อกับศิษย์เก่า
-          </p>
-        </span>
+      <div className="w-full flex flex-col p-3 sm:p-5 bg-gray-50 min-h-screen">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-3 w-full border-b border-gray-300">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              ค้นหาศิษย์เก่า
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm">
+              ค้นหาและติดต่อกับศิษย์เก่า
+            </p>
+          </div>
+        </div>
 
-        <span className="bg-white mt-3.5 p-4 w-full flex flex-col border border-gray-300 rounded-lg shadow-md">
-          <div className="w-full flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Search />
-              <p className="text-lg font-bold">ค้นหาและกรอง</p>
+        {/* Filter Card */}
+        <div className="bg-white mt-4 p-4 sm:p-5 w-full flex flex-col border border-gray-200 rounded-xl shadow-xs">
+          <div className="w-full flex items-center justify-between pb-3 border-b border-gray-100">
+            <div className="flex items-center gap-2.5">
+              <Search size={19} className="text-blue-600" />
+              <p className="text-base sm:text-lg font-bold text-gray-800">
+                ค้นหาและกรอง
+              </p>
             </div>
 
-            {/* {(search || faculty || department) && ( */}
-            <button onClick={resetSearch} title="ล้างการค้นหา">
-              <RotateCw size={18} color="blue" />
+            <button
+              onClick={resetSearch}
+              title="ล้างการค้นหา"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 px-3 rounded-lg transition-colors"
+            >
+              <RotateCw size={14} />
+              <span>ล้างตัวกรอง</span>
             </button>
-            {/* )} */}
           </div>
 
-          <div className="mt-3 flex items-center flex-col gap-2 lg:flex-row">
-            <span className="w-full lg:w-1/2 flex items-center gap-2 p-2 rounded-md  shadow-sm border border-gray-300">
-              <Search size={18} color="gray" />
+          {/* Primary Filter Row */}
+          <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <div className="h-[38px] px-3 bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+              <Search size={17} className="text-gray-400 shrink-0" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
-                className="w-[90%] text-[0.9rem]"
-                placeholder="พิมพ์ค้นหา"
+                className="w-full text-sm bg-transparent outline-none"
+                placeholder="พิมพ์ค้นหาชื่อ หรือข้อมูล..."
               />
-            </span>
+            </div>
+
             <Select
               placeholder="เลือกคณะ"
-              className="w-full lg:w-1/4 shadow-sm text-sm z-20"
+              className="text-sm z-25"
+              isClearable
+              isSearchable
               options={faculties.map((f) => ({
-                label: f.name,
-                value: f.id,
+                label: f.label ?? f.name ?? f.faculty_name,
+                value: f.value ?? f.id ?? f.faculty_id,
               }))}
               value={
                 faculties
                   .map((f) => ({
-                    label: f.name,
-                    value: f.id,
+                    label: f.label ?? f.name ?? f.faculty_name,
+                    value: f.value ?? f.id ?? f.faculty_id,
                   }))
-                  .find((f) => Number(f?.value) == faculty) || null
+                  .find((f) => String(f?.value) === String(faculty)) || null
               }
-              onChange={(option) => setFaculty(option.value)}
+              onChange={(option) => {
+                setFaculty(option ? option.value : "");
+                setDepartment("");
+              }}
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  minHeight: "38px",
+                  height: "38px",
+                  borderRadius: "8px",
+                  borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+                  boxShadow: state.isFocused
+                    ? "0 0 0 1px #3b82f6"
+                    : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                  "&:hover": {
+                    borderColor: "#9ca3af",
+                  },
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontSize: "0.875rem",
+                  color: "#6b7280",
+                }),
+                valueContainer: (base) => ({
+                  ...base,
+                  padding: "0 8px",
+                }),
+                indicatorsContainer: (base) => ({
+                  ...base,
+                  height: "38px",
+                }),
+                menu: (base) => ({
+                  ...base,
+                  zIndex: 50,
+                  borderRadius: "8px",
+                }),
+              }}
             />
+
             <Select
               placeholder="เลือกสาขา"
-              className="w-full lg:w-1/4 shadow-sm text-sm z-20"
-              options={departments.map((d) => ({
-                label: d.name,
-                value: d.id,
-              }))}
+              className="text-sm z-20"
+              isClearable
+              isSearchable
+              options={departments
+                .filter((d) => {
+                  if (!faculty) return true;
+                  const targetFac = String(faculty);
+                  const facSub =
+                    targetFac.length >= 2
+                      ? targetFac.substring(1, 2)
+                      : targetFac;
+                  const depFacId = d.faculty_id ? String(d.faculty_id) : null;
+                  const depIdStr = String(d.value ?? d.id ?? "");
+                  return (
+                    depFacId === targetFac ||
+                    depIdStr.substring(0, 1) === facSub ||
+                    depIdStr.startsWith(targetFac)
+                  );
+                })
+                .map((d) => ({
+                  label: d.label ?? d.name ?? d.department_name,
+                  value: d.value ?? d.id ?? d.department_id,
+                }))}
               value={
                 departments
-                  .map((f) => ({
-                    label: f.name,
-                    value: f.id,
+                  .map((d) => ({
+                    label: d.label ?? d.name ?? d.department_name,
+                    value: d.value ?? d.id ?? d.department_id,
                   }))
-                  .find((f) => Number(f.value) == department) || null
+                  .find((f) => String(f.value) === String(department)) || null
               }
-              onChange={(option) => setDepartment(option.value)}
+              onChange={(option) => setDepartment(option ? option.value : "")}
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  minHeight: "38px",
+                  height: "38px",
+                  borderRadius: "8px",
+                  borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+                  boxShadow: state.isFocused
+                    ? "0 0 0 1px #3b82f6"
+                    : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                  "&:hover": {
+                    borderColor: "#9ca3af",
+                  },
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontSize: "0.875rem",
+                  color: "#6b7280",
+                }),
+                valueContainer: (base) => ({
+                  ...base,
+                  padding: "0 8px",
+                }),
+                indicatorsContainer: (base) => ({
+                  ...base,
+                  height: "38px",
+                }),
+                menu: (base) => ({
+                  ...base,
+                  zIndex: 50,
+                  borderRadius: "8px",
+                }),
+              }}
             />
+
             <SelectEduLevel
               selectEduLevel={selectEduLevel}
               setSelectEduLevel={setSelectEduLevel}
+              width="w-full"
             />
           </div>
 
-          <div className="flex flex-col lg:grid lg:grid-cols-3 w-full gap-5 mt-5">
-            <div className="flex flex-col gap-2 col-span-2">
-              <p className="text-sm text-gray-600 pb-2 border-b border-gray-200">
-                เมนูค้นหา
-              </p>
-
-              <span className="flex gap-1.5 lg:gap-2  lg:flex-row lg:items-center">
+          {/* Secondary Controls Row */}
+          <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+            {/* Search Sub-filters */}
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs font-medium text-gray-500">เมนูค้นหา</p>
+              <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={type}
                   disabled={user?.roleId <= 1}
-                  name=""
                   onChange={(e) => setType(e.target.value)}
-                  id=""
-                  className="outline-0 text-sm w-full lg:w-1/4 p-2 rounded-md bg-gray-50 shadow-sm border border-gray-100"
+                  className="h-[38px] px-3 rounded-lg bg-white border border-gray-300 text-sm shadow-xs outline-none focus:border-blue-500 cursor-pointer"
                 >
                   <option value={1}>ศิษย์เก่า</option>
                   <option value={2}>อาจารย์</option>
                 </select>
 
-                <>
-                  {" "}
-                  <SelectYearStart
-                    setSelectYearStart={setSelectYearStart}
-                    selectYearStart={selectYearStart}
-                    setPage={setPage}
-                  />
-                  <SelectYearEnd
-                    setSelectYearEnd={setSelectYearEnd}
-                    selectYearEnd={selectYearEnd}
-                    setPage={setPage}
-                  />
-                  <div title="แสดงจำนวนแถว" className="relative inline-block">
-                    <select
-                      onChange={(e) => {
-                        setTake(e.target.value);
-                        setPage(1);
-                      }}
-                      value={take}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                <SelectYearStart
+                  setSelectYearStart={setSelectYearStart}
+                  selectYearStart={selectYearStart}
+                  setPage={setPage}
+                />
+                <SelectYearEnd
+                  setSelectYearEnd={setSelectYearEnd}
+                  selectYearEnd={selectYearEnd}
+                  setPage={setPage}
+                />
+
+                <div title="แสดงจำนวนแถว" className="relative">
+                  <select
+                    onChange={(e) => {
+                      setTake(Number(e.target.value));
+                      setPage(1);
+                    }}
+                    value={take}
+                    id="search-take"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  >
+                    <option value={10} className="text-sm">
+                      10
+                    </option>
+                    <option value={25} className="text-sm">
+                      25
+                    </option>
+                    <option value={50} className="text-sm">
+                      50
+                    </option>
+                    <option value={100} className="text-sm">
+                      100
+                    </option>
+                  </select>
+                  <label
+                    htmlFor="search-take"
+                    className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
+                  >
+                    <List size={16} className="text-gray-500" />
+                    <p className="text-sm">แสดง {take} แถว</p>
+                  </label>
+                </div>
+
+                <div title="เรียงตาม" className="relative">
+                  <select
+                    onChange={(e) => {
+                      setSort(e.target.value);
+                      setPage(1);
+                    }}
+                    value={sort}
+                    id="search-sort"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  >
+                    <option
+                      value={JSON.stringify({ year_start: "desc" })}
+                      className="text-sm"
                     >
-                      <option value={10} className="text-sm">
-                        10
-                      </option>
-                      <option value={25} className="text-sm">
-                        25
-                      </option>
-                      <option value={50} className="text-sm">
-                        50
-                      </option>
-                      <option value={100} className="text-sm">
-                        100
-                      </option>
-                    </select>
-                    <label
-                      htmlFor="select-row"
-                      className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                      ปีที่เข้ารับการศึกษา (มากไปน้อย)
+                    </option>
+                    <option
+                      value={JSON.stringify({ year_start: "asc" })}
+                      className="text-sm"
                     >
-                      <List size={17} />
-                      <p className="text-sm hidden lg:inline-flex">
-                        แสดง {take} แถว
-                      </p>
-                    </label>
-                  </div>
-                  <div title="เรียงตาม" className="relative inline-block">
-                    <select
-                      onChange={(e) => {
-                        setSort(e.target.value);
-                        setPage(1);
-                      }}
-                      value={sort}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      ปีที่เข้ารับการศึกษา (น้อยไปมาก)
+                    </option>
+                    <option
+                      value={JSON.stringify({ updatedAt: "desc" })}
+                      className="text-sm"
                     >
-                      <option
-                        value={JSON.stringify({ year_start: "desc" })}
-                        className="text-sm"
-                      >
-                        ปีที่เข้ารับการศึกษา (มากไปน้อย)
-                      </option>
-                      <option
-                        value={JSON.stringify({ year_start: "asc" })}
-                        className="text-sm"
-                      >
-                        ปีที่เข้ารับการศึกษา (น้อยไปมาก)
-                      </option>
-                      <option
-                        value={JSON.stringify({ updatedAt: "desc" })}
-                        className="text-sm"
-                      >
-                        อัปเดตล่าสุด
-                      </option>
-                    </select>
-                    <label
-                      htmlFor="select-row"
-                      className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <ChevronsUpDown size={17} />
-                      <p className="text-sm hidden lg:inline-flex">เรียง</p>
-                    </label>
-                  </div>
-                </>
-              </span>
+                      อัปเดตล่าสุด
+                    </option>
+                  </select>
+                  <label
+                    htmlFor="search-sort"
+                    className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
+                  >
+                    <ChevronsUpDown size={16} className="text-gray-500" />
+                    <p className="text-sm">เรียง</p>
+                  </label>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2 ">
-              <p className="text-sm text-gray-600 pb-2 border-b border-gray-200">
+            {/* View Mode Switcher */}
+            <div className="flex flex-col gap-1.5 xl:items-end">
+              <p className="text-xs font-medium text-gray-500">
                 เลือกรูปแบบการแสดงผล
               </p>
-              <span className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg border border-gray-200 self-start xl:self-auto">
                 <button
+                  type="button"
                   onClick={() => setShowAsTableFormat(true)}
-                  className={`${
-                    showAstTableFormat && "bg-blue-600 text-white"
-                  } border border-gray-300 text-xs lg:text-sm p-2 rounded-sm shadow-md flex items-center gap-2 hover:shadow-lg`}
+                  className={`h-[32px] px-3 rounded-md text-xs sm:text-sm font-medium flex items-center gap-2 transition-all ${
+                    showAstTableFormat
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "text-gray-700 hover:bg-white/60"
+                  }`}
                 >
-                  <Table2 size={17} />
-                  <p>แสดงในรูปแบบตาราง</p>
+                  <Table2 size={16} />
+                  <span>แสดงในรูปแบบตาราง</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowAsTableFormat(false)}
-                  className={`${
-                    !showAstTableFormat && "bg-blue-600 text-white"
-                  } border border-gray-300 text-xs lg:text-sm p-2 rounded-sm shadow-md flex items-center gap-2 hover:shadow-lg`}
+                  className={`h-[32px] px-3 rounded-md text-xs sm:text-sm font-medium flex items-center gap-2 transition-all ${
+                    !showAstTableFormat
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "text-gray-700 hover:bg-white/60"
+                  }`}
                 >
-                  <Box size={17} />
-                  <p>แสดงในรูปแบบบล็อค</p>
+                  <Box size={16} />
+                  <span>แสดงในรูปแบบบล็อค</span>
                 </button>
-              </span>
+              </div>
             </div>
           </div>
-        </span>
+        </div>
 
-        <span className="w-full flex items-center justify-between">
-          <label htmlFor="" className="font-bold text-sm mt-7">
-            ผลการค้นหา ({loading ? "กำลังโหลด..." : resultLenth + " คน" || "0"})
-          </label>
+        {/* Results Info & Pagination */}
+        <div className="w-full flex items-center justify-between flex-wrap gap-2 mt-5">
+          <p className="font-bold text-sm text-gray-700">
+            ผลการค้นหา ({loading ? "กำลังโหลด..." : `${resultLenth || 0} คน`})
+          </p>
           {totalPage > 1 && (
-            <div className="items-center flex gap-5 mt-5 justify-center text-sm">
-              {page > 1 && (
-                <button
-                  onClick={() => {
-                    setPage((prev) => prev - 1);
-                  }}
-                  className="shadow-md hover:bg-blue-600 rounded-md p-1.5 bg-blue-500 text-white"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-              )}
+            <div className="flex items-center gap-2 text-sm">
+              <button
+                onClick={() => {
+                  setPage((prev) => Math.max(1, prev - 1));
+                }}
+                disabled={page <= 1}
+                className={`p-1.5 px-2 rounded-lg border border-gray-300 flex items-center justify-center transition-colors ${
+                  page <= 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50 shadow-xs"
+                }`}
+              >
+                <ChevronLeft size={16} />
+              </button>
 
-              <p>
-                {page} จาก {totalPage}
-              </p>
-              {page < totalPage && (
-                <button
-                  onClick={() => {
-                    setPage((prev) => prev + 1);
-                  }}
-                  className="shadow-md hover:bg-blue-600 rounded-md p-1.5 bg-blue-500 text-white"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              )}
+              <span className="text-gray-700 font-medium px-2">
+                หน้า {page} จาก {totalPage}
+              </span>
+
+              <button
+                onClick={() => {
+                  setPage((prev) => Math.min(totalPage, prev + 1));
+                }}
+                disabled={page >= totalPage}
+                className={`p-1.5 px-2 rounded-lg border border-gray-300 flex items-center justify-center transition-colors ${
+                  page >= totalPage
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50 shadow-xs"
+                }`}
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           )}
-        </span>
+        </div>
 
+        {/* Content Section */}
         {loading ? (
-          <div className="w-full my-5 py-5 flex flex-col gap-2 items-center justify-center">
+          <div className="w-full my-12 py-5 flex flex-col gap-2 items-center justify-center">
             <Loading type={2} />
-            <p>กำลังโหลด...</p>
+            <p className="text-sm text-gray-500">กำลังโหลด...</p>
           </div>
         ) : dataList?.length > 0 ? (
           showAstTableFormat ? (
-            <div className="w-full h-[600px] mt-3 rounded-tl-md rounded-tr-md overflow-auto">
-              <table className="w-auto lg:w-full">
-                <thead className="sticky top-0 z-10">
+            <div className="w-full h-[600px] mt-3 rounded-xl border border-gray-200 bg-white overflow-x-auto shadow-xs overflow-y-auto">
+              <table className="w-full min-w-[650px]">
+                <thead className="sticky top-0 z-10 bg-blue-50 border-b border-gray-200">
                   <tr>
                     {[
                       "ที่",
                       "ชื่อ-นามสกุล",
                       "คณะ",
                       "สาขา",
-
                       "ปีการศึกษา (พ.ศ.)",
-
                       "แอ็คชัน",
-                    ].map((h) => (
-                      <td key={uuid()} className="p-3 bg-blue-100 text-sm">
+                    ].map((h, i) => (
+                      <th
+                        key={i}
+                        className="p-3 text-start text-xs sm:text-sm font-medium text-gray-700"
+                      >
                         {h}
-                      </td>
+                      </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100">
                   {dataList.map((d, index) => (
                     <tr
                       onClick={(e) => {
@@ -426,28 +543,28 @@ const SearchPage = () => {
                         setPrevPath("/users/search");
                         router.push(`/users/search/${d?.alumni_id}/1`);
                       }}
-                      key={uuid()}
-                      className="text-sm hover:bg-sky-100 transition-all duration-200 cursor-pointer border-b border-gray-200"
+                      key={d?.alumni_id || index}
+                      className="text-sm hover:bg-blue-50/70 transition-colors duration-150 cursor-pointer"
                     >
-                      <td className="p-2 px-2.5">
+                      <td className="p-3 text-gray-500 font-medium">
                         {index + (page - 1) * take + 1}
                       </td>
-                      <td className="p-2.5 py-3 text-start">
+                      <td className="p-3 text-start font-medium text-gray-900">
                         {d?.prefix}
                         {d?.fname} {d?.lname}
                       </td>
-                      <td className="p-2.5 py-3 text-start">
+                      <td className="p-3 text-start text-gray-600">
                         {facultyText(faculties, d?.facultyId)}
                       </td>
-                      <td className="p-2.5 py-3 text-start">
+                      <td className="p-3 text-start text-gray-600">
                         {departmentText(departments, d?.departmentId)}
                       </td>
-                      <td className="p-2.5 py-3 text-start">
+                      <td className="p-3 text-start text-gray-600">
                         {`${d?.year_start || "ไม่พบข้อมูล"} - ${
                           d?.year_end || "ไม่พบข้อมูล"
                         }`}
                       </td>
-                      <td className="">
+                      <td className="p-3">
                         <div className="flex items-center justify-center">
                           {user?.id !== d?.alumni_id ? (
                             <button
@@ -456,7 +573,7 @@ const SearchPage = () => {
                                 e.stopPropagation();
                                 handleShowSendEmail(d);
                               }}
-                              className="w-1/2 p-2 border border-gray-400 bg-blue-500 text-white hover:bg-blue-400 rounded-md flex justify-center items-center"
+                              className="p-2 px-3 border border-blue-500 bg-blue-500 text-white hover:bg-blue-600 rounded-lg flex justify-center items-center shadow-xs transition-colors"
                             >
                               <MessageCircle size={15} color="white" />
                             </button>
@@ -464,7 +581,7 @@ const SearchPage = () => {
                             <Link
                               href="/users/profile"
                               title="โปรไฟล์ของฉัน"
-                              className="w-1/2 z-30 p-2 border border-gray-400 hover:bg-yellow-300 rounded-md flex justify-center items-center"
+                              className="p-2 px-3 border border-gray-300 hover:bg-yellow-100 text-gray-700 rounded-lg flex justify-center items-center shadow-xs transition-colors"
                             >
                               <Eye size={15} />
                             </Link>
@@ -477,59 +594,75 @@ const SearchPage = () => {
               </table>
             </div>
           ) : (
-            <div className="grid lg:grid-cols-4 grid-cols-1 gap-5 mt-5">
-              {dataList?.map((d) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+              {dataList?.map((d, index) => (
                 <div
-                  key={uuid()}
-                  className="relative p-4 rounded-md border bg-white border-gray-300 shadow-md flex flex-col gap-3"
+                  key={d?.alumni_id || d?.professor_id || index}
+                  className="relative p-4 rounded-xl border bg-white border-gray-200 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between gap-3"
                 >
-                  <span className="absolute top-2 right-2 my-1 text-xs p-1 px-2 border border-gray-400 rounded-full ">
-                    {type > 1 ? d?.univercity_position : "ศิษย์เก่า"}
-                  </span>
-                  <span className="flex items-start gap-3">
-                    <div className="flex flex-col gap-0.5 items-start">
-                      <h2 className="text-lg font-bold">
-                        {type < 2 ? d?.prefix : d?.academic_rank}
-                        {d?.fname} {d?.lname}
-                      </h2>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-xs p-1 px-2.5 bg-blue-50 text-blue-700 font-medium rounded-full border border-blue-100">
+                        {type > 1 ? d?.univercity_position : "ศิษย์เก่า"}
+                      </span>
+                    </div>
 
-                      <span className="flex items-center gap-2">
-                        <GraduationCap size={15} color="gray" />
-                        <p className="text-sm text-gray-500">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                      {type < 2 ? d?.prefix : d?.academic_rank}
+                      {d?.fname} {d?.lname}
+                    </h2>
+
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap
+                          size={15}
+                          className="text-gray-400 shrink-0"
+                        />
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
                           {facultyText(
                             faculties,
                             d?.facultyId || d?.alumni_id?.substring(3, 5),
                           )}
                         </p>
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <Book size={15} color="gray" />
-                        <p className="text-sm text-gray-500">
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Book size={15} className="text-gray-400 shrink-0" />
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
                           {departmentText(
                             departments,
                             d?.departmentId || d?.alumni_id?.substring(4, 8),
                           )}
                         </p>
-                      </span>
+                      </div>
                       {type < 2 && (
                         <>
-                          {" "}
-                          <span className="flex items-center gap-2 text-gray-600 text-sm">
-                            <Calendar size={15} color="gray" /> ปีการศึกษา
-                            (พ.ศ.) {d?.year_start || "ไม่พบข้อมูล"} -{" "}
-                            {d?.year_end || "ไม่พบข้อมูล"}
-                          </span>
-                          <span className="flex items-center gap-2 text-gray-600 text-sm">
-                            <Clock size={15} color="gray" />
-                            {d?.updatedAt
-                              ? "อัปเดตล่าสุด " + dayjs(d?.updatedAt).fromNow()
-                              : "ไม่มีการอัปเดตข้อมูล"}
-                          </span>
+                          <div className="flex items-center gap-2 text-gray-600 text-xs sm:text-sm">
+                            <Calendar
+                              size={15}
+                              className="text-gray-400 shrink-0"
+                            />
+                            <span>
+                              ปีการศึกษา {d?.year_start || "-"} -{" "}
+                              {d?.year_end || "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-500 text-xs">
+                            <Clock
+                              size={14}
+                              className="text-gray-400 shrink-0"
+                            />
+                            <span>
+                              {d?.updatedAt
+                                ? "อัปเดต " + dayjs(d?.updatedAt).fromNow()
+                                : "ไม่มีการอัปเดตข้อมูล"}
+                            </span>
+                          </div>
                         </>
                       )}
                     </div>
-                  </span>
-                  <span className="w-full flex gap-3 mt-2">
+                  </div>
+
+                  <div className="w-full flex gap-2 pt-2 border-t border-gray-100">
                     <button
                       onClick={() => {
                         setPrevPath("/users/search");
@@ -539,28 +672,30 @@ const SearchPage = () => {
                           }/${type}`,
                         );
                       }}
-                      className="w-1/2 p-2 border border-gray-400 hover:bg-yellow-300 rounded-md flex justify-center items-center gap-2"
+                      className="flex-1 p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 flex justify-center items-center gap-1.5 text-xs sm:text-sm font-medium transition-colors shadow-xs"
                     >
                       <Eye size={15} />
-                      <p className="text-sm">ดูเพิ่มเติม</p>
+                      <span>ดูเพิ่มเติม</span>
                     </button>
                     {user?.id !==
                       (type < 2 ? d?.alumni_id : d?.professor_id) && (
                       <button
                         onClick={() => handleShowSendEmail(d)}
-                        className="w-1/2 p-2 border border-gray-400 bg-blue-500 text-white hover:bg-blue-400 rounded-md flex justify-center items-center gap-2"
+                        className="flex-1 p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white flex justify-center items-center gap-1.5 text-xs sm:text-sm font-medium transition-colors shadow-xs"
                       >
                         <MessageCircle size={15} color="white" />
-                        <p className="text-sm">ส่งข้อความ</p>
+                        <span>ส่งข้อความ</span>
                       </button>
                     )}
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
           )
         ) : (
-          <p className="my-5 w-full text-center text-xl">ไม่พบข้อมูล</p>
+          <div className="my-12 w-full text-center text-gray-500 text-base">
+            ไม่พบข้อมูล
+          </div>
         )}
       </div>
 

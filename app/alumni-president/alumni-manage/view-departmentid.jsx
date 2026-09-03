@@ -65,13 +65,16 @@ const ViewDepartment = () => {
           <div className="p-5 pt-5 border-t border-gray-300 w-full">
             <div className="flex items-center flex-wrap w-full gap-2">
               <p className="text-sm">ค้นหา:</p>
-              <SelectFaculty
-                facultyId={facultyId}
-                loadData={loadData}
-                setDepartmentId={setDepartmentId}
-                setFacultyId={setFacultyId}
-                setFaculty={setFaculty}
-              />
+              <div className="w-full lg:w-1/3 z-30">
+                <SelectFaculty
+                  facultyId={facultyId}
+                  loadData={loadData}
+                  setDepartmentId={setDepartmentId}
+                  setFacultyId={setFacultyId}
+                  setFaculty={setFaculty}
+                />
+              </div>
+
               <SelectDepartment
                 departmentId={departmentId}
                 faculty={faculty}

@@ -50,12 +50,14 @@ export const SelectYearStart = ({
         ))}
       </select>
       <label
-        htmlFor="select-row"
-        className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+        htmlFor="select-year-start"
+        className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
       >
-        <Calendar1 size={17} />
+        <Calendar1 size={16} className="text-gray-500" />
         <p className="text-sm">
-          {load ? "กำลังโหลด..." : `ปีที่เข้าศึกษา ${selectYearStart && `พ.ศ. ${selectYearStart}`}`}
+          {load
+            ? "กำลังโหลด..."
+            : `ปีที่เข้าศึกษา ${selectYearStart ? `พ.ศ. ${selectYearStart}` : ""}`}
         </p>
       </label>
     </div>
@@ -81,14 +83,14 @@ export const SelectYearEnd = ({ setSelectYearEnd, selectYearEnd, setPage }) => {
     getYearOptions();
   }, []);
   return (
-    <div title="ค้นหาปีที่เข้าศึกษา" className="relative inline-block bg-white">
+    <div title="ค้นหาปีที่สำเร็จการศึกษา" className="relative">
       <select
         onChange={(e) => {
           setSelectYearEnd(e.target.value);
           setPage(1);
         }}
         value={selectYearEnd}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
       >
         {yearEnd.map((y, index) => (
           <option key={index} className="text-sm" value={y}>
@@ -97,12 +99,14 @@ export const SelectYearEnd = ({ setSelectYearEnd, selectYearEnd, setPage }) => {
         ))}
       </select>
       <label
-        htmlFor="select-row"
-        className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+        htmlFor="select-year-end"
+        className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
       >
-        <CalendarCheck size={17} />
+        <CalendarCheck size={16} className="text-gray-500" />
         <p className="text-sm">
-          {load ? "กำลังโหลด..." : `ปีที่สำเร็จการศึกษา ${selectYearEnd && `พ.ศ. ${selectYearEnd}`}`}
+          {load
+            ? "กำลังโหลด..."
+            : `ปีที่สำเร็จการศึกษา ${selectYearEnd ? `พ.ศ. ${selectYearEnd}` : ""}`}
         </p>
       </label>
     </div>

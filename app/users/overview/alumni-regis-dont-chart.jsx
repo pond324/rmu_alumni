@@ -31,17 +31,20 @@ const AlumniRegisDonutChart = () => {
   }, []);
 
   return (
-    <FadeInSection className="w-full h-full lg:w-1/3 p-5 rounded-lg flex flex-col items-center bg-white border border-gray-300 shadow-sm">
-      <p className="font-semibold w-full">สถานะการลงทะเบียน</p>
-      <p className="text-sm text-gray-600 mb-3 w-full">
-        สถานะการลงทะเบียนของศิษย์เก่า
-      </p>
-     cd b 
-     c
-      <DonutChart
-        data={data}
-        color={["#60A5FA", "#9CA3AF", "#fbbf24", "#F87171"]}
-      />
+    <FadeInSection className="w-full lg:w-1/3 min-w-0 p-4 sm:p-5 rounded-xl flex flex-col justify-between items-center bg-white border border-gray-200 shadow-xs">
+      <div className="w-full">
+        <p className="font-semibold w-full">สถานะการลงทะเบียน</p>
+        <p className="text-sm text-gray-600 mb-3 w-full">
+          สถานะการลงทะเบียนของศิษย์เก่า
+        </p>
+      </div>
+
+      <div className="w-full flex items-center justify-center my-auto">
+        <DonutChart
+          data={data}
+          color={["#60A5FA", "#9CA3AF", "#fbbf24", "#F87171"]}
+        />
+      </div>
     </FadeInSection>
   );
 };

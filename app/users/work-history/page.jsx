@@ -180,7 +180,7 @@ const WorkHistory = () => {
         setShowJobForm(false);
       }
       reset();
-      fetchWorkExprerience(searchText, dataType, page, sort, user);
+      fetchWorkExprerience(searchText, dataType, page, sort, user?.id);
     } catch (error) {
       console.error(error);
       alerts.err("โปรดตรวจสอบเครือข่ายแล้วลองอีกครั้ง");
@@ -200,30 +200,36 @@ const WorkHistory = () => {
   const [experience, setExperience] = useState([]);
   const fetchWorkExprerience = async (
     search = "",
-    dataType = 0,
-    page = 1,
-    sort = JSON.stringify({ createdAt: "desc" }),
-    user,
+    type = 0,
+    currentPage = 1,
+    currentSort = JSON.stringify({ createdAt: "desc" }),
+    userParam,
   ) => {
+    const targetUserId =
+      userParam?.id ||
+      (typeof userParam === "string" || typeof userParam === "number"
+        ? userParam
+        : null) ||
+      user?.id;
+    if (!targetUserId) return;
     setFetching(true);
     try {
       const res = await axios.get(
-        apiConfig.rmuAPI + `/alumni/work-list/${user?.id}`,
+        apiConfig.rmuAPI + `/alumni/work-list/${targetUserId}`,
         {
           withCredentials: true,
           params: {
             search,
-            type: dataType,
-            page,
-            sort,
+            type,
+            page: currentPage,
+            sort: currentSort,
           },
         },
       );
-      console.log(user);
       if (res.status === 200) {
         setDataAvg(res?.data?.dataAvg);
-        setExperience(res?.data?.workExprerience);
-        setTotalPage(res?.data?.totalPage);
+        setExperience(res?.data?.workExprerience || []);
+        setTotalPage(res?.data?.totalPage || 1);
       }
     } catch (error) {
       console.error(error);
@@ -233,11 +239,22 @@ const WorkHistory = () => {
     }
   };
 
-  const debounceSearch = useMemo(() => debounce(fetchWorkExprerience, 500), []);
+  const debounceSearch = useMemo(
+    () =>
+      debounce((search, type, curPage, curSort, userId) => {
+        fetchWorkExprerience(search, type, curPage, curSort, userId);
+      }, 400),
+    [user?.id],
+  );
 
   useEffect(() => {
-    debounceSearch(searchText, dataType, page, sort, user);
-  }, [searchText, dataType, page, sort, user]);
+    if (user?.id) {
+      debounceSearch(searchText, dataType, page, sort, user?.id);
+    }
+    return () => {
+      debounceSearch.cancel();
+    };
+  }, [searchText, dataType, page, sort, user?.id]);
 
   return (
     <div className="w-full flex flex-col p-5">
@@ -401,20 +418,38 @@ const WorkHistory = () => {
           <p className="w-full text-center mt-10">ไม่พบประวัติการทำงาน</p>
         ) : (
           <div className="w-full grid lg:grid-cols-3 gap-5 gap-y-1 grid-cols-1">
-            {experience.map((e) =>
+            {experience.map((e, index) =>
               e?.continued_study ? (
                 <StudyCard
                   e={e}
                   handleEdit={handleEdit}
-                  fetchWorkExprerience={() => fetchWorkExprerience(searchText)}
-                  key={uuid()}
+                  fetchWorkExprerience={() =>
+                    fetchWorkExprerience(
+                      searchText,
+                      dataType,
+                      page,
+                      sort,
+                      user?.id,
+                    )
+                  }
+                  currentUser={user}
+                  key={e?.id || `study-${index}`}
                 />
               ) : (
                 <WorkCard
-                  key={uuid()}
+                  key={e?.id || `work-${index}`}
                   e={e}
                   handleEdit={handleEdit}
-                  fetchWorkExprerience={() => fetchWorkExprerience(searchText)}
+                  fetchWorkExprerience={() =>
+                    fetchWorkExprerience(
+                      searchText,
+                      dataType,
+                      page,
+                      sort,
+                      user?.id,
+                    )
+                  }
+                  currentUser={user}
                 />
               ),
             )}

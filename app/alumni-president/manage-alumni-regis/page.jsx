@@ -383,13 +383,16 @@ const ManageAlumniRegis = () => {
             />
           </div>
 
-          <SelectFaculty
-            facultyId={facultyId}
-            loadData={loadData}
-            setDepartmentId={setDepartmentId}
-            setFacultyId={setFacultyId}
-            setFaculty={setFaculty}
-          />
+          <div className="w-full lg:w-1/4 z-30">
+            <SelectFaculty
+              facultyId={facultyId}
+              loadData={loadData}
+              setDepartmentId={setDepartmentId}
+              setFacultyId={setFacultyId}
+              setFaculty={setFaculty}
+            />
+          </div>
+
           <SelectDepartment
             departmentId={departmentId}
             faculty={faculty}

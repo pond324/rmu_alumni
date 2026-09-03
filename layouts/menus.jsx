@@ -161,7 +161,7 @@ const Menu = () => {
       <div
         className={`p-3 bg-linear-200 from-blue-800 to-blue-950 lg:flex bg-white ${
           showResponsive ? "flex w-[80%] absolute top-0" : "hidden"
-        } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-20`}
+        } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-40`}
       >
         <div className="w-full flex flex-col">
           <div className="flex items-center w-full gap-4 pb-3 p-1 border-b border-gray-200">
@@ -191,7 +191,7 @@ const Menu = () => {
             {showResponsive && (
               <button
                 onClick={() => setShowResponsive(false)}
-                className="absolute top-3 right-5"
+                className="absolute top-3 right-5 text-white"
               >
                 <X size={28} />
               </button>
@@ -220,7 +220,7 @@ const Menu = () => {
           <label htmlFor="" className="my-4 text-sm text-gray-300">
             ระบบ
           </label>
-          {user?.roleId == 5 && (
+          {/* {user?.roleId == 5 && (
             <Link
               className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${
                 path.split("/")[2] === "setting"
@@ -232,7 +232,7 @@ const Menu = () => {
               <Cog className="" size={18} />
               <p>ตั้งค่าระบบ</p>
             </Link>
-          )}
+          )} */}
           <button
             onClick={logout}
             className="flex items-center text-sm gap-3 shadow-sm text-red-500 bg-red/15  hover:text-gray-100 transition-all duration-300 hover:bg-red-500 mt-1 rounded-lg w-full px-3.5 py-3"

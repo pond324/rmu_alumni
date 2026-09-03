@@ -24,24 +24,13 @@ const Layout = ({ children }) => {
 
   return (
     <AppProvider>
-      <div className="w-screen h-screen flex items-center bg-white">
+      <div className="w-screen h-screen flex bg-white overflow-hidden">
         <Menu />
-        <div className="flex flex-col w-full h-full overflow-auto">
+        <div className="flex flex-col flex-1 h-full overflow-y-auto min-h-0">
           <AppHeader />
-          {/* header */}
-          {/* {pathName.split("/")[2] !== "news" && (
-            <header className="mb-2 p-2 w-full flex items-center gap-2 pb-2 border-b border-gray-300">
-              <Image alt="logo" priority className="w-10 h-10" src={logo} />
-              <div className="flex flex-col lg:flex-row lg:gap-2">
-                <h1 className="font-bold text-sm text-blue-600">RMU ALUMNI</h1>
-                <p className="text-sm ">
-                  : ระบบสารสนเทศเครือข่ายศิษย์เก่า มหาวิทยาลัยราชภัฏมหาสารคาม
-                </p>
-              </div>
-            </header>
-          )} */}
-
-          {children}
+          <div className="flex-1 flex flex-col w-full">
+            {children}
+          </div>
           <Footer />
         </div>
       </div>

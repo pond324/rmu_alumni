@@ -16,7 +16,7 @@ export const SelectFaculty = ({
       loading={loadData}
       isDisabled={loadData}
       placeholder="ทุกคณะ"
-      className={`z-19 col-span-5 text-sm ${width}`}
+      className={`z-20 text-sm ${width}`}
       options={faculties}
       value={faculties.find((f) => f?.value == facultyId) || null}
       onChange={(option) => {
@@ -25,15 +25,39 @@ export const SelectFaculty = ({
         setFaculty(option);
       }}
       styles={{
+        control: (base, state) => ({
+          ...base,
+          minHeight: "38px",
+          height: "38px",
+          borderRadius: "8px",
+          borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+          boxShadow: state.isFocused
+            ? "0 0 0 1px #3b82f6"
+            : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+          "&:hover": {
+            borderColor: "#9ca3af",
+          },
+        }),
         placeholder: (base) => ({
           ...base,
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
+          fontSize: "0.875rem",
+          color: "#6b7280",
         }),
-        container: (base) => ({
+        valueContainer: (base) => ({
           ...base,
-          backgroundColor: "white",
+          padding: "0 8px",
+        }),
+        indicatorsContainer: (base) => ({
+          ...base,
+          height: "38px",
+        }),
+        menu: (base) => ({
+          ...base,
+          zIndex: 50,
+          borderRadius: "8px",
         }),
       }}
     />
@@ -64,22 +88,46 @@ export const SelectDepartment = ({
       loading={loadData}
       isDisabled={loadData}
       placeholder={facultyId ? `สาขาวิชาใน${faculty?.label}` : "ทุกสาขาวิชา"}
-      className={`z-19 col-span-5 text-sm ${width}`}
+      className={`z-20 text-sm ${width}`}
       options={departmentsList}
       value={departmentsList.find((f) => f?.value == departmentId) || null}
       onChange={(option) => {
         setDepartmentId(option.value);
       }}
       styles={{
+        control: (base, state) => ({
+          ...base,
+          minHeight: "38px",
+          height: "38px",
+          borderRadius: "8px",
+          borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+          boxShadow: state.isFocused
+            ? "0 0 0 1px #3b82f6"
+            : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+          "&:hover": {
+            borderColor: "#9ca3af",
+          },
+        }),
         placeholder: (base) => ({
           ...base,
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
+          fontSize: "0.875rem",
+          color: "#6b7280",
         }),
-        container: (base) => ({
+        valueContainer: (base) => ({
           ...base,
-          backgroundColor: "white",
+          padding: "0 8px",
+        }),
+        indicatorsContainer: (base) => ({
+          ...base,
+          height: "38px",
+        }),
+        menu: (base) => ({
+          ...base,
+          zIndex: 50,
+          borderRadius: "8px",
         }),
       }}
     />

@@ -39,8 +39,9 @@ const ExportDataSelection = ({
   handleSelectYearStart,
   sectionHeder,
   sectionDes,
-  showSelectYear = true
+  showSelectYear = true,
 }) => {
+  // console.log("🚀 ~ ExportDataSelection ~ faculties:", faculties)
   const [showSelectFacModal, setShowSelectFacModal] = useState(false);
   const [showSelectDepModal, setShowSelectDepModal] = useState(false);
   const pathName = usePathname();
@@ -82,14 +83,16 @@ const ExportDataSelection = ({
 
               <p className="text-sm mt-3.5">คณะ/สาขาวิชา</p>
               <div className="flex items-center mt-2 flex-wrap w-full gap-2">
-                <p className="text-sm">ค้นหา:</p>
-                <SelectFaculty
-                  facultyId={facultyId}
-                  loadData={loadData}
-                  setDepartmentId={setDepartmentId}
-                  setFacultyId={setFacultyId}
-                  setFaculty={setFaculty}
-                />
+                <p className="text-sm">ค้นหา:</p>{" "}
+                <div className="w-full lg:w-1/3 z-30">
+                  <SelectFaculty
+                    facultyId={facultyId}
+                    loadData={loadData}
+                    setDepartmentId={setDepartmentId}
+                    setFacultyId={setFacultyId}
+                    setFaculty={setFaculty}
+                  />
+                </div>
                 <SelectDepartment
                   departmentId={departmentId}
                   faculty={faculty}
@@ -126,17 +129,17 @@ const ExportDataSelection = ({
                   <div className="flex w-full text-sm  h-[300px] overflow-auto gap-1 mt-1.5 p-2.5 rounded-lg border border-gray-300 shadow-xs flex-col">
                     {faultyList.map((f, index) => (
                       <button
-                        onClick={() => handleSelectFacultyId(f?.id)}
+                        onClick={() => handleSelectFacultyId(f?.value)}
                         key={index}
                         className="flex items-center gap-2.5 text-start"
                       >
                         <input
-                          checked={selecetFacultyId?.includes(f?.id)}
+                          checked={selecetFacultyId?.includes(f?.value)}
                           readOnly
                           type="checkbox"
                           className="w-3.5 h-3.5 cursor-pointer"
                         />
-                        <p>{f?.name}</p>
+                        <p>{f?.label}</p>
                       </button>
                     ))}
                   </div>
@@ -169,17 +172,17 @@ const ExportDataSelection = ({
                   <div className="flex w-full h-[300px] overflow-auto text-sm mt-1.5 gap-1 p-2.5 rounded-lg border border-gray-300 shadow-xs flex-col">
                     {departmentList.map((f, index) => (
                       <span
-                        onClick={() => handleSelectDepId(f?.id)}
+                        onClick={() => handleSelectDepId(f?.value)}
                         key={index}
                         className="flex items-center cursor-pointer gap-2.5"
                       >
                         <input
-                          checked={selectDepartmentId.includes(f?.id)}
+                          checked={selectDepartmentId.includes(f?.value)}
                           readOnly
                           type="checkbox"
                           className="w-3.5 h-3.5 cursor-pointer"
                         />
-                        <p className="text-start"> {f?.name}</p>
+                        <p className="text-start"> {f?.label}</p>
                       </span>
                     ))}
                   </div>
@@ -192,49 +195,51 @@ const ExportDataSelection = ({
                 </div>
               </div>
 
-              {pathName !== "/alumni-president/personels-manage" && pathName !== "/alumni-president/admin-manage" &&  (
-                <>
-                  <p className="text-sm mt-3.5">ปีการศึกษา</p>
-                  <div className="mt-2 w-full flex items-center gap-5">
-                    <div className="flex flex-col flex-1">
-                      {" "}
-                      <div className="w-full flex lg:items-center flex-col lg:flex-row justify-between">
-                        <span
-                          onClick={handleSelectAllYearStart}
-                          className=" hover:underline cursor-pointer flex items-center text-sm text-blue-500 gap-2"
-                        >
-                          <input
-                            readOnly
-                            checked={
-                              selectYearStart.length === yearStartOptions.length
-                            }
-                            type="checkbox"
-                            className="w-3.5 h-3.5 cursor-pointer"
-                          />
-                          <p>เลือกทั้งหมด</p>
-                        </span>
-                      </div>
-                      <div className="flex w-full text-sm  h-[300px] overflow-auto gap-1 mt-1.5 p-2.5 rounded-lg border border-gray-300 shadow-xs flex-col">
-                        {yearStartOptions?.map((f, index) => (
+              {pathName !== "/alumni-president/personels-manage" &&
+                pathName !== "/alumni-president/admin-manage" && (
+                  <>
+                    <p className="text-sm mt-3.5">ปีการศึกษา</p>
+                    <div className="mt-2 w-full flex items-center gap-5">
+                      <div className="flex flex-col flex-1">
+                        {" "}
+                        <div className="w-full flex lg:items-center flex-col lg:flex-row justify-between">
                           <span
-                            onClick={() => handleSelectYearStart(f)}
-                            key={index}
-                            className="flex items-center gap-2.5 cursor-pointer"
+                            onClick={handleSelectAllYearStart}
+                            className=" hover:underline cursor-pointer flex items-center text-sm text-blue-500 gap-2"
                           >
                             <input
-                              checked={selectYearStart.includes(f)}
                               readOnly
+                              checked={
+                                selectYearStart.length ===
+                                yearStartOptions.length
+                              }
                               type="checkbox"
                               className="w-3.5 h-3.5 cursor-pointer"
                             />
-                            <p>{f}</p>
+                            <p>เลือกทั้งหมด</p>
                           </span>
-                        ))}
+                        </div>
+                        <div className="flex w-full text-sm  h-[300px] overflow-auto gap-1 mt-1.5 p-2.5 rounded-lg border border-gray-300 shadow-xs flex-col">
+                          {yearStartOptions?.map((f, index) => (
+                            <span
+                              onClick={() => handleSelectYearStart(f)}
+                              key={index}
+                              className="flex items-center gap-2.5 cursor-pointer"
+                            >
+                              <input
+                                checked={selectYearStart.includes(f)}
+                                readOnly
+                                type="checkbox"
+                                className="w-3.5 h-3.5 cursor-pointer"
+                              />
+                              <p>{f}</p>
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
             </div>
           </div>
 
@@ -283,6 +288,7 @@ const ExportDataSelection = ({
                   className="text-blue-500 flex items-center gap-2 bg-blue-50 text-xs mt-1.5 hover:bg-blue-100 hover:shadow-xs w-fit rounded-full p-1.5 px-3"
                 >
                   {facultyText(faculties, f)}
+
                   <button
                     onClick={() => handleSelectFacultyId(f)}
                     className="p-1.5 hover:text-red-500 rounded-lg bg-white"

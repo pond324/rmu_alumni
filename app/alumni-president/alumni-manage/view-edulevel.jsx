@@ -21,7 +21,6 @@ const ViewEduLevel = () => {
       );
       if (res.status === 200) {
         setedulevelList(res.data.data || []);
-        console.log("🚀 ~ getEduList ~ res.data.data:", res.data.data)
       }
     } catch (error) {
       console.error(error);

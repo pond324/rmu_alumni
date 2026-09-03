@@ -39,12 +39,12 @@ const ImportDataHistory = () => {
     getData();
   }, []);
   return (
-    <FadeInSection className="w-full mt-5 p-5 rounded-lg bg-white flex flex-col shadow-sm border border-gray-300">
+    <FadeInSection className="w-full min-w-0 mt-5 p-4 sm:p-5 rounded-lg bg-white flex flex-col shadow-sm border border-gray-300">
       <p className="font-semibold">ประวัติการนำเข้าข้อมูลล่าสุด</p>
-      <div className="w-full mt-3.5">
-        <table className="w-full min-w-max">
+      <div className="w-full mt-3.5 overflow-x-auto">
+        <table className="w-full min-w-[620px]">
           <thead>
-            <tr className="border-b border-gray-300 sticky top-0 left-0">
+            <tr className="border-b border-gray-300 sticky top-0 left-0 bg-white z-10">
               <th className="text-sm font-normal text-start p-2.5 pb-3 text-gray-700">
                 ไฟล์
               </th>
@@ -64,9 +64,9 @@ const ImportDataHistory = () => {
           </thead>
           <tbody>
             {load ? (
-              <RowLoader numcol={4} />
+              <RowLoader numcol={5} />
             ) : data.length < 1 ? (
-              <RowDataNotFound numCol={4} />
+              <RowDataNotFound numCol={5} />
             ) : (
               data?.map((d, index) => (
                 <tr
@@ -75,12 +75,12 @@ const ImportDataHistory = () => {
                 >
                   <td className="p-2.5">
                     <div className="flex items-center gap-2">
-                      <p className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                      <p className="p-2 rounded-lg bg-blue-100 text-blue-600 shrink-0">
                         {" "}
                         <FileTerminalIcon size={16} />
                       </p>
-                      <div className="flex flex-col">
-                        <p>{d?.file_name}</p>
+                      <div className="flex flex-col min-w-0">
+                        <p className="font-medium max-w-[200px] truncate">{d?.file_name}</p>
                         <p className="text-xs text-gray-500 font-semibold">
                           {formatFileSize(Number(d?.file_size || 0))}
                         </p>
@@ -88,18 +88,18 @@ const ImportDataHistory = () => {
                     </div>
                   </td>
                   <td className="p-2.5">
-                    <p className="">
+                    <p className="whitespace-nowrap">
                       {d?.import_type === "alumni" ? "ข้อมูลศิษย์เก่า" : "ข้อมูลบุคลากร"}
                     </p>
                   </td>
                   <td className="p-2.5">
-                    <p className="text-blue-600">
+                    <p className="text-blue-600 font-medium">
                       {d?.total_rows?.toLocaleString("th-TH") || 0}
                     </p>
                   </td>
                   <td className="p-2.5">
-                    <div className="flex items-center gap-2">
-                      <p className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      <p className="p-2 rounded-lg bg-blue-100 text-blue-600 shrink-0">
                         {" "}
                         <User size={16} />
                       </p>
@@ -109,7 +109,7 @@ const ImportDataHistory = () => {
                       </p>
                     </div>
                   </td>
-                  <td className="p-2.5">
+                  <td className="p-2.5 whitespace-nowrap">
                     <p>{new Date(d?.created_at).toLocaleDateString("th-TH")}</p>
                   </td>
                 </tr>

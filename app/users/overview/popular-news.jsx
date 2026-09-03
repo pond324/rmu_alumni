@@ -31,12 +31,12 @@ const PopularNews = () => {
   }, []);
 
   return (
-    <FadeInSection className="w-full lg:w-1/2 p-5 rounded-lg border border-gray-300 bg-white shadow-sm flex flex-col">
+    <FadeInSection className="w-full lg:w-1/2 min-w-0 p-4 sm:p-5 rounded-lg border border-gray-300 bg-white shadow-sm flex flex-col justify-between">
       <p className="font-semibold">ข่าว/กิจกรรม ยอดนิยม</p>
-      <div className="mt-3.5 w-full h-43 overflow-auto">
-        <table className="w-full min-w-max">
+      <div className="mt-3.5 w-full max-h-[300px] overflow-auto">
+        <table className="w-full min-w-[480px]">
           <thead>
-            <tr className="border-b border-gray-300 sticky top-0 left-0">
+            <tr className="border-b border-gray-300 sticky top-0 left-0 bg-white z-10">
               <th className="text-sm font-normal text-start p-2.5 pb-3 text-gray-700">
                 หัวข้อ
               </th>
@@ -60,12 +60,12 @@ const PopularNews = () => {
               data?.map((d, index) => (
                 <tr key={index} className="hover:bg-blue-50">
                   <td className="p-2.5 pb-3 border-b border-gray-300 text-sm">
-                    <p className="font-semibold w-50 line-clamp-1">
+                    <p className="font-semibold max-w-[180px] sm:max-w-[240px] line-clamp-1">
                       {d?.title}
                     </p>
                   </td>
                   <td className="p-2.5 pb-3 border-b border-gray-300 text-sm">
-                    <p className="text-xs p-0.5 px-2 w-fit rounded-full text-blue-600 bg-blue-50 shadow-xs">
+                    <p className="text-xs p-0.5 px-2 w-fit rounded-full text-blue-600 bg-blue-50 shadow-xs whitespace-nowrap">
                       {d?.category == 0 ? "ข่าวสาร/กิจกรรม" : "โครงการบริจาค"}
                     </p>
                   </td>
@@ -74,7 +74,7 @@ const PopularNews = () => {
                       {d?.view?.toLocaleString() || 0}
                     </p>
                   </td>
-                  <td className="p-2.5 pb-3 border-b border-gray-300 text-sm">
+                  <td className="p-2.5 pb-3 border-b border-gray-300 text-sm whitespace-nowrap">
                     <p className="text-gray-700">
                       {DateTHFormat(d?.updatedAt)}
                     </p>

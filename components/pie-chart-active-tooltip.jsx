@@ -15,8 +15,8 @@ const renderCustomizedLabel = (props) => {
 
   if (!showLine) {
     // slice ใหญ่: วาง label ชิดขอบวงตรงๆ ไม่มีเส้น
-    const x = cx + (outerRadius + 10) * cos;
-    const y = cy + (outerRadius + 10) * sin;
+    const x = cx + (outerRadius + 8) * cos;
+    const y = cy + (outerRadius + 8) * sin;
     return (
       <text
         x={x}
@@ -24,7 +24,7 @@ const renderCustomizedLabel = (props) => {
         textAnchor={textAnchor}
         dominantBaseline="central"
         fill={color}
-        fontSize={14}
+        fontSize={12}
       >
         {`${name}: ${value.toLocaleString()}`}
       </text>
@@ -34,9 +34,9 @@ const renderCustomizedLabel = (props) => {
   // slice เล็ก: วาดเส้นชี้แบบเดิม
   const sx = cx + (outerRadius + 1) * cos;
   const sy = cy + (outerRadius + 1) * sin;
-  const mx = cx + (outerRadius + 24) * cos;
-  const my = cy + (outerRadius + 24) * sin;
-  const ex = mx + (cos >= 0 ? 1 : -1) * 16;
+  const mx = cx + (outerRadius + 18) * cos;
+  const my = cy + (outerRadius + 18) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 12;
   const ey = my;
 
   return (
@@ -47,14 +47,14 @@ const renderCustomizedLabel = (props) => {
         fill="none"
         strokeWidth={1}
       />
-      <circle cx={ex} cy={ey} r={2.5} fill={color} stroke="none" />
+      <circle cx={ex} cy={ey} r={2} fill={color} stroke="none" />
       <text
-        x={ex + (textAnchor === "start" ? 8 : -8)}
+        x={ex + (textAnchor === "start" ? 6 : -6)}
         y={ey}
         textAnchor={textAnchor}
         dominantBaseline="central"
         fill={color}
-        fontSize={14}
+        fontSize={12}
       >
         {`${name}: ${value.toLocaleString()}`}
       </text>
@@ -120,7 +120,7 @@ const PieChartComponentWithActiveTooltips = ({ data, openToolTip = true }) => {
   const isSingleSlice = dataWithTotal.length === 1;
 
   return (
-    <div style={{ width: 550, height: 500 }}>
+    <div className="w-full h-[280px] sm:h-[320px] flex flex-col items-center justify-center min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -129,10 +129,10 @@ const PieChartComponentWithActiveTooltips = ({ data, openToolTip = true }) => {
             cy="50%"
             labelLine={false}
             label={isSingleSlice ? false : renderCustomizedLabel}
-            outerRadius={150}
+            outerRadius={95}
             innerRadius={0}
             dataKey="value"
-            activeShape={{ outerRadius: 165 }}
+            activeShape={{ outerRadius: 105 }}
           >
             {dataWithTotal.map((entry, index) => (
               <Cell

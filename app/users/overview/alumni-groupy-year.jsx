@@ -31,15 +31,19 @@ const AlumniGroupByYear = () => {
   }, []);
 
   return (
-    <FadeInSection className="w-full h-full p-5 rounded-lg bg-white flex flex-col shadow-sm border border-gray-300">
-      <p className="font-semibold">ศิษย์เก่าตามปีการศึกษา</p>
-      <p className="text-sm text-gray-700 mb-8">
-        จำนวนศิษย์เก่าทั้งหมดจำแนกตามปีการศึกษา (10 ปีหลังสุด)
-      </p>
+    <FadeInSection className="w-full lg:w-2/3 min-w-0 p-4 sm:p-5 rounded-lg bg-white flex flex-col justify-between shadow-sm border border-gray-300">
+      <div>
+        <p className="font-semibold">ศิษย์เก่าตามปีการศึกษา</p>
+        <p className="text-sm text-gray-700 mb-4 sm:mb-6">
+          จำนวนศิษย์เก่าทั้งหมดจำแนกตามปีการศึกษา (10 ปีหลังสุด)
+        </p>
+      </div>
       {load ? (
         <ChartSimpleSkeleton />
       ) : (
-        <CustomAreaChart data={data} name={"ศิษย์เก่า (คน)"}/>
+        <div className="w-full min-w-0">
+          <CustomAreaChart data={data} name={"ศิษย์เก่า (คน)"} />
+        </div>
       )}
     </FadeInSection>
   );

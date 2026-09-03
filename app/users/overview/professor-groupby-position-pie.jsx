@@ -26,13 +26,14 @@ const ProfessorGroupByPosition = () => {
   }, []);
 
   return (
-    <FadeInSection className="w-full lg:w-1/3 p-5 rounded-lg bg-white border border-gray-300 shadow-sm flex flex-col items-center">
-      <p className="font-semibold w-full">บุคลากรจำแนกตามตำแหน่ง</p>
-      <p className="text-sm text-gray-700 w-full">
-        จำนวนบุคลากรจำแนกตามตำแหน่ง
-      </p>
-      <div className="w-full h-100 flex flex-col items-center">
-        {" "}
+    <FadeInSection className="w-full min-w-0 p-4 sm:p-5 rounded-lg bg-white border border-gray-300 shadow-sm flex flex-col justify-between items-center">
+      <div className="w-full">
+        <p className="font-semibold w-full">บุคลากรจำแนกตามตำแหน่ง</p>
+        <p className="text-sm text-gray-700 w-full">
+          จำนวนบุคลากรจำแนกตามตำแหน่ง
+        </p>
+      </div>
+      <div className="w-full min-w-0 flex flex-col items-center justify-center my-auto">
         <DonutChart data={data} />
       </div>
     </FadeInSection>

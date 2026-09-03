@@ -19,7 +19,6 @@ import { useFacultyDep } from "@/hook/useFacultyDep";
 import PaginationBtn from "./pageination-btn";
 import { SelectDepartment, SelectFaculty } from "./select-fac-dep";
 import ImportHistoryData from "@/app/alumni-president/alumni-manage/import-history-btn";
-import ExportDataSelection from "./export-data-selection";
 import ExportAlumniData from "@/app/alumni-president/alumni-manage/export-alumni-data";
 import SelectEduLevel from "./select-edu-level";
 
@@ -28,7 +27,6 @@ const TablePage = ({
   children,
   theads,
   fetchData,
-  exportData,
   totalPage,
   total,
   filterBtn,
@@ -166,16 +164,16 @@ const TablePage = ({
           </div>
           {pathName === "/alumni-president/alumni-manage" && (
             <div className="flex items-center gap-2.5">
-              <ImportAlumniData fetchData={fetchData} />
-              <ImportHistoryData fetchAlumni={fetchData} />
+              {/* <ImportAlumniData fetchData={fetchData} /> */}
+              {/* <ImportHistoryData fetchAlumni={fetchData} /> */}
               <ExportAlumniData />
             </div>
           )}
         </span>
 
-        <div className="gap-2.5 w-full flex-wrap flex items-center my-2.5">
-          <div className="lg:w-1/6 w-full md:w-1/3 bg-white col-span-5 p-2 px-3 rounded-lg border border-gray-300 shadow-sm flex items-center gap-2">
-            <Search size={18} />
+        <div className="w-full flex flex-wrap items-center gap-2.5 my-3">
+          <div className="flex-1 min-w-[200px] sm:min-w-[240px] max-w-full sm:max-w-xs h-[38px] px-3 bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+            <Search size={17} className="text-gray-400 shrink-0" />
             <input
               value={search}
               onChange={(e) => {
@@ -186,26 +184,32 @@ const TablePage = ({
               }}
               type="text"
               placeholder="พิมพ์ค้นหา"
-              className="text-[0.9rem] w-[90%]"
+              className="text-sm w-full bg-transparent outline-none"
             />
           </div>
           {user?.roleId > 3 && (
-            <SelectFaculty
-              facultyId={facultyId}
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-              setFacultyId={setFacultyId}
-              setFaculty={setFaculty}
-            />
+            <div className="w-full sm:w-[200px] md:w-[220px]">
+              <SelectFaculty
+                facultyId={facultyId}
+                loadData={loadData}
+                setDepartmentId={setDepartmentId}
+                setFacultyId={setFacultyId}
+                setFaculty={setFaculty}
+                width="w-full"
+              />
+            </div>
           )}
           {user?.roleId > 2 && (
-            <SelectDepartment
-              departmentId={departmentId}
-              faculty={faculty}
-              facultyId={facultyId}
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-            />
+            <div className="w-full sm:w-[200px] md:w-[220px]">
+              <SelectDepartment
+                departmentId={departmentId}
+                faculty={faculty}
+                facultyId={facultyId}
+                loadData={loadData}
+                setDepartmentId={setDepartmentId}
+                width="w-full"
+              />
+            </div>
           )}
           <SelectEduLevel
             selectEduLevel={selectEduLevel}
@@ -226,7 +230,7 @@ const TablePage = ({
 
           <div
             title="เลือกจำนวนที่ต้องการแสดง"
-            className="relative inline-block"
+            className="relative"
           >
             <select
               onChange={(e) => {
@@ -234,7 +238,8 @@ const TablePage = ({
                 setPage(1);
               }}
               value={take}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              id="select-take"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             >
               <option value={10} className="text-sm">
                 10
@@ -250,22 +255,23 @@ const TablePage = ({
               </option>
             </select>
             <label
-              htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg border bg-white border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              htmlFor="select-take"
+              className="h-[38px] px-3.5 rounded-lg border bg-white border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
             >
-              <List size={17} />
-              <p className="text-sm ">แสดง {take} แถว</p>
+              <List size={16} className="text-gray-500" />
+              <p className="text-sm">แสดง {take} แถว</p>
             </label>
           </div>
 
-          <div title="เรียงตาม" className="relative inline-block">
+          <div title="เรียงตาม" className="relative">
             <select
               onChange={(e) => {
                 setSort(e.target.value);
                 setPage(1);
               }}
               value={sort}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              id="select-sort"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             >
               <option
                 value={JSON.stringify({ year_start: "desc" })}
@@ -281,28 +287,31 @@ const TablePage = ({
               </option>
             </select>
             <label
-              htmlFor="select-row"
-              className="p-2 px-3.5 rounded-lg bg-white border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              htmlFor="select-sort"
+              className="h-[38px] px-3.5 rounded-lg bg-white border border-gray-300 shadow-xs flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
             >
-              <ChevronsUpDown size={17} />
-              <p className="text-sm ">เรียง</p>
+              <ChevronsUpDown size={16} className="text-gray-500" />
+              <p className="text-sm">เรียง</p>
             </label>
           </div>
           <button
+            type="button"
             title="ล้างการค้นหา"
             onClick={resetData}
-            className="p-2 bg-white px-3.5 justify-center rounded-lg border border-gray-300 shadow-md flex items-center gap-2"
+            className="h-[38px] px-3.5 justify-center bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 hover:bg-gray-50 text-gray-700 whitespace-nowrap transition-colors"
           >
-            <RotateCcw size={17} />
-            <p className="text-sm ">ล้างการค้นหา</p>
+            <RotateCcw size={16} className="text-gray-500" />
+            <p className="text-sm">ล้างการค้นหา</p>
           </button>
           {totalPage > 1 && (
-            <PaginationBtn
-              forwardPage={forwardPage}
-              page={page}
-              totalPage={totalPage}
-              prevPage={prevPage}
-            />
+            <div className="ml-auto flex items-center">
+              <PaginationBtn
+                forwardPage={forwardPage}
+                page={page}
+                totalPage={totalPage}
+                prevPage={prevPage}
+              />
+            </div>
           )}
         </div>
 

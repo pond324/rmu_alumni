@@ -245,7 +245,6 @@ const ImportAlumniData = ({ fetchData }) => {
     try {
       setProgress(0);
       const formData = new FormData();
-      formData.append("data", JSON.stringify(json));
       formData.append("file", file);
       formData.append("fileSize", String(file.size));
       const res = await axios.post(
