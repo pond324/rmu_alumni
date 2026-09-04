@@ -9,20 +9,29 @@ export const SelectFaculty = ({
   facultyId,
   setFaculty = () => {},
   width = "w-full lg:w-1/4",
+  faculties: propFaculties,
 }) => {
-  const { faculties } = useFacultyDep();
+  const hookData = useFacultyDep();
+  const faculties = propFaculties || hookData.faculties || [];
+  const isLoading = loadData !== undefined ? loadData : hookData.loadData;
+
   return (
     <Select
-      loading={loadData}
-      isDisabled={loadData}
+      isClearable
+      isSearchable
+      loading={isLoading}
+      isDisabled={isLoading}
       placeholder="ทุกคณะ"
-      className={`z-20 text-sm ${width}`}
+      className={`z-30 text-sm ${width}`}
+      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
       options={faculties}
-      value={faculties.find((f) => f?.value == facultyId) || null}
+      value={
+        faculties.find((f) => String(f?.value) === String(facultyId)) || null
+      }
       onChange={(option) => {
-        setFacultyId(option.value);
+        setFacultyId(option ? option.value : "");
         setDepartmentId("");
-        setFaculty(option);
+        setFaculty(option || null);
       }}
       styles={{
         control: (base, state) => ({
@@ -56,8 +65,12 @@ export const SelectFaculty = ({
         }),
         menu: (base) => ({
           ...base,
-          zIndex: 50,
+          zIndex: 9999,
           borderRadius: "8px",
+        }),
+        menuPortal: (base) => ({
+          ...base,
+          zIndex: 9999,
         }),
       }}
     />
@@ -71,28 +84,49 @@ export const SelectDepartment = ({
   setDepartmentId,
   departmentId,
   width = "w-full lg:w-1/4",
+  departments: propDepartments,
 }) => {
-  const { departments } = useFacultyDep();
+  const hookData = useFacultyDep();
+  const departments = propDepartments || hookData.departments || [];
+  const isLoading = loadData !== undefined ? loadData : hookData.loadData;
   const [departmentsList, setDepartmentList] = useState([]);
-  useEffect(() => {
-    setDepartmentList(departments);
 
-    if (!departments || !facultyId) return;
+  useEffect(() => {
+    if (!departments || departments.length === 0) {
+      setDepartmentList([]);
+      return;
+    }
+    if (!facultyId) {
+      setDepartmentList(departments);
+      return;
+    }
     const normalizedData = departments.filter(
-      (d) => d?.faculty_id === facultyId,
+      (d) => String(d?.faculty_id) === String(facultyId),
     );
     setDepartmentList(normalizedData);
   }, [departments, facultyId]);
+
   return (
     <Select
-      loading={loadData}
-      isDisabled={loadData}
-      placeholder={facultyId ? `สาขาวิชาใน${faculty?.label}` : "ทุกสาขาวิชา"}
+      isClearable
+      isSearchable
+      loading={isLoading}
+      isDisabled={isLoading}
+      placeholder={
+        facultyId && faculty?.label
+          ? `สาขาวิชาใน${faculty.label}`
+          : "ทุกสาขาวิชา"
+      }
       className={`z-20 text-sm ${width}`}
+      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
       options={departmentsList}
-      value={departmentsList.find((f) => f?.value == departmentId) || null}
+      value={
+        departmentsList.find(
+          (f) => String(f?.value) === String(departmentId),
+        ) || null
+      }
       onChange={(option) => {
-        setDepartmentId(option.value);
+        setDepartmentId(option ? option.value : "");
       }}
       styles={{
         control: (base, state) => ({
@@ -126,10 +160,15 @@ export const SelectDepartment = ({
         }),
         menu: (base) => ({
           ...base,
-          zIndex: 50,
+          zIndex: 9999,
           borderRadius: "8px",
+        }),
+        menuPortal: (base) => ({
+          ...base,
+          zIndex: 9999,
         }),
       }}
     />
   );
 };
+

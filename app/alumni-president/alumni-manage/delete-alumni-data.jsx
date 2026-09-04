@@ -39,7 +39,7 @@ const DeleteAlumniData = ({ alumni_id, fetch }) => {
         apiConfig.rmuAPI + `/president/delete-alumni-data/${alumni_id}`,
         {
           withCredentials: true,
-          params: {
+          data: {
             toggleDeleteType,
             reason: watch("reason"),
             password: watch("password"),

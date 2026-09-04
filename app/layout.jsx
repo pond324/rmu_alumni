@@ -13,18 +13,27 @@ export const metadata = {
   icons: {
     icon: "/logo_rmu.png",
   },
+  other: {
+    "color-scheme": "light",
+  },
+};
+
+export const viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="th" className="light" style={{ colorScheme: "light" }}>
       <head>
         <link rel="icon" href="/logo_rmu.png" />
       </head>
-      <body className={`${sarabun.className} antialiased`}>
+      <body className={`${sarabun.className} antialiased bg-white text-gray-900`}>
         <PaginateProgress />
         {children}
       </body>
     </html>
   );
 }
+

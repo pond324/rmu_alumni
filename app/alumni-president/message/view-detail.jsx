@@ -17,6 +17,7 @@ import axios from "axios";
 import { apiConfig } from "@/config/api.config";
 import { departmentText, facultyText } from "@/components/faculty-p";
 import { useFacultyDep } from "@/hook/useFacultyDep";
+import { sanitizeHtml } from "@/libs/sanitize";
 
 const ViewDetail = ({ sendText }) => {
   const { faculties, departments } = useFacultyDep();
@@ -130,7 +131,7 @@ const ViewDetail = ({ sendText }) => {
             <div
               className="mt-1.5 w-full p-2 rounded-lg h-40 pb-3.5 border-b border-b-gray-300 overflow-auto bg-gray-50 border border-gray-100 shadow-xs"
               dangerouslySetInnerHTML={{
-                __html: sendText?.detail,
+                __html: sanitizeHtml(sendText?.detail),
               }}
             ></div>
 

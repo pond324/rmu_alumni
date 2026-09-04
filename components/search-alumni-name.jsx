@@ -218,15 +218,15 @@ const SearchAlumniName = () => {
               />
             </div>
 
-            <div className="w-full lg:w-1/4 z-30">
-              <SelectFaculty
-                loadData={loadData}
-                setDepartmentId={setDepartmentId}
-                setFacultyId={setFacultyId}
-                setFaculty={setFaculty}
-                facultyId={facultyId}
-              />
-            </div>
+            <SelectFaculty
+              loadData={loadData}
+              setDepartmentId={setDepartmentId}
+              setFacultyId={setFacultyId}
+              setFaculty={setFaculty}
+              facultyId={facultyId}
+              faculties={faculties}
+              width="w-full lg:w-1/4"
+            />
 
             <SelectDepartment
               loadData={loadData}
@@ -234,6 +234,8 @@ const SearchAlumniName = () => {
               facultyId={facultyId}
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
+              departments={departments}
+              width="w-full lg:w-1/4"
             />
             <SelectEduLevel
               selectEduLevel={selectEduLevel}
@@ -335,7 +337,7 @@ const SearchAlumniName = () => {
                 <option value={"pending"} className="text-sm">
                   รอตรวจสอบ
                 </option>
-                <option value={"accetp"} className="text-sm">
+                <option value={"accept"} className="text-sm">
                   อนุมัติแล้ว
                 </option>
                 <option value={"refuse"} className="text-sm">
@@ -506,7 +508,7 @@ const SearchAlumniName = () => {
                           <span className="w-fit bg-orange-100 text-orange-800 px-2 py-1.5 rounded-full text-xs font-semibold">
                             รอตรวจสอบ
                           </span>
-                        ) : r?.regis_alumni?.isApproved === "pending" ? (
+                        ) : r?.regis_alumni?.isApproved === "accept" ? (
                           <span className="w-fit bg-blue-100 text-blue-800 px-2 py-1.5 rounded-full text-xs font-semibold">
                             ลงทะเบียนแล้ว
                           </span>

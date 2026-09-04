@@ -3,6 +3,7 @@ import { apiConfig } from "@/config/api.config";
 import { DateTHFormat } from "@/libs/thai-local-formate-date";
 import { Eye, EyeClosed, HeartHandshake, Newspaper, X } from "lucide-react";
 import { useState } from "react";
+import { sanitizeHtml } from "@/libs/sanitize";
 
 const ViewDetail = ({ data,showText = true }) => {
   const [showModal, setShowModal] = useState(false);
@@ -139,7 +140,7 @@ const ViewDetail = ({ data,showText = true }) => {
                 <div
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: data?.detail || "",
+                    __html: sanitizeHtml(data?.detail || ""),
                   }}
                 />
               </div>

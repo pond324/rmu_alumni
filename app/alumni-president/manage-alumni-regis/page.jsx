@@ -383,15 +383,15 @@ const ManageAlumniRegis = () => {
             />
           </div>
 
-          <div className="w-full lg:w-1/4 z-30">
-            <SelectFaculty
-              facultyId={facultyId}
-              loadData={loadData}
-              setDepartmentId={setDepartmentId}
-              setFacultyId={setFacultyId}
-              setFaculty={setFaculty}
-            />
-          </div>
+          <SelectFaculty
+            facultyId={facultyId}
+            loadData={loadData}
+            setDepartmentId={setDepartmentId}
+            setFacultyId={setFacultyId}
+            setFaculty={setFaculty}
+            faculties={faculties}
+            width="w-full lg:w-1/4"
+          />
 
           <SelectDepartment
             departmentId={departmentId}
@@ -399,6 +399,8 @@ const ManageAlumniRegis = () => {
             facultyId={facultyId}
             loadData={loadData}
             setDepartmentId={setDepartmentId}
+            departments={departments}
+            width="w-full lg:w-1/4"
           />
           <SelectEduLevel
             selectEduLevel={selectEduLevel}

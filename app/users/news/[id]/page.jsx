@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dayjs from "@/libs/dayjs";
+import { sanitizeHtml } from "@/libs/sanitize";
 
 const Page = () => {
   const params = useParams();
@@ -133,7 +134,7 @@ const Page = () => {
 
           <div
             className="prose max-w-full break-words whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: data?.detail }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(data?.detail) }}
           />
         </div>
 

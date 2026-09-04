@@ -1,13 +1,57 @@
-import FadeInSection from "./fade-in-section";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Modal = ({ children, isOpen, onClose }) => {
-  if (!isOpen) return null;
-  return (
-    <FadeInSection className="z-60 overflow-hidden w-full h-full fixed top-0 right-0 bg-black/55 flex items-center justify-center p-5 lg:p-10">
-      <div onClick={onClose} className="inset-0 absolute top-0 w-full h-full" />
-      {children}
-    </FadeInSection>
-    
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  if (!mounted || !isOpen) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[99999] overflow-y-auto w-screen h-screen flex items-center justify-center p-4 sm:p-6 lg:p-10">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+        />
+
+        {/* Modal Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="relative z-10 w-full flex items-center justify-center max-h-full"
+        >
+          {children}
+        </motion.div>
+      </div>
+    </AnimatePresence>,
+    document.body
   );
 };
+
 export default Modal;
+

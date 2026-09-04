@@ -84,21 +84,23 @@ const ExportDataSelection = ({
               <p className="text-sm mt-3.5">คณะ/สาขาวิชา</p>
               <div className="flex items-center mt-2 flex-wrap w-full gap-2">
                 <p className="text-sm">ค้นหา:</p>{" "}
-                <div className="w-full lg:w-1/3 z-30">
-                  <SelectFaculty
-                    facultyId={facultyId}
-                    loadData={loadData}
-                    setDepartmentId={setDepartmentId}
-                    setFacultyId={setFacultyId}
-                    setFaculty={setFaculty}
-                  />
-                </div>
+                <SelectFaculty
+                  facultyId={facultyId}
+                  loadData={loadData}
+                  setDepartmentId={setDepartmentId}
+                  setFacultyId={setFacultyId}
+                  setFaculty={setFaculty}
+                  faculties={faculties}
+                  width="w-full lg:w-1/3"
+                />
                 <SelectDepartment
                   departmentId={departmentId}
                   faculty={faculty}
                   facultyId={facultyId}
                   loadData={loadData}
                   setDepartmentId={setDepartmentId}
+                  departments={departments}
+                  width="w-full lg:w-1/3"
                 />
                 <button
                   onClick={resetSearch}
