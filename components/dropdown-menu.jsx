@@ -18,7 +18,9 @@ export default function DropdownMenu({
   const handleClickOutside = (event) => {
     if (
       event.target.closest(".swal2-container") ||
-      event.target.closest(".swal2-popup")
+      event.target.closest(".swal2-popup") ||
+      event.target.closest(".app-modal-portal") ||
+      event.target.closest("[data-modal]")
     ) {
       return;
     }

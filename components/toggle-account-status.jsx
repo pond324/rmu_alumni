@@ -21,6 +21,14 @@ export default function ToggleAccoutStatus({
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   const handleClickOutside = (event) => {
+    if (
+      event.target.closest(".swal2-container") ||
+      event.target.closest(".swal2-popup") ||
+      event.target.closest(".app-modal-portal") ||
+      event.target.closest("[data-modal]")
+    ) {
+      return;
+    }
     if (menuRef.current && !menuRef.current.contains(event.target)) {
       setIsOpen(false);
     }
