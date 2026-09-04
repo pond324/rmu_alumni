@@ -16,6 +16,12 @@ export default function DropdownMenu({
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   const handleClickOutside = (event) => {
+    if (
+      event.target.closest(".swal2-container") ||
+      event.target.closest(".swal2-popup")
+    ) {
+      return;
+    }
     if (menuRef.current && !menuRef.current.contains(event.target)) {
       setIsOpen(false);
     }

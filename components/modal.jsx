@@ -26,7 +26,7 @@ const Modal = ({ children, isOpen, onClose }) => {
 
   return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[99999] overflow-y-auto w-screen h-screen flex items-center justify-center p-4 sm:p-6 lg:p-10">
+      <div className="fixed inset-0 z-[9999] overflow-y-auto w-screen h-screen flex items-center justify-center p-4 sm:p-6 lg:p-10">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}

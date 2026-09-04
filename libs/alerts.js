@@ -1,4 +1,3 @@
-import { warning } from "framer-motion";
 import Swal from "sweetalert2";
 
 export const alerts = {

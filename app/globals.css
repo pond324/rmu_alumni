@@ -90,3 +90,11 @@ select {
   forced-color-adjust: none;
 }
 
+/* ===============================
+   SweetAlert2 Layering Fix
+   Ensure SweetAlert2 is always on top of all modals, sheets, and overlays
+   =============================== */
+.swal2-container {
+  z-index: 1000000 !important;
+}
+
