@@ -57,6 +57,10 @@ select {
   background-color: #ffffff;
 }
 
+textarea {
+  min-height: 5rem;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #6b7280;

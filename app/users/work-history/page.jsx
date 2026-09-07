@@ -1041,7 +1041,7 @@ const WorkHistory = () => {
                     {...field}
                     value={field.value || ""}
                     rows={3}
-                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    className="w-full min-h-[85px] outline-none mt-1 p-2 px-3 border border-gray-400 rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500 resize-y"
                     placeholder="อธิบายเกี่ยวกับงานที่ทำ บทบาทหน้าที่..."
                   />
                 )}
@@ -1067,7 +1067,7 @@ const WorkHistory = () => {
                     {...field}
                     value={field.value || ""}
                     rows={3}
-                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    className="w-full min-h-[85px] outline-none mt-1 p-2 px-3 border border-gray-400 rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500 resize-y"
                     placeholder="ได้รับผิดชอบทำอะไรบ้าง เช่น พิมพ์งานเอกสาร,ส่งเอกสาร"
                   />
                 )}
@@ -1092,7 +1092,7 @@ const WorkHistory = () => {
                     {...field}
                     value={field.value || ""}
                     rows={3}
-                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    className="w-full min-h-[85px] outline-none mt-1 p-2 px-3 border border-gray-400 rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500 resize-y"
                     placeholder="เช่น ใช้ Microsoft Words,Microsoft Excel"
                   />
                 )}
@@ -1116,7 +1116,7 @@ const WorkHistory = () => {
                 {...field}
                 value={field.value || ""}
                 rows={3}
-                className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
+                className="w-full min-h-[85px] outline-none mt-1 p-2 px-3 border border-gray-400 rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500 resize-y"
                 placeholder="รายละเอียดอื่นๆที่ต้องการบอกเพิ่มเติม"
               />
             )}
