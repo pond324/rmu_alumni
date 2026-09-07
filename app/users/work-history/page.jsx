@@ -1031,10 +1031,11 @@ const WorkHistory = () => {
                 }}
                 control={control}
                 render={({ field }) => (
-                  <input
+                  <textarea
                     {...field}
                     value={field.value || ""}
-                    className="w-full outline-none mt-2.5 p-2 px-3 border border-gray-400 resize-none h-[100px] rounded-lg text-base leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    rows={3}
+                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
                     placeholder="อธิบายเกี่ยวกับงานที่ทำ บทบาทหน้าที่..."
                   />
                 )}
@@ -1056,10 +1057,11 @@ const WorkHistory = () => {
                 }}
                 control={control}
                 render={({ field }) => (
-                  <input
+                  <textarea
                     {...field}
                     value={field.value || ""}
-                    className="w-full outline-none mt-2.5 p-2 px-3 border border-gray-400 resize-none h-[100px] rounded-lg text-base leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    rows={3}
+                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
                     placeholder="ได้รับผิดชอบทำอะไรบ้าง เช่น พิมพ์งานเอกสาร,ส่งเอกสาร"
                   />
                 )}
@@ -1080,10 +1082,11 @@ const WorkHistory = () => {
                 }}
                 control={control}
                 render={({ field }) => (
-                  <input
+                  <textarea
                     {...field}
                     value={field.value || ""}
-                    className="w-full outline-none mt-2.5 p-2 px-3 border border-gray-400 resize-none h-[100px] rounded-lg text-base leading-relaxed focus:ring-1 focus:ring-blue-500"
+                    rows={3}
+                    className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
                     placeholder="เช่น ใช้ Microsoft Words,Microsoft Excel"
                   />
                 )}
@@ -1103,10 +1106,11 @@ const WorkHistory = () => {
             name="remark"
             control={control}
             render={({ field }) => (
-              <input
+              <textarea
                 {...field}
                 value={field.value || ""}
-                className="w-full outline-none mt-2.5 p-2 px-3 border border-gray-400 resize-none h-[100px] rounded-lg text-base leading-relaxed focus:ring-1 focus:ring-blue-500"
+                rows={3}
+                className="w-full outline-none mt-1 p-2 px-3 border border-gray-400 resize-none rounded-lg text-[0.9rem] leading-relaxed focus:ring-1 focus:ring-blue-500"
                 placeholder="รายละเอียดอื่นๆที่ต้องการบอกเพิ่มเติม"
               />
             )}
