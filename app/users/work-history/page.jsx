@@ -489,37 +489,43 @@ const WorkHistory = () => {
       <Modal isOpen={showJobForm} onClose={() => setShowJobForm(false)}>
         <form
           onSubmit={handleSubmit(save)}
-          className="z-50 w-full mx-8 lg:w-1/3 h-[90%] overflow-y-auto flex flex-col items-start p-5 rounded-lg bg-white shadow-md"
+          className="z-50 w-full max-w-lg max-h-[85vh] flex flex-col bg-white rounded-xl shadow-xl overflow-hidden"
         >
-          <span className="w-full flex items-center justify-between">
-            <h2 className="text-lg font-bold">
+          {/* Header */}
+          <div className="w-full flex items-center justify-between p-4 px-6 border-b border-gray-200 bg-white shrink-0">
+            <h2 className="text-lg font-bold text-gray-800">
               {isEditing ? "แก้ไข" : "เพิ่ม"}ประวัติ
             </h2>
-            <X
+            <button
+              type="button"
               onClick={() => setShowJobForm(false)}
-              size={25}
-              className="cursor-pointer"
-            />
-          </span>
-          {!isEditing && (
-            <div className="w-full flex items-center justify-between my-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setContinuedStudy(false);
-                  reset();
-                }}
-                className={` w-1/2 flex items-center gap-1 flex-col p-3 border-b border-blue-300 ${
-                  !continuedStudy &&
-                  "text-white bg-gradient-to-r from-blue-300 to-blue-400 rounded-tl-lg rounded-tr-lg"
-                }`}
-              >
-                <Briefcase
-                  size={20}
-                  color={!continuedStudy ? "white" : "blue"}
-                />
-                <p className="text-[0.9rem]">ประวัติการทำงาน</p>
-              </button>
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <X size={22} />
+            </button>
+          </div>
+
+          {/* Form Body (Scrollable) */}
+          <div className="w-full flex-1 overflow-y-auto p-6 flex flex-col items-start">
+            {!isEditing && (
+              <div className="w-full flex items-center justify-between mb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setContinuedStudy(false);
+                    reset();
+                  }}
+                  className={` w-1/2 flex items-center gap-1 flex-col p-3 border-b border-blue-300 ${
+                    !continuedStudy &&
+                    "text-white bg-gradient-to-r from-blue-300 to-blue-400 rounded-tl-lg rounded-tr-lg"
+                  }`}
+                >
+                  <Briefcase
+                    size={20}
+                    color={!continuedStudy ? "white" : "blue"}
+                  />
+                  <p className="text-[0.9rem]">ประวัติการทำงาน</p>
+                </button>
               <button
                 type="button"
                 onClick={() => {
@@ -1116,16 +1122,28 @@ const WorkHistory = () => {
             )}
           />
 
-          <button
-            disabled={loading || load}
-            type="submit"
-            className="mt-7 p-2.5 px-3 text-white rounded-lg bg-blue-500 hover:bg-blue-600 hover:shadow-md flex items-center gap-2.5"
-          >
-            {saving ? <Loading type={1} /> : <Save size={18} color="white" />}
-            <p className="text-[0.9rem]">
-              {saving ? "กำลังดำเนินการ..." : "บันทึก"}
-            </p>
-          </button>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="w-full p-4 px-6 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowJobForm(false)}
+              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+            >
+              ยกเลิก
+            </button>
+            <button
+              disabled={loading || load || saving}
+              type="submit"
+              className="px-5 py-2 text-sm text-white rounded-lg bg-blue-500 hover:bg-blue-600 hover:shadow-md flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {saving ? <Loading type={1} /> : <Save size={18} color="white" />}
+              <p className="text-[0.9rem]">
+                {saving ? "กำลังดำเนินการ..." : "บันทึก"}
+              </p>
+            </button>
+          </div>
         </form>
       </Modal>
     </div>
