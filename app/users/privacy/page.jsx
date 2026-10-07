@@ -1,5 +1,6 @@
 "use client";
 import Loading from "@/components/loading";
+import { PrivacySkeleton } from "@/components/skeletons";
 import { apiConfig } from "@/config/api.config";
 import useGetSession from "@/hook/useGetSeesion";
 import { alerts } from "@/libs/alerts";
@@ -92,13 +93,7 @@ const Privacy = () => {
     }
   };
 
-  if (loading)
-    return (
-      <div className="w-full h-full flex items-center justify-center flex-col gap-2">
-        <Loading />
-        <p>กำลังโหลด...</p>
-      </div>
-    );
+  if (loading) return <PrivacySkeleton />;
 
   return (
     <div className="w-full p-5 flex flex-col items-center gap-5 bg-gradient-to-r from-sky-50 to-gray-50">

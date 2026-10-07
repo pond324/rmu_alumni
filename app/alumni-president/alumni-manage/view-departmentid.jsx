@@ -18,18 +18,23 @@ const ViewDepartment = () => {
   }, [departments, loadData]);
 
   useEffect(() => {
-    if (!departments || !facultyId) return;
-    let normalizedData = departmentList;
-    if (facultyId) {
-      normalizedData = departments.filter((d) => d?.faculty_id === facultyId);
+    if (!departments) return;
+    if (!facultyId) {
+      setDepartmentList(departments);
+      return;
     }
+    let normalizedData = departments.filter(
+      (d) => String(d?.faculty_id) === String(facultyId),
+    );
     if (departmentId) {
       normalizedData = normalizedData.filter(
-        (d) => d?.id === departmentId || d?.value === departmentId,
+        (d) =>
+          String(d?.id) === String(departmentId) ||
+          String(d?.value) === String(departmentId),
       );
     }
     setDepartmentList(normalizedData);
-  }, [facultyId, departmentId]);
+  }, [facultyId, departmentId, departments]);
 
   const resetSearch = () => {
     setFaculty(null);

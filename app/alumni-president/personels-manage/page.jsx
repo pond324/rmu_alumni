@@ -22,6 +22,7 @@ import ToggleAccoutStatus from "@/components/toggle-account-status";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import ImportPersonelData from "./import-personel-data";
 import { SelectDepartment, SelectFaculty } from "@/components/select-fac-dep";
+import SelectAccountStatus from "@/components/select-account-status";
 import RowLoader from "@/components/row-loader";
 import RowDataNotFound from "@/components/row-data-notfound";
 import PaginationBtn from "@/components/pageination-btn";
@@ -50,6 +51,7 @@ const TablePage = () => {
   const [faculty, setFaculty] = useState(null);
   const [departmentId, setDepartmentId] = useState("");
   const [filter, setFilter] = useState(null);
+  const [canUse, setCanUse] = useState("");
   const { user } = useGetSession();
   const { setPrevPath } = useAppContext();
 
@@ -65,6 +67,7 @@ const TablePage = () => {
     departmentId,
     sort,
     filter,
+    canUse,
   ) => {
     setLoading(true);
     try {
@@ -78,6 +81,7 @@ const TablePage = () => {
           departmentId,
           sort,
           filter,
+          canUse: canUse !== "" && canUse !== undefined ? canUse : undefined,
         },
       });
       if (res.status === 200) {
@@ -112,15 +116,25 @@ const TablePage = () => {
     setPage(1);
     setFilter(null);
     setSort(JSON.stringify({ createdAt: "desc" }));
+    setCanUse("");
   };
 
   // ✅ โหลดข้อมูลทุกครั้งที่ state เปลี่ยน
   useEffect(() => {
-    debounceSearch(page, take, search, facultyId, departmentId, sort, filter);
-  }, [page, take, search, facultyId, departmentId, sort, filter]);
+    debounceSearch(
+      page,
+      take,
+      search,
+      facultyId,
+      departmentId,
+      sort,
+      filter,
+      canUse,
+    );
+  }, [page, take, search, facultyId, departmentId, sort, filter, canUse]);
   return (
     <div className="w-full flex flex-col bg-gray-50">
-      <div className="w-full items-start flex flex-col px-5 pt-3">
+      <div className="w-full items-start flex flex-col px-3 sm:px-5 pt-3">
         {user?.roleId < 5 && (
           <button
             onClick={() => {
@@ -133,46 +147,19 @@ const TablePage = () => {
           </button>
         )}
 
-        <span className="w-full flex flex-col lg:flex-row lg:items-end gap-2 justify-between lg:border-b lg:pb-3 lg:border-gray-300">
-          <div className="flex flex-col mt-2">
-            <h1 className="font-bold text-lg">จัดการบุคลากร</h1>
-            <p className="text-[0.9rem] text-gray-700">
+        <span className="w-full flex flex-col sm:flex-row sm:items-end gap-2 justify-between border-b pb-3 border-gray-200">
+          <div className="flex flex-col mt-1 sm:mt-2">
+            <h1 className="font-bold text-base sm:text-lg text-gray-800">จัดการบุคลากร</h1>
+            <p className="text-xs sm:text-[0.9rem] text-gray-600">
               ผลการค้นหาบุคลากรทั้งหมด ({total} คน)
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <ImportPersonelData
-              fetchData={() =>
-                fetchData(
-                  page,
-                  take,
-                  search,
-                  facultyId,
-                  departmentId,
-                  sort,
-                  filter,
-                )
-              }
-            />
-            <ImportHistoryData
-              fetchAlumni={() =>
-                fetchData(
-                  page,
-                  take,
-                  search,
-                  facultyId,
-                  departmentId,
-                  sort,
-                  filter,
-                )
-              }
-              type="personel"
-            />
+          <div className="flex items-center gap-2 flex-wrap">
             <ExportPersonelBtn />
           </div>
         </span>
 
-        <div className="w-full flex flex-wrap items-center gap-2.5 my-3">
+        <div className="w-full flex flex-wrap items-center gap-2 sm:gap-2.5 my-3">
           {/* Search Box */}
           <div className="flex-1 min-w-[200px] sm:min-w-[240px] max-w-full sm:max-w-xs h-[38px] px-3 bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
             <Search size={17} className="text-gray-400 shrink-0" />
@@ -283,6 +270,16 @@ const TablePage = () => {
             </label>
           </div>
 
+          {/* Account Status Filter */}
+          <SelectAccountStatus
+            value={canUse}
+            onChange={(val) => {
+              setCanUse(val);
+              setPage(1);
+            }}
+            setPage={setPage}
+          />
+
           {/* Rows per page */}
           <div
             title="เลือกจำนวนที่ต้องการแสดง"
@@ -374,8 +371,8 @@ const TablePage = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto bg-white h-[600px] overflow-y-auto rounded-tl pb-3">
-          <table className="min-w-max w-full">
+        <div className="w-full overflow-x-auto bg-white h-[600px] overflow-y-auto rounded-xl border border-gray-200 pb-3">
+          <table className="min-w-[700px] w-full">
             <thead>
               <tr className="sticky top-0 bg-white z-10">
                 {[
@@ -383,7 +380,7 @@ const TablePage = () => {
                   "คณะ",
                   "สาขา",
                   "ตำแหน่ง",
-                  "วันที่นำเข้าข้อมูล",
+                  // "วันที่นำเข้าข้อมูล",
                   "สถานะบัญชี",
                   "จัดการ",
                 ].map((h, index) => (
@@ -406,9 +403,7 @@ const TablePage = () => {
                     className="text-sm bg-white cursor-pointer border-b border-gray-200 hover:bg-gray-50"
                   >
                     <td className="p-2.5">
-                      {d?.univercity_position === "อาจารย์"
-                        ? d?.prefix
-                        : d?.academic_rank}
+                      {d?.prefix}
                       {d?.fname} {d?.lname}
                     </td>
                     <td className="p-2.5">
@@ -418,7 +413,7 @@ const TablePage = () => {
                       {departmentText(departments, d?.departmentId)}
                     </td>
                     <td className="p-2.5">{d?.univercity_position}</td>
-                    <td className="p-2.5">
+                    {/* <td className="p-2.5">
                       <p className="p-1.5 w-fit px-2 rounded-full bg-blue-50 shadow-xs text-xs">
                         {" "}
                         {new Date(d?.createdAt).toLocaleDateString("th-TH", {
@@ -427,7 +422,7 @@ const TablePage = () => {
                           year: "numeric",
                         })}
                       </p>
-                    </td>
+                    </td> */}
                     <td className="p-2.5">
                       <ToggleAccoutStatus
                         canUse={d?.canUse}
@@ -440,6 +435,7 @@ const TablePage = () => {
                             departmentId,
                             sort,
                             filter,
+                            canUse,
                           )
                         }
                         user_id={d?.professor_id}
@@ -459,11 +455,12 @@ const TablePage = () => {
                                 departmentId,
                                 sort,
                                 filter,
+                                canUse,
                               )
                             }
                             user_id={d?.professor_id}
                           />
-                          <DeletePersonelBtn
+                          {/* <DeletePersonelBtn
                             professor_id={d?.professor_id}
                             fetch={() =>
                               fetchData(
@@ -476,7 +473,7 @@ const TablePage = () => {
                                 filter,
                               )
                             }
-                          />
+                          /> */}
                         </>
                       </DropdownMenu>
                     </td>

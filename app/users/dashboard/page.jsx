@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import PieChartComponent from "@/components/chart-pie";
 import ChartSimple from "@/components/chart-simple";
+import { DashboardSkeleton } from "@/components/skeletons";
 import Select from "react-select";
 import {
   Users,
@@ -36,6 +37,7 @@ import axios from "axios";
 import { apiConfig } from "@/config/api.config";
 import Loading from "@/components/loading";
 import Image from "next/image";
+import SafeImage from "@/components/safe-image";
 import { NO_PROFILE_IMG } from "../profile/alumni-profile";
 import { useDashboardContext } from "./dashboard-context";
 import NoData from "@/components/nodata";
@@ -57,6 +59,8 @@ import LineChartComponent from "@/components/line-chart";
 import AlumniColumnChart from "@/components/column-chart";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import ExportBtn from "./export-btn";
+import DrilldownFacultyModal from "./drilldown-faculty-modal";
+import DrilldownAlumniModal from "./drilldown-alumni-modal";
 
 const StatCardSkeleton = () => (
   <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm animate-pulse flex flex-col justify-between h-[128px]">
@@ -82,6 +86,47 @@ const ChartSkeleton = ({ height = 350 }) => (
   </div>
 );
 
+const customSelectStyles = {
+  control: (base, state) => ({
+    ...base,
+    borderRadius: "0.5rem",
+    borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
+    boxShadow: state.isFocused
+      ? "0 0 0 1px #3b82f6"
+      : "0 1px 2px 0 rgba(0,0,0,0.05)",
+    backgroundColor: state.isDisabled ? "#f3f4f6" : "#ffffff",
+    minHeight: "36px",
+    height: "36px",
+    fontSize: "0.8125rem",
+    cursor: state.isDisabled ? "not-allowed" : "pointer",
+    "&:hover": { borderColor: state.isDisabled ? "#d1d5db" : "#9ca3af" },
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "#6b7280",
+    fontSize: "0.8125rem",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "#1f2937",
+    fontSize: "0.8125rem",
+    fontWeight: 500,
+  }),
+  indicatorsContainer: (base) => ({
+    ...base,
+    height: "36px",
+  }),
+  menu: (base) => ({
+    ...base,
+    zIndex: 50,
+    borderRadius: "0.5rem",
+    fontSize: "0.8125rem",
+  }),
+};
+
 const Dashboard = () => {
   const { faculties, departments, loadData } = useFacultyDep();
   const { user } = useGetSession();
@@ -92,6 +137,10 @@ const Dashboard = () => {
     selectYearEnd,
     setSelectYearStart,
     setSelectYearEnd,
+    selectEduLevel,
+    setSelectEduLevel,
+    selectGender,
+    setSelectGender,
   } = useDashboardContext();
   const { setPrevPath } = useAppContext();
   const router = useRouter();
@@ -99,6 +148,7 @@ const Dashboard = () => {
   // Selected filters (null or { id, name })
   const [selectFaculty, setSelectFacultyState] = useState(null);
   const [selectDepartment, setSelectDepartmentState] = useState(null);
+  const [eduLevels, setEduLevels] = useState([]);
 
   // Loading states
   const [loadingOverview, setLoadingOverview] = useState(true);
@@ -115,6 +165,39 @@ const Dashboard = () => {
   const [workRatePercent, setWorkRatePercent] = useState([]);
   const [noWorkData, setNoWorkData] = useState([]);
   const [alumniNoWorkList, setAlumniNoWorkList] = useState([]);
+
+  // Drilldown modal states
+  const [drillFacultyModalOpen, setDrillFacultyModalOpen] = useState(false);
+  const [selectedFacultyForDrill, setSelectedFacultyForDrill] = useState(null);
+  const [drillAlumniModalOpen, setDrillAlumniModalOpen] = useState(false);
+  const [drillAlumniConfig, setDrillAlumniConfig] = useState({
+    title: "",
+    subtitle: "",
+    params: {},
+  });
+
+  // Fetch education level options
+  useEffect(() => {
+    const fetchEduLevels = async () => {
+      try {
+        const res = await axios.get(
+          apiConfig.rmuAPI + "/president/get-edulevels?isOptions=true",
+          { withCredentials: true }
+        );
+        if (res.status === 200 && res.data?.data) {
+          setEduLevels(
+            res.data.data.map((item) => ({
+              value: item.edu_levelId,
+              label: item.edu_level_name,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch edu levels:", error);
+      }
+    };
+    fetchEduLevels();
+  }, []);
 
   // Helper to resolve faculty name by ID
   const getFacultyName = (id) => {
@@ -138,6 +221,11 @@ const Dashboard = () => {
         String(d?.department_id) === String(id)
     );
     return found?.label || found?.name || found?.department_name || `สาขา (${id})`;
+  };
+
+  const formatDeptTitle = (deptName) => {
+    if (!deptName) return "สาขาวิชา";
+    return deptName.startsWith("สาขาวิชา") ? deptName : `สาขาวิชา${deptName}`;
   };
 
   // Faculty dropdown menu items
@@ -203,6 +291,8 @@ const Dashboard = () => {
   const clearQuery = () => {
     setSelectYearStart("");
     setSelectYearEnd("");
+    setSelectEduLevel("");
+    setSelectGender("");
     setSelectFacultyState(null);
     setSelectDepartmentState(null);
     setFaculty(null);
@@ -215,11 +305,27 @@ const Dashboard = () => {
     if (selectDepartment) count++;
     if (selectYearStart) count++;
     if (selectYearEnd) count++;
+    if (selectEduLevel) count++;
+    if (selectGender) count++;
     return count;
-  }, [selectFaculty, selectDepartment, selectYearStart, selectYearEnd]);
+  }, [
+    selectFaculty,
+    selectDepartment,
+    selectYearStart,
+    selectYearEnd,
+    selectEduLevel,
+    selectGender,
+  ]);
 
   // Fetch KPI stats
-  const fetchPageStart = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+  const fetchPageStart = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     setLoadingOverview(true);
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/all-avg", {
@@ -229,6 +335,8 @@ const Dashboard = () => {
           departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
@@ -243,22 +351,36 @@ const Dashboard = () => {
   };
 
   // Fetch bar chart data (Employed vs Unemployed)
-  const fetchChartBarData = async (facId = "", yrStart = "", yrEnd = "") => {
+  const fetchChartBarData = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/chart-bar-data", {
         withCredentials: true,
         params: {
           facultyId: facId || undefined,
+          departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
         const data = res.data || [];
         const isDeptLevel = (user?.roleId && user.roleId < 3) || Boolean(selectFaculty);
         const result = data.map((d) => {
-          const name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
+          let name = d.name;
+          if (!name) {
+            name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
+          }
           return {
+            id: d.id,
             name,
             working: Number(d.working) || 0,
             unemployed: Number(d.unemployed) || 0,
@@ -272,25 +394,41 @@ const Dashboard = () => {
   };
 
   // Fetch average salary per faculty/dept
-  const fetchPieData = async (facId = "", yrStart = "", yrEnd = "") => {
+  const fetchPieData = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/pie-chart-data", {
         withCredentials: true,
         params: {
           facultyId: facId || undefined,
+          departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
         const data = res.data || [];
         const isDeptLevel = (user?.roleId && user.roleId < 4) || Boolean(selectFaculty);
         const result = data.map((d) => {
-          const name =
-            isDeptLevel && d.departmentId
-              ? getDepartmentName(d.departmentId)
-              : getFacultyName(d.facultyId);
+          let name = d.name;
+          if (!name) {
+            name =
+              isDeptLevel && d.departmentId
+                ? getDepartmentName(d.departmentId)
+                : getFacultyName(d.facultyId);
+          }
           return {
+            id: d.departmentId || d.facultyId || d.id,
+            facultyId: d.facultyId,
+            departmentId: d.departmentId,
             name,
             value: Math.round(Number(d.avgSalary) || 0),
           };
@@ -303,7 +441,14 @@ const Dashboard = () => {
   };
 
   // Fetch Work Place Rate (In Thailand vs Abroad)
-  const fetchWorkPlaceRate = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+  const fetchWorkPlaceRate = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/work-place-rate", {
         withCredentials: true,
@@ -312,6 +457,8 @@ const Dashboard = () => {
           departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
@@ -324,7 +471,14 @@ const Dashboard = () => {
   };
 
   // Fetch Most Popular Jobs
-  const fetchMostPopular = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+  const fetchMostPopular = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/population-job", {
         withCredentials: true,
@@ -333,6 +487,8 @@ const Dashboard = () => {
           departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
@@ -349,7 +505,14 @@ const Dashboard = () => {
   };
 
   // Fetch Top Provinces
-  const fetchMostLive = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+  const fetchMostLive = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/most-live-province", {
         withCredentials: true,
@@ -358,6 +521,8 @@ const Dashboard = () => {
           departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
@@ -369,21 +534,34 @@ const Dashboard = () => {
   };
 
   // Fetch Work Rate Percent
-  const fetchWorkRatePercent = async (facId = "", yrStart = "", yrEnd = "") => {
+  const fetchWorkRatePercent = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/workrate-percent", {
         withCredentials: true,
         params: {
           facultyId: facId || undefined,
+          departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
         const data = res.data || [];
         const isDeptLevel = (user?.roleId && user.roleId < 3) || Boolean(selectFaculty);
         const result = data.map((d) => {
-          const name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
+          let name = d.name;
+          if (!name) {
+            name = isDeptLevel ? getDepartmentName(d.id) : getFacultyName(d.id);
+          }
           return {
             name,
             percent: Math.round(Number(d?.percent) || 0),
@@ -397,7 +575,14 @@ const Dashboard = () => {
   };
 
   // Fetch No Work Data
-  const fetchNoWorkData = async (facId = "", deptId = "", yrStart = "", yrEnd = "") => {
+  const fetchNoWorkData = async (
+    facId = "",
+    deptId = "",
+    yrStart = "",
+    yrEnd = "",
+    eduId = "",
+    gndr = ""
+  ) => {
     try {
       const res = await axios.get(apiConfig.rmuAPI + "/dashboard/no-work-data", {
         withCredentials: true,
@@ -406,6 +591,8 @@ const Dashboard = () => {
           departmentId: deptId || undefined,
           selectYearStart: yrStart || undefined,
           selectYearEnd: yrEnd || undefined,
+          edu_levelId: eduId || undefined,
+          gender: gndr || undefined,
         },
       });
       if (res.status === 200) {
@@ -424,18 +611,18 @@ const Dashboard = () => {
     if (!user || loadData) return;
     setLoadingCharts(true);
 
-    const facId = selectFaculty?.id || "";
-    const deptId = selectDepartment?.id || "";
+    const facId = selectFaculty?.id || (user?.roleId <= 3 ? user?.facultyId : "") || "";
+    const deptId = selectDepartment?.id || (user?.roleId < 3 ? user?.departmentId : "") || "";
 
     Promise.all([
-      fetchPageStart(facId, deptId, selectYearStart, selectYearEnd),
-      fetchChartBarData(facId, selectYearStart, selectYearEnd),
-      fetchPieData(facId, selectYearStart, selectYearEnd),
-      fetchMostPopular(facId, deptId, selectYearStart, selectYearEnd),
-      fetchMostLive(facId, deptId, selectYearStart, selectYearEnd),
-      fetchWorkRatePercent(facId, selectYearStart, selectYearEnd),
-      fetchNoWorkData(facId, deptId, selectYearStart, selectYearEnd),
-      fetchWorkPlaceRate(facId, deptId, selectYearStart, selectYearEnd),
+      fetchPageStart(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchChartBarData(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchPieData(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchMostPopular(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchMostLive(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchWorkRatePercent(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchNoWorkData(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
+      fetchWorkPlaceRate(facId, deptId, selectYearStart, selectYearEnd, selectEduLevel, selectGender),
     ]).finally(() => {
       setLoadingCharts(false);
     });
@@ -445,28 +632,25 @@ const Dashboard = () => {
     selectFaculty,
     selectYearStart,
     selectYearEnd,
+    selectEduLevel,
+    selectGender,
     faculties,
     departments,
     loadData,
   ]);
 
-  if (!user) {
-    return (
-      <div className="w-full h-96 flex flex-col items-center justify-center gap-3 text-slate-500">
-        <Loading type={2} />
-        <p className="text-sm font-medium">กำลังเตรียมข้อมูลระบบ...</p>
-      </div>
-    );
+  if (!user || loadingCharts) {
+    return <DashboardSkeleton />;
   }
 
   // Scope label for current view
   const scopeLabel = () => {
     let parts = [];
-    if (selectFaculty) parts.push(selectFaculty.name || selectFaculty.label);
-    if (selectDepartment) parts.push(`สาขาวิชา${selectDepartment.name || selectDepartment.label}`);
+    if (selectFaculty) parts.push(selectFaculty.name?.startsWith("คณะ") ? selectFaculty.name : `คณะ${selectFaculty.name}`);
+    if (selectDepartment) parts.push(formatDeptTitle(selectDepartment.name || selectDepartment.label));
     if (parts.length === 0) {
-      if (user?.roleId < 3) parts.push(getDepartmentName(user?.departmentId));
-      else if (user?.roleId === 3) parts.push(getFacultyName(user?.facultyId));
+      if (user?.roleId < 3) parts.push(formatDeptTitle(getDepartmentName(user?.departmentId)));
+      else if (user?.roleId === 3) parts.push(getFacultyName(user?.facultyId)?.startsWith("คณะ") ? getFacultyName(user?.facultyId) : `คณะ${getFacultyName(user?.facultyId)}`);
       else parts.push("มหาวิทยาลัยราชภัฏมหาสารคาม (ทุกคณะ)");
     }
     return parts.join(" • ");
@@ -476,6 +660,181 @@ const Dashboard = () => {
     headerData?.allAlumni && headerData.allAlumni > 0
       ? ((Number(headerData?.alumniWorking || 0) / Number(headerData.allAlumni)) * 100).toFixed(1)
       : 0;
+
+  // Handle clicking on employment bar chart
+  const handleEmploymentBarClick = (item, clickedKey) => {
+    if (!item) return;
+    const isDeptLevel = (user?.roleId && user.roleId < 3) || Boolean(selectFaculty);
+
+    if (!isDeptLevel) {
+      // Executive / University level -> open Faculty drilldown modal (Level 1)
+      setSelectedFacultyForDrill({
+        id: item.id,
+        name: item.name,
+        working: item.working,
+        unemployed: item.unemployed,
+      });
+      setDrillFacultyModalOpen(true);
+    } else {
+      // Department level / Single faculty -> open alumni list modal directly (Level 2)
+      const workStatus =
+        clickedKey === "working"
+          ? "working"
+          : clickedKey === "unemployed"
+          ? "unemployed"
+          : "all";
+      const statusLabel =
+        workStatus === "working"
+          ? " (มีงานทำ)"
+          : workStatus === "unemployed"
+          ? " (ว่างงาน/ศึกษาต่อ)"
+          : "";
+
+      setDrillAlumniConfig({
+        title: `รายชื่อศิษย์เก่า - ${item.name}${statusLabel}`,
+        subtitle: `ข้อมูลสถิติการมีงานทำของ ${item.name}`,
+        params: {
+          departmentId: item.id || selectDepartment?.id || selectDepartment?.value,
+          facultyId: selectFaculty?.id || selectFaculty?.value || user?.facultyId,
+          workStatus,
+          selectYearStart,
+          selectYearEnd,
+          selectEduLevel,
+          selectGender,
+        },
+      });
+      setDrillAlumniModalOpen(true);
+    }
+  };
+
+  // Handle department selection from faculty modal (Level 2 drilldown)
+  const handleSelectDepartmentFromFacultyModal = (dept, workStatus) => {
+    const statusLabel =
+      workStatus === "working"
+        ? " (มีงานทำ)"
+        : workStatus === "unemployed"
+        ? " (ว่างงาน/ศึกษาต่อ)"
+        : "";
+
+    const resolvedDeptName = dept?.name || getDepartmentName(dept?.id);
+
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่า - ${resolvedDeptName}${statusLabel}`,
+      subtitle: `${selectedFacultyForDrill?.name || ""} • ข้อมูลสำหรับการติดตามและส่งออก`,
+      params: {
+        facultyId: selectedFacultyForDrill?.id,
+        departmentId: dept.id,
+        workStatus: workStatus || "all",
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
+
+  // Handle salary slice click
+  const handleSalaryPieClick = (item) => {
+    if (!item) return;
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่า - ${item.name} (เงินเดือนเฉลี่ย ฿${Number(item.value).toLocaleString()})`,
+      subtitle: "รายชื่อศิษย์เก่าที่มีรายได้ในการประกอบอาชีพ",
+      params: {
+        facultyId: item.facultyId || (user?.roleId <= 3 ? user?.facultyId : selectFaculty?.id),
+        departmentId: item.departmentId || selectDepartment?.id,
+        workStatus: "working",
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
+
+  // Handle workplace (In Thailand vs Abroad) slice or badge click
+  const handleWorkPlacePieClick = (item) => {
+    if (!item) return;
+    const isAbroad = item.name?.includes("ต่างประเทศ");
+    const country = isAbroad ? "abroad" : "inThai";
+
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่าที่ทำงาน${isAbroad ? "ในต่างประเทศ" : "ในประเทศ"}`,
+      subtitle: `จำนวนทั้งหมด ${Number(item.value).toLocaleString()} คน`,
+      params: {
+        country,
+        workStatus: "working",
+        facultyId: selectFaculty?.id || (user?.roleId <= 3 ? user?.facultyId : undefined),
+        departmentId: selectDepartment?.id || (user?.roleId < 3 ? user?.departmentId : undefined),
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
+
+  // Handle top province area/dot click
+  const handleProvinceClick = (item) => {
+    if (!item || !item.company_place) return;
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่าที่ทำงานในจังหวัด${item.company_place}`,
+      subtitle: `จำนวนศิษย์เก่า ${Number(item.value).toLocaleString()} คน`,
+      params: {
+        companyPlace: item.company_place,
+        workStatus: "working",
+        facultyId: selectFaculty?.id || (user?.roleId <= 3 ? user?.facultyId : undefined),
+        departmentId: selectDepartment?.id || (user?.roleId < 3 ? user?.departmentId : undefined),
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
+
+  // Handle country column bar click
+  const handleCountryBarClick = (item) => {
+    if (!item || !item.name) return;
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่าที่ทำงานในประเทศ ${item.name}`,
+      subtitle: `จำนวนศิษย์เก่า ${Number(item.alumniCount || item.value).toLocaleString()} คน`,
+      params: {
+        country: item.name,
+        workStatus: "working",
+        facultyId: selectFaculty?.id || (user?.roleId <= 3 ? user?.facultyId : undefined),
+        departmentId: selectDepartment?.id || (user?.roleId < 3 ? user?.departmentId : undefined),
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
+
+  // Handle popular job bar click
+  const handlePopularJobBarClick = (item) => {
+    if (!item || !item.name) return;
+    setDrillAlumniConfig({
+      title: `รายชื่อศิษย์เก่าตำแหน่ง ${item.name}`,
+      subtitle: `จำนวนศิษย์เก่า ${Number(item.count).toLocaleString()} คน`,
+      params: {
+        jobPosition: item.name,
+        workStatus: "working",
+        facultyId: selectFaculty?.id || (user?.roleId <= 3 ? user?.facultyId : undefined),
+        departmentId: selectDepartment?.id || (user?.roleId < 3 ? user?.departmentId : undefined),
+        selectYearStart,
+        selectYearEnd,
+        selectEduLevel,
+        selectGender,
+      },
+    });
+    setDrillAlumniModalOpen(true);
+  };
 
   return (
     <div className="w-full flex-1 flex flex-col bg-slate-100 pb-16 font-sans">
@@ -487,8 +846,14 @@ const Dashboard = () => {
           <div>
             <h1 className="text-base sm:text-lg font-bold text-gray-800 tracking-tight">
               ภาพรวมสรุปข้อมูลของศิษย์เก่า ภายใน
-              {selectFaculty
-                ? selectFaculty.name
+              {user?.roleId < 3
+                ? formatDeptTitle(getDepartmentName(user?.departmentId))
+                : selectDepartment
+                ? formatDeptTitle(selectDepartment.name)
+                : selectFaculty
+                ? (selectFaculty.name?.startsWith("คณะ")
+                    ? selectFaculty.name
+                    : `คณะ${selectFaculty.name}`)
                 : "มหาวิทยาลัยราชภัฏมหาสารคาม"}
             </h1>
           </div>
@@ -525,94 +890,97 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Secondary Filter Row (Faculty & Department for Admins/Executives) */}
-        {user?.roleId > 2 && (
-          <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-gray-100">
-            <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
-              <Filter size={13} /> ตัวกรอง:
-            </span>
+        {/* Filter Row: Education Level, Gender, Faculty, Department */}
+        <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-gray-100">
+          <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+            <Filter size={13} /> ตัวกรอง:
+          </span>
 
-            {/* Faculty React-Select */}
-            {user?.roleId > 3 && (
-              <div className="w-[200px] sm:w-[220px]">
-                <Select
-                  instanceId="select-faculty"
-                  placeholder="เลือกคณะ..."
-                  isClearable
-                  isSearchable
-                  options={faculties.map((f) => ({
-                    value: f.value ?? f.id,
-                    label: f.label ?? f.name,
-                  }))}
-                  value={
-                    selectFaculty
-                      ? { value: selectFaculty.id, label: selectFaculty.name }
-                      : null
+          {/* Education Level React-Select */}
+          <div className="w-[180px] sm:w-[200px]">
+            <Select
+              instanceId="select-edu-level"
+              placeholder="ระดับการศึกษา..."
+              isClearable
+              isSearchable
+              options={eduLevels}
+              value={
+                eduLevels.find(
+                  (el) => String(el.value) === String(selectEduLevel),
+                ) || null
+              }
+              onChange={(opt) => setSelectEduLevel(opt ? opt.value : "")}
+              styles={customSelectStyles}
+            />
+          </div>
+
+          {/* Gender React-Select */}
+          <div className="w-[130px] sm:w-[140px]">
+            <Select
+              instanceId="select-gender"
+              placeholder="เพศ..."
+              isClearable
+              isSearchable={false}
+              options={[
+                { value: "male", label: "เพศชาย" },
+                { value: "female", label: "เพศหญิง" },
+              ]}
+              value={
+                selectGender === "male"
+                  ? { value: "male", label: "เพศชาย" }
+                  : selectGender === "female"
+                  ? { value: "female", label: "เพศหญิง" }
+                  : null
+              }
+              onChange={(opt) => setSelectGender(opt ? opt.value : "")}
+              styles={customSelectStyles}
+            />
+          </div>
+
+          {/* Faculty React-Select */}
+          {user?.roleId > 3 && (
+            <div className="w-[190px] sm:w-[210px]">
+              <Select
+                instanceId="select-faculty"
+                placeholder="เลือกคณะ..."
+                isClearable
+                isSearchable
+                options={faculties.map((f) => ({
+                  value: f.value ?? f.id,
+                  label: f.label ?? f.name,
+                }))}
+                value={
+                  selectFaculty
+                    ? { value: selectFaculty.id, label: selectFaculty.name }
+                    : null
+                }
+                onChange={(opt) => {
+                  if (!opt) {
+                    setSelectFacultyState(null);
+                    setFaculty(null);
+                    setSelectDepartmentState(null);
+                    setDepartment(null);
+                  } else {
+                    const facObj = {
+                      id: opt.value,
+                      name: opt.label,
+                      value: opt.value,
+                      label: opt.label,
+                    };
+                    setSelectFacultyState(facObj);
+                    setFaculty(facObj);
+                    setSelectDepartmentState(null);
+                    setDepartment(null);
                   }
-                  onChange={(opt) => {
-                    if (!opt) {
-                      setSelectFacultyState(null);
-                      setFaculty(null);
-                      setSelectDepartmentState(null);
-                      setDepartment(null);
-                    } else {
-                      const facObj = {
-                        id: opt.value,
-                        name: opt.label,
-                        value: opt.value,
-                        label: opt.label,
-                      };
-                      setSelectFacultyState(facObj);
-                      setFaculty(facObj);
-                      setSelectDepartmentState(null);
-                      setDepartment(null);
-                    }
-                  }}
-                  styles={{
-                    control: (base, state) => ({
-                      ...base,
-                      borderRadius: "0.5rem",
-                      borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
-                      boxShadow: state.isFocused
-                        ? "0 0 0 1px #3b82f6"
-                        : "0 1px 2px 0 rgba(0,0,0,0.05)",
-                      backgroundColor: "#ffffff",
-                      minHeight: "36px",
-                      height: "36px",
-                      fontSize: "0.8125rem",
-                      cursor: "pointer",
-                      "&:hover": { borderColor: "#9ca3af" },
-                    }),
-                    placeholder: (base) => ({
-                      ...base,
-                      color: "#6b7280",
-                      fontSize: "0.8125rem",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }),
-                    singleValue: (base) => ({
-                      ...base,
-                      color: "#1f2937",
-                      fontSize: "0.8125rem",
-                      fontWeight: 500,
-                    }),
-                    indicatorsContainer: (base) => ({
-                      ...base,
-                      height: "36px",
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      zIndex: 50,
-                      borderRadius: "0.5rem",
-                    }),
-                  }}
-                />
-              </div>
-            )}
+                }}
+                styles={customSelectStyles}
+              />
+            </div>
+          )}
 
-            {/* Department React-Select */}
-            <div className="w-[200px] sm:w-[240px]">
+          {/* Department React-Select */}
+          {user?.roleId > 2 && (
+            <div className="w-[190px] sm:w-[230px]">
               <Select
                 instanceId="select-department"
                 placeholder="เลือกสาขาวิชา..."
@@ -670,65 +1038,23 @@ const Dashboard = () => {
                     setDepartment(deptObj);
                   }
                 }}
-                styles={{
-                  control: (base, state) => ({
-                    ...base,
-                    borderRadius: "0.5rem",
-                    borderColor: state.isFocused ? "#3b82f6" : "#d1d5db",
-                    boxShadow: state.isFocused
-                      ? "0 0 0 1px #3b82f6"
-                      : "0 1px 2px 0 rgba(0,0,0,0.05)",
-                    backgroundColor: state.isDisabled
-                      ? "#f3f4f6"
-                      : "#ffffff",
-                    minHeight: "36px",
-                    height: "36px",
-                    fontSize: "0.8125rem",
-                    cursor: state.isDisabled ? "not-allowed" : "pointer",
-                    "&:hover": {
-                      borderColor: state.isDisabled ? "#d1d5db" : "#9ca3af",
-                    },
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: "#6b7280",
-                    fontSize: "0.8125rem",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    color: "#1f2937",
-                    fontSize: "0.8125rem",
-                    fontWeight: 500,
-                  }),
-                  indicatorsContainer: (base) => ({
-                    ...base,
-                    height: "36px",
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    zIndex: 50,
-                    borderRadius: "0.5rem",
-                  }),
-                }}
+                styles={customSelectStyles}
               />
             </div>
+          )}
 
-            {/* Clear Filters Button (if active) */}
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearQuery}
-                title="ล้างตัวกรองทั้งหมด"
-                className="h-[36px] px-3 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <X size={14} />
-                <span>ล้างตัวกรอง ({activeFilterCount})</span>
-              </button>
-            )}
-          </div>
-        )}
+          {/* Clear Filters Button (if active) */}
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearQuery}
+              title="ล้างตัวกรองทั้งหมด"
+              className="h-[36px] px-3 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <X size={14} />
+              <span>ล้างตัวกรอง ({activeFilterCount})</span>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* ================= MAIN DASHBOARD BODY ================= */}
@@ -958,10 +1284,18 @@ const Dashboard = () => {
         {/* ================= EMPLOYMENT BAR CHART ================= */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-5 flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
-            <h3 className="font-bold text-gray-800 text-sm md:text-base">
-              แผนภูมิแท่งแสดงภาพรวมการมีงานทำของแต่ละ
-              {selectFaculty ? "สาขา" : "คณะ"}
-            </h3>
+            <div>
+              <h3 className="font-bold text-gray-800 text-sm md:text-base">
+                แผนภูมิแท่งแสดงภาพรวมการมีงานทำ
+                {selectGender === "male"
+                  ? " (เพศชาย)"
+                  : selectGender === "female"
+                  ? " (เพศหญิง)"
+                  : user?.roleId < 3 || selectDepartment
+                  ? " จำแนกตามเพศชาย - หญิง"
+                  : `ของแต่ละ${selectFaculty ? "สาขาวิชา" : "คณะ"}`}
+              </h3>
+            </div>
 
             <div className="flex items-center gap-4 text-xs font-medium">
               <div className="flex items-center gap-1.5">
@@ -998,35 +1332,47 @@ const Dashboard = () => {
                 key2="unemployed"
                 color2="#F97316"
                 height={360}
+                onBarClick={handleEmploymentBarClick}
               />
             )}
           </div>
         </div>
 
         {/* ================= 3. SALARY & PROFILE COMPLETENESS ================= */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ================= 3. SALARY & PROFILE COMPLETENESS ================= */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           {/* Donut Chart: Salary Distribution */}
-          {(!selectDepartment || user?.roleId >= 3) && (
-            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
-              <div className="pb-3 border-b border-slate-100 mb-2">
-                <h3 className="font-bold text-slate-800 text-sm md:text-base">
-                  สัดส่วนเงินเดือนเฉลี่ย
-                </h3>
-                <p className="text-xs text-slate-400">
-                  เปรียบเทียบในแต่ละ{selectFaculty ? "สาขาวิชา" : "คณะ"}
-                </p>
-              </div>
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col justify-between h-full">
+            <div className="pb-3 border-b border-slate-100 mb-2">
+              <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                สัดส่วนเงินเดือนเฉลี่ย
+              </h3>
+              <p className="text-xs text-slate-400">
+                {selectGender === "male"
+                  ? "ข้อมูลเฉพาะเพศชาย"
+                  : selectGender === "female"
+                  ? "ข้อมูลเฉพาะเพศหญิง"
+                  : user?.roleId < 3 || selectDepartment
+                  ? "เปรียบเทียบระหว่างเพศชาย - หญิง"
+                  : `เปรียบเทียบในแต่ละ${selectFaculty ? "สาขาวิชา" : "คณะ"}`}
+              </p>
+            </div>
 
-              {loadingCharts ? (
-                <ChartSkeleton height={320} />
-              ) : (
-                <PieChartComponent data={pieData} openToolTip={true} />
-              )}
-            </FadeInSection>
-          )}
+            {loadingCharts ? (
+              <ChartSkeleton height={320} />
+            ) : (
+              <div className="flex-1 flex flex-col justify-between min-h-0">
+                <PieChartComponent
+                  data={pieData}
+                  openToolTip={true}
+                  onSliceClick={handleSalaryPieClick}
+                />
+              </div>
+            )}
+          </FadeInSection>
 
           {/* Donut Chart: Domestic vs International Work */}
-          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col justify-between h-full">
             <div className="pb-3 border-b border-slate-100 mb-2">
               <h3 className="font-bold text-slate-800 text-sm md:text-base">
                 สัดส่วนการทำงานใน/ต่างประเทศ
@@ -1037,119 +1383,138 @@ const Dashboard = () => {
             {loadingCharts ? (
               <ChartSkeleton height={320} />
             ) : (
-              <WorkPlaceRatePieChartComponent
-                data={pieWorkRate}
-                openToolTip={true}
-              />
+              <div className="flex-1 flex flex-col justify-between min-h-0">
+                <WorkPlaceRatePieChartComponent
+                  data={pieWorkRate}
+                  openToolTip={true}
+                  onSliceClick={handleWorkPlacePieClick}
+                />
+              </div>
             )}
           </FadeInSection>
 
           {/* Incomplete Profiles / Missing Work Data List */}
-          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
-                <div>
-                  <h3 className="font-bold text-slate-800 text-sm md:text-base">
-                    ยังไม่พบข้อมูลการทำงาน
-                  </h3>
-                  <p className="text-xs text-slate-400">ศิษย์เก่าที่ยังไม่ได้ระบุสถานะงาน</p>
-                </div>
-
-                {noWorkData?.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setPrevPath("/users/dashboard");
-                      router.push("/users/dashboard/list-no-data");
-                    }}
-                    title="ดูรายชื่อทั้งหมด"
-                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1"
-                  >
-                    <span>ดูทั้งหมด</span>
-                    <ChevronRight size={15} />
-                  </button>
-                )}
+          <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col h-full">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base">
+                  ยังไม่พบข้อมูลการทำงาน
+                </h3>
+                <p className="text-xs text-slate-400">ศิษย์เก่าที่ยังไม่ได้ระบุสถานะงาน</p>
               </div>
 
-              {/* List container */}
-              <div className="w-full flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
-                {headerData?.allAlumni < 1 ? (
-                  <div className="py-12 text-center text-slate-400 text-xs">
-                    <NoData bg={2} />
-                  </div>
-                ) : noWorkData.length > 0 ? (
-                  user?.roleId < 3 || selectDepartment ? (
-                    alumniNoWorkList.map((a, index) => (
-                      <button
-                        onClick={() => {
-                          setPrevPath("/users/dashboard");
-                          router.push(`/users/search/${a?.alumni_id}/1`);
-                        }}
-                        key={index}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/60 transition-all text-left group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200">
-                            <Image
-                              alt="profile"
-                              width={40}
-                              height={40}
-                              src={
-                                a?.profile
-                                  ? apiConfig.imgAPI + a?.profile
-                                  : NO_PROFILE_IMG
-                              }
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
-                              {a?.prefix}
-                              {a?.fname} {a?.lname}
-                            </span>
-                            <span className="text-[11px] text-slate-400">
-                              รหัสนักศึกษา: {a?.alumni_id}
-                            </span>
-                          </div>
+              {noWorkData?.length > 0 && (
+                <button
+                  onClick={() => {
+                    setPrevPath("/users/dashboard");
+                    router.push("/users/dashboard/list-no-data");
+                  }}
+                  title="ดูรายชื่อทั้งหมด"
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1"
+                >
+                  <span>ดูทั้งหมด</span>
+                  <ChevronRight size={15} />
+                </button>
+              )}
+            </div>
+
+            {/* List container filling remaining card height */}
+            <div className="w-full flex-1 min-h-[300px] max-h-[350px] overflow-y-auto pr-1 flex flex-col gap-2">
+              {headerData?.allAlumni < 1 ? (
+                <div className="py-12 text-center text-slate-400 text-xs">
+                  <NoData bg={2} />
+                </div>
+              ) : noWorkData.length > 0 ? (
+                user?.roleId < 3 || selectDepartment ? (
+                  alumniNoWorkList.map((a, index) => (
+                    <button
+                      onClick={() => {
+                        setPrevPath("/users/dashboard");
+                        router.push(`/users/search/${a?.alumni_id}/1`);
+                      }}
+                      key={index}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/60 transition-all text-left group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200">
+                          <SafeImage
+                            alt="profile"
+                            width={40}
+                            height={40}
+                            type="avatar"
+                            src={
+                              a?.profile
+                                ? apiConfig.imgAPI + a?.profile
+                                : NO_PROFILE_IMG
+                            }
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <ArrowUpRight
-                          size={14}
-                          className="text-slate-300 group-hover:text-blue-500 transition-colors"
-                        />
-                      </button>
-                    ))
-                  ) : (
-                    noWorkData.map((r, index) => {
-                      const name =
-                        user?.roleId < 3 || selectFaculty
-                          ? getDepartmentName(r?.departmentId)
-                          : getFacultyName(r?.facultyId);
-                      return (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
-                        >
-                          <div className="flex items-center gap-2 truncate pr-2">
-                            <UserX size={14} className="text-slate-400 shrink-0" />
-                            <span className="truncate text-slate-700 font-medium">
-                              {name}
-                            </span>
-                          </div>
-                          <span className="font-bold text-amber-600 shrink-0">
-                            {r?._count?.alumni_id} คน
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                            {a?.prefix}
+                            {a?.fname} {a?.lname}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            รหัสนักศึกษา: {a?.alumni_id}
                           </span>
                         </div>
-                      );
-                    })
-                  )
+                      </div>
+                      <ArrowUpRight
+                        size={14}
+                        className="text-slate-300 group-hover:text-blue-500 transition-colors"
+                      />
+                    </button>
+                  ))
                 ) : (
-                  <div className="py-12 flex flex-col items-center justify-center text-center gap-2 text-emerald-600">
-                    <CheckCircle2 size={42} className="text-emerald-500" />
-                    <p className="text-xs font-bold text-slate-700">
-                      ศิษย์เก่าทุกคนกรอกข้อมูลครบถ้วน
-                    </p>
-                  </div>
-                )}
-              </div>
+                  noWorkData.map((r, index) => {
+                    const name =
+                      user?.roleId < 3 || selectFaculty
+                        ? getDepartmentName(r?.departmentId)
+                        : getFacultyName(r?.facultyId);
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          setDrillAlumniConfig({
+                            title: `รายชื่อศิษย์เก่าที่ยังไม่พบข้อมูลการทำงาน - ${name}`,
+                            subtitle: `ข้อมูลสำหรับการติดตามสถานะการมีงานทำ`,
+                            params: {
+                              facultyId: r?.facultyId,
+                              departmentId: r?.departmentId,
+                              workStatus: "unemployed",
+                              selectYearStart,
+                              selectYearEnd,
+                              selectEduLevel,
+                              selectGender,
+                            },
+                          });
+                          setDrillAlumniModalOpen(true);
+                        }}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50/70 border border-slate-100 hover:border-amber-200 text-xs transition-colors cursor-pointer group"
+                        title="คลิกเพื่อดูรายชื่อศิษย์เก่าที่ยังไม่ระบุข้อมูลการทำงาน"
+                      >
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          <UserX size={14} className="text-slate-400 group-hover:text-amber-600 shrink-0" />
+                          <span className="truncate text-slate-700 group-hover:text-amber-800 font-medium">
+                            {name}
+                          </span>
+                        </div>
+                        <span className="font-bold text-amber-600 shrink-0">
+                          {r?._count?.alumni_id} คน
+                        </span>
+                      </div>
+                    );
+                  })
+                )
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center text-center gap-2 text-emerald-600">
+                  <CheckCircle2 size={42} className="text-emerald-500" />
+                  <p className="text-xs font-bold text-slate-700">
+                    ศิษย์เก่าทุกคนกรอกข้อมูลครบถ้วน
+                  </p>
+                </div>
+              )}
             </div>
           </FadeInSection>
         </section>
@@ -1165,9 +1530,9 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             {/* Top Employment Provinces Area Chart */}
-            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col h-full">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm md:text-base">
@@ -1188,12 +1553,13 @@ const Dashboard = () => {
                     company_place: d?.company_place || "ไม่ระบุ",
                     value: Number(d?._count?.alumniId) || 0,
                   }))}
+                  onPointClick={handleProvinceClick}
                 />
               )}
             </FadeInSection>
 
             {/* Top International Destinations Column Chart */}
-            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col">
+            <FadeInSection className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-md flex flex-col h-full">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2">
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm md:text-base">
@@ -1209,7 +1575,10 @@ const Dashboard = () => {
               {loadingCharts ? (
                 <ChartSkeleton height={320} />
               ) : (
-                <AlumniColumnChart rawData={otherCountryList} />
+                <AlumniColumnChart
+                  rawData={otherCountryList}
+                  onBarClick={handleCountryBarClick}
+                />
               )}
             </FadeInSection>
           </div>
@@ -1237,6 +1606,7 @@ const Dashboard = () => {
                 key1="count"
                 data={populationJob}
                 height={360}
+                onBarClick={handlePopularJobBarClick}
               />
             ) : (
               <div className="w-full h-72 flex flex-col items-center justify-center text-slate-400 gap-2">
@@ -1247,6 +1617,33 @@ const Dashboard = () => {
           </FadeInSection>
         </section>
       </main>
+
+      {/* Modal Level 1: ภาพรวมการมีงานทำระดับคณะ -> รายสาขาวิชา */}
+      <DrilldownFacultyModal
+        isOpen={drillFacultyModalOpen}
+        onClose={() => setDrillFacultyModalOpen(false)}
+        faculty={selectedFacultyForDrill}
+        departmentsLookup={departments}
+        filterParams={{
+          selectYearStart,
+          selectYearEnd,
+          selectEduLevel,
+          selectGender,
+        }}
+        onSelectDepartment={handleSelectDepartmentFromFacultyModal}
+      />
+
+      {/* Modal Level 2: รายชื่อนักศึกษา/ศิษย์เก่า พร้อมฟังก์ชันค้นหาและส่งออก Excel */}
+      <DrilldownAlumniModal
+        isOpen={drillAlumniModalOpen}
+        onClose={() => setDrillAlumniModalOpen(false)}
+        title={drillAlumniConfig.title}
+        subtitle={drillAlumniConfig.subtitle}
+        params={drillAlumniConfig.params}
+        filterParams={drillAlumniConfig.params}
+        faculties={faculties}
+        departments={departments}
+      />
     </div>
   );
 };

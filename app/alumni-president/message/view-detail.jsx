@@ -1,4 +1,5 @@
 import Modal from "@/components/modal";
+import { Skeleton } from "@/components/skeletons";
 import {
   Calendar,
   Eye,
@@ -141,9 +142,13 @@ const ViewDetail = ({ sendText }) => {
             </p>
             <div className="w-full mt-1.5 h-40 overflow-auto flex flex-col">
               {load ? (
-                <div className="w-full flex flex-col items-center py-24 text-sm gap-2">
-                  <Loader2 className="animate-spin text-blue-500" size={35} />
-                  <p>กำลังโหลด...</p>
+                <div className="w-full flex flex-col gap-2 p-2 animate-pulse">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex flex-col gap-1.5 p-2 border-b border-gray-100">
+                      <Skeleton className="h-4 w-44 rounded" />
+                      <Skeleton className="h-3 w-64 rounded" />
+                    </div>
+                  ))}
                 </div>
               ) : alumniList.length < 1 ? (
                 <div className="w-full text-gray-700 flex flex-col items-center py-24 gap-2">

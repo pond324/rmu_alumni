@@ -1,4 +1,5 @@
 import { NO_PROFILE_IMG } from "@/app/users/profile/alumni-profile";
+import SafeImage from "@/components/safe-image";
 import Modal from "@/components/modal";
 import Select from "@/components/select";
 import { isValidEmail, isValidThaiPhoneNumber } from "@/libs/validate";
@@ -193,10 +194,11 @@ const CreateEdit = ({ admin, fetch }) => {
                   onChange={handleSelectImg}
                 />
                 <div className="w-30 rounded-full h-30 shadow-md overflow-hidden">
-                  <img
+                  <SafeImage
                     src={previewProfile}
+                    type="avatar"
                     className="w-full h-full object-cover"
-                    alt=""
+                    alt="avatar"
                   />
                 </div>
               </label>

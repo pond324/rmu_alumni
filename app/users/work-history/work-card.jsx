@@ -116,33 +116,49 @@ const WorkCard = ({ e, handleEdit, fetchWorkExprerience, currentUser }) => {
       <span className="flex items-center gap-2 mt-2">
         <Calendar size={17} color="gray" />
         <p className="text-gray-600 text-[0.9rem]">
-          {" "}
-          {dayjs(e?.start_date).format(`D MMMM BBBB`)} -{" "}
+          {e?.start_date ? dayjs(e?.start_date).format(`D MMMM BBBB`) : "-"} -{" "}
           {e?.isCurrent
             ? "ปัจจุบัน"
-            : dayjs(e?.start_date).format(`D MMMM BBBB`)}
+            : e?.end_date
+              ? dayjs(e?.end_date).format(`D MMMM BBBB`)
+              : "-"}
         </p>
       </span>
 
-      <p className="w-full my-3 text-gray-600">{e?.job_detail}</p>
+      {e?.job_detail && (
+        <p className="w-full my-3 text-gray-600">{e?.job_detail}</p>
+      )}
 
       {pathName === "/users/work-history" && (
         <>
-          <label htmlFor="" className="text-[0.9rem]">
-            หน้าที่รับผิดชอบ
-          </label>
-          {e?.job_responsibility?.split(",").map((t, index) => (
-            <li key={index} className="ml-2 text-[0.9rem] text-gray-600">
-              {t}
-            </li>
-          ))}
+          {e?.job_responsibility && (
+            <>
+              <label htmlFor="" className="text-[0.9rem] font-medium text-gray-700 mt-2">
+                หน้าที่รับผิดชอบ
+              </label>
+              {e?.job_responsibility?.split(/[\n,]/).map((t, index) => {
+                const text = t.trim();
+                if (!text) return null;
+                return (
+                  <li key={index} className="ml-2 text-[0.9rem] text-gray-600">
+                    {text}
+                  </li>
+                );
+              })}
+            </>
+          )}
 
-          <label htmlFor="" className="text-[0.9rem] mt-3">
-            ทักษะที่ใช้
-          </label>
-          <p className="text-sm text-gray-600">{e?.job_skills}</p>
+          {e?.job_skills && (
+            <>
+              <label htmlFor="" className="text-[0.9rem] font-medium text-gray-700 mt-2">
+                ทักษะที่ใช้
+              </label>
+              <p className="text-sm text-gray-600">{e?.job_skills}</p>
+            </>
+          )}
+
           {e?.remark && (
-            <p className="p-2 text-sm bg-blue-50 mt-2">
+            <p className="p-2 text-sm bg-blue-50 mt-2 rounded">
               หมายเหตุ : {e?.remark}
             </p>
           )}

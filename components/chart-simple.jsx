@@ -61,6 +61,7 @@ export default function ChartSimple({
   color2,
   domain,
   height = 380,
+  onBarClick,
 }) {
   if (!data || data.length === 0) {
     return (
@@ -73,6 +74,12 @@ export default function ChartSimple({
       </div>
     );
   }
+
+  const handleBarClick = (entry, key) => {
+    if (!onBarClick) return;
+    const item = entry?.payload || entry;
+    onBarClick(item, key);
+  };
 
   return (
     <div className="w-full min-w-0" style={{ height }}>
@@ -105,6 +112,9 @@ export default function ChartSimple({
             fill={color1 || "#3B82F6"}
             barSize={key2 ? 20 : 28}
             radius={[6, 6, 0, 0]}
+            cursor={onBarClick ? "pointer" : "default"}
+            onClick={(entry) => handleBarClick(entry, key1)}
+            className={onBarClick ? "hover:opacity-85 transition-opacity" : ""}
           />
           {key2 && (
             <Bar
@@ -113,6 +123,9 @@ export default function ChartSimple({
               fill={color2 || "#F97316"}
               barSize={20}
               radius={[6, 6, 0, 0]}
+              cursor={onBarClick ? "pointer" : "default"}
+              onClick={(entry) => handleBarClick(entry, key2)}
+              className={onBarClick ? "hover:opacity-85 transition-opacity" : ""}
             />
           )}
         </BarChart>

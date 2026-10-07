@@ -7,6 +7,8 @@ export const DashboardContext = ({ children }) => {
   const [department, setDepartment] = useState();
   const [selectYearStart, setSelectYearStart] = useState("");
   const [selectYearEnd, setSelectYearEnd] = useState("");
+  const [selectEduLevel, setSelectEduLevel] = useState("");
+  const [selectGender, setSelectGender] = useState("");
 
   return (
     <dashbaordProvider.Provider
@@ -16,9 +18,13 @@ export const DashboardContext = ({ children }) => {
         department,
         setDepartment,
         selectYearStart,
-        setSelectYearEnd,
-        selectYearEnd,
         setSelectYearStart,
+        selectYearEnd,
+        setSelectYearEnd,
+        selectEduLevel,
+        setSelectEduLevel,
+        selectGender,
+        setSelectGender,
       }}
     >
       {children}

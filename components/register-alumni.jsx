@@ -28,6 +28,7 @@ import axios from "axios";
 import { apiConfig } from "@/config/api.config";
 import PasswordRules from "./password-rules";
 import { isValidThaiPhoneNumber } from "@/libs/validate";
+import SafeImage from "./safe-image";
 import { departmentText, facultyText } from "./faculty-p";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import { useRouter } from "next/navigation";
@@ -415,11 +416,12 @@ const RegisterAlumni = () => {
                 <p>สแกน QR เพื่อชำระเงิน</p>
               </span>
 
-              <div className="p-1 rounded-lg md:w-1/2 w-2/3 h-52 border border-gray-300 shadow-xs mt-3">
-                <img
+              <div className="p-1 rounded-lg md:w-1/2 w-2/3 h-52 border border-gray-300 shadow-xs mt-3 flex items-center justify-center overflow-hidden">
+                <SafeImage
                   src={apiConfig.imgAPI + regisData?.regis_payment_qrcode}
-                  className="w-full h-full object-cover"
-                  alt=""
+                  className="w-full h-full object-contain"
+                  type="image"
+                  alt="QR Code สำหรับชำระเงิน"
                 />
               </div>
               <button onClick={handleDownloadQrCode} className="mt-2 hover:bg-blue-100 p-2 px-3 rounded-lg text-xs flex items-center gap-2 bg-blue-50 text-blue-600 shadow-sm">

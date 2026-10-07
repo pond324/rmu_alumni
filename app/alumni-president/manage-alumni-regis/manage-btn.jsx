@@ -19,6 +19,8 @@ import { useEffect, useState } from "react";
 import RefuseBtn from "./refuse-btn";
 import { formatPhoneNumber } from "@/libs/validate";
 import DeleteRegisBtn from "./delete-regis";
+import SafeImage from "@/components/safe-image";
+import { Skeleton } from "@/components/skeletons";
 
 const ManageBtn = ({ alumni, faculties, departments, fetch }) => {
   const [showModal, setShowModal] = useState(false);
@@ -230,9 +232,9 @@ const ManageBtn = ({ alumni, faculties, departments, fetch }) => {
               )}
             </div>
             {load ? (
-              <div className="w-full py-28 flex flex-col mt-1.5 gap-2 items-center justify-center">
-                <Loader2 size={25} className="animate-spin text-blue-600" />
-                <p>กำลังโหลด...</p>
+              <div className="w-full mt-4 space-y-3 animate-pulse">
+                <Skeleton className="h-4 w-32 rounded" />
+                <Skeleton className="w-full h-64 rounded-xl" />
               </div>
             ) : regisData?.id && regisData?.slip_payment_url ? (
               <div className="mt-5 w-full flex flex-col">
@@ -252,10 +254,11 @@ const ManageBtn = ({ alumni, faculties, departments, fetch }) => {
                 </span>
 
                 <div className="w-full mt-3 shadow-sm">
-                  <img
+                  <SafeImage
                     src={apiConfig.imgAPI + regisData?.slip_payment_url}
                     className="w-full h-auto rounded-lg shadow-sm"
-                    alt=""
+                    type="image"
+                    alt="หลักฐานการชำระเงิน"
                   />
                 </div>
               </div>

@@ -16,6 +16,7 @@ import LiveContact from "./live-contact";
 import Contact from "./contact";
 import useGetSession from "@/hook/useGetSeesion";
 import { alerts } from "@/libs/alerts";
+import { ProfileSkeleton } from "@/components/skeletons";
 import axios from "axios";
 import { apiConfig } from "@/config/api.config";
 import Loading from "@/components/loading";
@@ -23,8 +24,7 @@ import { departmentText, facultyText } from "@/components/faculty-p";
 import CurrentStatus from "./current-status";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 
-export const NO_PROFILE_IMG =
-  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+export const NO_PROFILE_IMG = "/placeholder-avatar.svg";
 
 const AlumniProfile = () => {
   const { user } = useGetSession();
@@ -142,13 +142,7 @@ const AlumniProfile = () => {
     setRoleId(user?.roleId);
   }, [user]);
 
-  if (loading)
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-        <Loading type={2} />
-        <p className="">กำลังโหลด...</p>
-      </div>
-    );
+  if (loading) return <ProfileSkeleton />;
 
   return (
     <>
@@ -171,9 +165,10 @@ const AlumniProfile = () => {
               />
 
               <img
-                src={profileImage}
+                src={profileImage || NO_PROFILE_IMG}
+                onError={() => setProfileImage(NO_PROFILE_IMG)}
                 className="w-full h-full object-cover"
-                alt=""
+                alt="รูปโปรไฟล์"
               />
             </label>
 

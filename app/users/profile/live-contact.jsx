@@ -1,4 +1,5 @@
 import Loading from "@/components/loading";
+import { Skeleton } from "@/components/skeletons";
 import { apiConfig } from "@/config/api.config";
 import useProvince from "@/hook/useProvince";
 import { alerts } from "@/libs/alerts";
@@ -17,6 +18,8 @@ import {
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
+
+const getNameTh = (item) => item?.name?.th || item?.name_th || "";
 
 const LiveContact = () => {
   const [editing, setEditing] = useState(false);
@@ -56,13 +59,13 @@ const LiveContact = () => {
           amphure: amphure || "",
           province: province || "",
         });
-        const amphures = provinces.filter((p) => p.name_th === province)[0]
-          ?.districts;
-        setAmphures(
-          provinces.filter((p) => p.name_th === province)[0]?.districts,
-        );
-        const tambonsOp = amphures?.filter((p) => p.name_th === amphure)[0]
-          ?.sub_districts;
+        const amphuresList =
+          (provinces || []).find((p) => getNameTh(p) === province)?.districts ||
+          [];
+        setAmphures(amphuresList);
+        const tambonsOp =
+          amphuresList.find((p) => getNameTh(p) === amphure)?.sub_districts ||
+          [];
         setTambons(tambonsOp);
         setZipCode(zipcode);
       }
@@ -113,9 +116,19 @@ const LiveContact = () => {
 
   if (load)
     return (
-      <div className="w-full h-[400px] flex flex-col items-center justify-center  gap-2 py-10">
-        <Loading type={2} />
-        <p>กำลังโหลด...</p>
+      <div className="w-full flex flex-col gap-4 animate-pulse py-4">
+        <div className="flex justify-between items-center pb-2">
+          <Skeleton className="h-6 w-32 rounded-md" />
+          <Skeleton className="h-8 w-24 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-3 bg-gray-50/80 rounded-xl border border-gray-100 space-y-2">
+              <Skeleton className="h-3.5 w-24 rounded" />
+              <Skeleton className="h-5 w-3/4 rounded-md" />
+            </div>
+          ))}
+        </div>
       </div>
     );
 
@@ -209,8 +222,8 @@ const LiveContact = () => {
                   value={
                     provinces
                       ?.map((a) => ({
-                        label: a.name_th,
-                        value: a.name_th,
+                        label: getNameTh(a),
+                        value: getNameTh(a),
                       }))
                       .find((t) => t.value === watch("province")) || null
                   }
@@ -220,10 +233,11 @@ const LiveContact = () => {
                     setValue("tambon", "");
                     setZipCode("");
                     setAmphures(
-                      provinces.filter((p) => p.name_th === option.value)[0]
-                        ?.districts,
+                      (provinces || []).find(
+                        (p) => getNameTh(p) === option?.value
+                      )?.districts || []
                     );
-                    setValue("province", option.value);
+                    setValue("province", option?.value || "");
                   }}
                   className="mt-1 text-sm w-full"
                 />
@@ -255,25 +269,26 @@ const LiveContact = () => {
                   {...field}
                   isDisabled={loading || !watch("province")}
                   options={amphures?.map((a) => ({
-                    label: a.name_th,
-                    value: a.name_th,
+                    label: getNameTh(a),
+                    value: getNameTh(a),
                   }))}
                   value={
                     amphures
                       ?.map((a) => ({
-                        label: a.name_th,
-                        value: a.name_th,
+                        label: getNameTh(a),
+                        value: getNameTh(a),
                       }))
                       .find((t) => t.value === watch("amphure")) || null
                   }
                   placeholder={"เลือกอำเภอ"}
                   onChange={(option) => {
                     setValue("tambon", "");
-                    setValue("amphure", option.value);
+                    setValue("amphure", option?.value || "");
                     setZipCode("");
                     setTambons(
-                      amphures?.filter((p) => p.name_th === option.value)[0]
-                        ?.sub_districts,
+                      (amphures || []).find(
+                        (p) => getNameTh(p) === option?.value
+                      )?.sub_districts || []
                     );
                   }}
                   isSearchable
@@ -310,23 +325,24 @@ const LiveContact = () => {
                     loading || !watch("province") || !watch("amphure")
                   }
                   options={tambons?.map((a) => ({
-                    label: a.name_th,
-                    value: a.name_th,
+                    label: getNameTh(a),
+                    value: getNameTh(a),
                   }))}
                   value={
                     tambons
                       ?.map((a) => ({
-                        label: a.name_th,
-                        value: a.name_th,
+                        label: getNameTh(a),
+                        value: getNameTh(a),
                       }))
                       .find((t) => t.value === watch("tambon")) || null
                   }
                   placeholder={"เลือกตำบล"}
                   onChange={(option) => {
-                    setValue("tambon", option.value);
+                    setValue("tambon", option?.value || "");
                     setZipCode(
-                      tambons?.filter((p) => p.name_th === option.value)[0]
-                        ?.zip_code,
+                      (tambons || []).find(
+                        (p) => getNameTh(p) === option?.value
+                      )?.zip_code || ""
                     );
                   }}
                   isSearchable

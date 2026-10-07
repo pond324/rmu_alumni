@@ -172,11 +172,11 @@ const ManageAlumniRegis = () => {
   }, []);
 
   return (
-    <div className="w-full flex flex-col px-5 bg-gray-50">
-      <div className="w-full flex items-center justify-between">
+    <div className="w-full flex flex-col px-3 sm:px-5 py-2 bg-gray-50">
+      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <span className="flex flex-col">
-          <p className="text-xl font-bold">ตรวจสอบการลงทะเบียนศิษย์เก่า</p>
-          <p className="text-gray-600 text-sm">
+          <p className="text-lg sm:text-xl font-bold text-gray-800">ตรวจสอบการลงทะเบียนศิษย์เก่า</p>
+          <p className="text-gray-600 text-xs sm:text-sm">
             ตรวจสอบหลักฐานการชำระเงิน อนุมัติ หรือปฏิเสธคำขอลงทะเบียน
           </p>
         </span>
@@ -184,10 +184,10 @@ const ManageAlumniRegis = () => {
       </div>
 
       {/* stats */}
-      <div className="w-full mt-5 grid md:grid-cols-2 lg:grid-cols-6 gap-3.5">
+      <div className="w-full mt-4 sm:mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
         <FadeInSection
           className={
-            "p-3.5 bg-white rounded-lg border border-gray-300 shadow-sm flex items-center gap-5"
+            "p-3 sm:p-3.5 bg-white rounded-xl border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-4"
           }
         >
           <p className="p-2 rounded-lg bg-blue-50 text-blue-500">
@@ -320,7 +320,7 @@ const ManageAlumniRegis = () => {
         </FadeInSection>
       </div>
       {/* data */}
-      <div className="w-full mt-5 p-5 rounded-lg bg-white shadow-sm">
+      <div className="w-full mt-4 sm:mt-5 p-3 sm:p-5 rounded-xl bg-white shadow-2xs border border-gray-200">
         <div className="w-full flex items-center justify-between">
           <p className="font-semibold">รายชื่อนักศึกษาและสถานะการลงทะเบียน</p>
         </div>
@@ -497,9 +497,9 @@ const ManageAlumniRegis = () => {
           พบข้อมูลทั้งหมด ({total} รายการ)
         </p>
         <div
-          className={`mt-3.5 w-full transition-all duration-300 h-[600px] overflow-auto`}
+          className={`mt-3.5 w-full transition-all duration-300 h-[600px] overflow-auto rounded-xl border border-gray-200`}
         >
-          <table className="w-full hidden lg:table">
+          <table className="w-full hidden lg:table min-w-[750px]">
             <thead>
               <tr className="border-b border-gray-300 sticky top-0 bg-white shadow-sm">
                 <th className="bg-blue-50 text-start px-2.5 py-3 text-sm font-normal text-gray-700">

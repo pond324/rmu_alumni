@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 import { alerts } from "@/libs/alerts";
 import { debounce } from "lodash";
 import Loading from "@/components/loading";
+import { TableSkeleton, AlumniSearchCardSkeleton } from "@/components/skeletons";
 import axios from "axios";
 import { apiConfig } from "@/config/api.config";
 import Select from "@/components/select";
@@ -508,10 +509,15 @@ const SearchPage = () => {
 
         {/* Content Section */}
         {loading ? (
-          <div className="w-full my-12 py-5 flex flex-col gap-2 items-center justify-center">
-            <Loading type={2} />
-            <p className="text-sm text-gray-500">กำลังโหลด...</p>
-          </div>
+          showAstTableFormat ? (
+            <TableSkeleton rows={8} cols={6} />
+          ) : (
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <AlumniSearchCardSkeleton key={i} />
+              ))}
+            </div>
+          )
         ) : dataList?.length > 0 ? (
           showAstTableFormat ? (
             <div className="w-full h-[600px] mt-3 rounded-xl border border-gray-200 bg-white overflow-x-auto shadow-xs overflow-y-auto">

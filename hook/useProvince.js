@@ -15,10 +15,13 @@ export default function useProvince() {
       );
       const province = res.data;
       setProvinces(province);
-      const options = province.map((p) => ({
-        label: p.name_th,
-        value: p.name_th,
-      }));
+      const options = (province || []).map((p) => {
+        const thName = p?.name?.th || p?.name_th || "";
+        return {
+          label: thName,
+          value: thName,
+        };
+      });
       setProvinceOptions(options);
     } catch (err) {
       console.error(err);

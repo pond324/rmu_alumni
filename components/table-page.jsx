@@ -21,6 +21,7 @@ import { SelectDepartment, SelectFaculty } from "./select-fac-dep";
 import ImportHistoryData from "@/app/alumni-president/alumni-manage/import-history-btn";
 import ExportAlumniData from "@/app/alumni-president/alumni-manage/export-alumni-data";
 import SelectEduLevel from "./select-edu-level";
+import SelectAccountStatus from "./select-account-status";
 
 const TablePage = ({
   header,
@@ -52,6 +53,8 @@ const TablePage = ({
   showExportBtn = true, // ✅ optional filter,
   selectEduLevel,
   setSelectEduLevel,
+  canUse,
+  setCanUse,
 }) => {
   const pathName = usePathname();
   const { user } = useGetSession();
@@ -101,6 +104,7 @@ const TablePage = ({
     setSelectYearEnd("");
     setSelectYearStart("");
     setSelectEduLevel("");
+    if (setCanUse) setCanUse("");
   };
 
   // ✅ โหลดข้อมูลทุกครั้งที่ state เปลี่ยน
@@ -116,6 +120,7 @@ const TablePage = ({
       selectYearEnd,
       extraFilter,
       selectEduLevel,
+      canUse,
     );
   }, [
     page,
@@ -128,10 +133,11 @@ const TablePage = ({
     selectYearEnd,
     selectYearStart,
     selectEduLevel,
+    canUse,
   ]);
   return (
     <>
-      <div className="w-full h-auto items-start flex flex-col bg-gray-50 px-5 py-3">
+      <div className="w-full h-auto items-start flex flex-col bg-gray-50 px-3 sm:px-5 py-3">
         {user?.roleId < 5 && (
           <button
             onClick={() => {
@@ -146,10 +152,10 @@ const TablePage = ({
           </button>
         )}
 
-        <span className="w-full flex flex-col lg:flex-row lg:items-end gap-2 justify-between lg:border-b lg:pb-3 lg:border-gray-300">
-          <div className="flex flex-col mt-2">
-            <h1 className="font-bold text-lg">{header}</h1>
-            <p className="text-[0.9rem] text-gray-700">
+        <span className="w-full flex flex-col sm:flex-row sm:items-end gap-2 justify-between border-b pb-3 border-gray-200">
+          <div className="flex flex-col mt-1 sm:mt-2">
+            <h1 className="font-bold text-base sm:text-lg text-gray-800">{header}</h1>
+            <p className="text-xs sm:text-[0.9rem] text-gray-600">
               {description +
                 `${selectYearStart ? ` ปีการศึกษา พ.ศ. ${selectYearStart}` : ""}
             ${selectYearEnd && selectYearStart
@@ -162,15 +168,15 @@ const TablePage = ({
             </p>
           </div>
           {pathName === "/alumni-president/alumni-manage" && (
-            <div className="flex items-center gap-2.5">
-              <ImportAlumniData fetchData={fetchData} />
-              <ImportHistoryData fetchAlumni={fetchData} />
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* <ImportAlumniData fetchData={fetchData} /> */}
+              {/* <ImportHistoryData fetchAlumni={fetchData} /> */}
               <ExportAlumniData />
             </div>
           )}
         </span>
 
-        <div className="w-full flex flex-wrap items-center gap-2.5 my-3">
+        <div className="w-full flex flex-wrap items-center gap-2 sm:gap-2.5 my-3">
           <div className="flex-1 min-w-[200px] sm:min-w-[240px] max-w-full sm:max-w-xs h-[38px] px-3 bg-white rounded-lg border border-gray-300 shadow-xs flex items-center gap-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
             <Search size={17} className="text-gray-400 shrink-0" />
             <input
@@ -226,6 +232,17 @@ const TablePage = ({
           />
 
           {filterBtn}
+
+          {setCanUse && (
+            <SelectAccountStatus
+              value={canUse}
+              onChange={(val) => {
+                setCanUse(val);
+                setPage(1);
+              }}
+              setPage={setPage}
+            />
+          )}
 
           <div
             title="เลือกจำนวนที่ต้องการแสดง"
@@ -314,8 +331,8 @@ const TablePage = ({
           )}
         </div>
 
-        <div className="w-full rounded-tl-lg rounded-tr-lg overflow-x-auto h-[600px] bg-white overflow-y-auto pb-3">
-          <table className="min-w-max w-full">
+        <div className="w-full rounded-xl overflow-x-auto h-[600px] bg-white overflow-y-auto border border-gray-200 pb-3">
+          <table className="min-w-[700px] w-full">
             <thead>
               <tr className="sticky top-0 bg-white z-10">
                 {["ชื่อ - นามสกุล", "คณะ/สาขา", "ปีการศึกษา (พ.ศ.)"].map(

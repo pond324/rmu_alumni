@@ -1,7 +1,9 @@
 "use client";
 import { NO_PROFILE_IMG } from "@/app/users/profile/alumni-profile";
+import SafeImage from "@/components/safe-image";
 import { departmentText, facultyText } from "@/components/faculty-p";
 import Loading from "@/components/loading";
+import { ProfileSkeleton } from "@/components/skeletons";
 import { apiConfig } from "@/config/api.config";
 import { alerts } from "@/libs/alerts";
 import { formatPhoneNumber } from "@/libs/validate";
@@ -160,13 +162,7 @@ const UserDetail = () => {
     return true;
   };
 
-  if (loading)
-    return (
-      <div className="w-full items-center justify-center h-full flex flex-col gap-2">
-        <Loading type={2} />
-        <p>กำลังโหลด...</p>
-      </div>
-    );
+  if (loading) return <ProfileSkeleton />;
 
   return (
     <>
@@ -186,11 +182,12 @@ const UserDetail = () => {
         >
           <div className="flex flex-col items-center gap-2">
             <div className="overflow-hidden w-[120px] h-[120px] border-4 border-white shadow-md rounded-full bg-gray-200">
-              <img
+              <SafeImage
                 alt="profile"
                 className="w-full h-full object-cover"
-                width={50}
-                height={50}
+                width={120}
+                height={120}
+                type="avatar"
                 src={canviewProfile()}
               />
             </div>

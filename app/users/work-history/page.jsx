@@ -31,6 +31,7 @@ import Select from "react-select";
 import { debounce } from "lodash";
 import WorkCard from "./work-card";
 import StudyCard from "./study-card";
+import { WorkCardSkeleton } from "@/components/skeletons";
 import { v4 as uuid } from "uuid";
 
 const WorkHistory = () => {
@@ -177,6 +178,7 @@ const WorkHistory = () => {
         setShowJobForm(false);
         setShowOnTheLineErr(false);
         setIsOnTheLine(false);
+        setIsEditing(null);
         setShowJobForm(false);
       }
       reset();
@@ -410,9 +412,10 @@ const WorkHistory = () => {
         </span>
 
         {fetching ? (
-          <div className="w-full my-24 h-full flex flex-col gap-2 items-center justify-center">
-            <Loading />
-            <p>กำลังโหลด...</p>
+          <div className="w-full grid lg:grid-cols-3 gap-5 gap-y-1 grid-cols-1 mt-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <WorkCardSkeleton key={i} />
+            ))}
           </div>
         ) : experience?.length < 1 ? (
           <p className="w-full text-center mt-10">ไม่พบประวัติการทำงาน</p>
@@ -433,11 +436,11 @@ const WorkHistory = () => {
                     )
                   }
                   currentUser={user}
-                  key={e?.id || `study-${index}`}
+                  key={`study-${e?.id ?? index}`}
                 />
               ) : (
                 <WorkCard
-                  key={e?.id || `work-${index}`}
+                  key={`work-${e?.id ?? index}`}
                   e={e}
                   handleEdit={handleEdit}
                   fetchWorkExprerience={() =>
@@ -1053,14 +1056,10 @@ const WorkHistory = () => {
               )}
 
               <label htmlFor="" className="mt-4">
-                หน้าที่รับผิดชอบ{" "}
-                <small className="text-red-500 text-sm">*</small>
+                หน้าที่รับผิดชอบ
               </label>
               <Controller
                 name="job_responsibility"
-                rules={{
-                  required: "โปรดกรอกสิ่งที่ได้รับผิดชอบในงานนี้",
-                }}
                 control={control}
                 render={({ field }) => (
                   <textarea
@@ -1072,20 +1071,12 @@ const WorkHistory = () => {
                   />
                 )}
               />
-              {errors.job_responsibility && (
-                <small className="mt-2 text-red-500 lg:text-sm text-xs">
-                  {errors.job_responsibility.message}
-                </small>
-              )}
 
               <label htmlFor="" className="mt-4">
-                ทักษะที่ใช้ <small className="text-red-500 text-sm">*</small>
+                ทักษะที่ใช้
               </label>
               <Controller
                 name="job_skills"
-                rules={{
-                  required: "โปรดระบุทักษะที่ใช้ในงานนี้",
-                }}
                 control={control}
                 render={({ field }) => (
                   <textarea
@@ -1097,11 +1088,6 @@ const WorkHistory = () => {
                   />
                 )}
               />
-              {errors.job_skills && (
-                <small className="mt-2 text-red-500 lg:text-sm text-xs">
-                  {errors.job_skills.message}
-                </small>
-              )}
             </>
           )}
 

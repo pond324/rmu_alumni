@@ -169,27 +169,27 @@ const setProfileImage = () => {
 
   return (
     <>
-      <div className="w-full flex flex-col p-5 bg-gray-50">
-        <p className="text-xl font-bold">ประวัติการส่งข้อความ</p>
-        <p className="text-sm text-gray-700">
+      <div className="w-full flex flex-col p-3 sm:p-5 bg-gray-50">
+        <p className="text-lg sm:text-xl font-bold text-gray-800">ประวัติการส่งข้อความ</p>
+        <p className="text-xs sm:text-sm text-gray-600">
           ตรวจสอบและจัดการประวัติการส่งอีเมลทั้งหมด
         </p>
 
-        <div className="mt-3.5 w-full grid lg:grid-cols-5 gap-3.5 md:grid-cols-2">
+        <div className="mt-4 sm:mt-5 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
           <FadeInSection
             className={
-              "p-3.5 rounded-lg bg-white border border-gray-300 shadow-sm flex items-center gap-3.5"
+              "p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-3.5"
             }
           >
-            <p className="p-2 rounded-lg bg-blue-50 text-blue-500">
-              <Mail />
+            <p className="p-2 rounded-lg bg-blue-50 text-blue-500 shrink-0">
+              <Mail size={18} />
             </p>
             <span className="flex flex-col gap-0.5">
-              <p className="text-sm text-gray-700">ประวัติการส่งทั้งหมด</p>
+              <p className="text-xs sm:text-sm text-gray-600">ทั้งหมด</p>
               {loadStats ? (
                 <Loader2 className="animate-spin text-blue-500 mt-1" />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {stats?.all?.toLocaleString() || 0}
                 </p>
               )}
@@ -197,18 +197,18 @@ const setProfileImage = () => {
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 rounded-lg bg-white border border-gray-300 shadow-sm flex items-center gap-3.5"
+              "p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-3.5"
             }
           >
-            <p className="p-2 rounded-lg bg-orange-50 text-orange-500">
-              <UserCog />
+            <p className="p-2 rounded-lg bg-orange-50 text-orange-500 shrink-0">
+              <UserCog size={18} />
             </p>
             <span className="flex flex-col gap-0.5">
-              <p className="text-sm text-gray-700">ส่งโดยผู้ดูแล</p>
+              <p className="text-xs sm:text-sm text-gray-600">โดยผู้ดูแล</p>
               {loadStats ? (
                 <Loader2 className="animate-spin text-blue-500 mt-1" />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {stats?.allAdmin?.toLocaleString() || 0}
                 </p>
               )}
@@ -216,18 +216,18 @@ const setProfileImage = () => {
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 rounded-lg bg-white border border-gray-300 shadow-sm flex items-center gap-3.5"
+              "p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-3.5"
             }
           >
-            <p className="p-2 rounded-lg bg-amber-50 text-yellow-500">
-              <User />
+            <p className="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+              <User size={18} />
             </p>
             <span className="flex flex-col gap-0.5">
-              <p className="text-sm text-gray-700">ส่งโดยผู้บริหาร</p>
+              <p className="text-xs sm:text-sm text-gray-600">โดยผู้บริหาร</p>
               {loadStats ? (
                 <Loader2 className="animate-spin text-blue-500 mt-1" />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {stats?.allEx?.toLocaleString() || 0}
                 </p>
               )}
@@ -235,18 +235,18 @@ const setProfileImage = () => {
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 rounded-lg bg-white border border-gray-300 shadow-sm flex items-center gap-3.5"
+              "p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-3.5"
             }
           >
-            <p className="p-2 rounded-lg bg-purple-50 text-pink-500">
-              <BookUser />
+            <p className="p-2 rounded-lg bg-purple-50 text-purple-600 shrink-0">
+              <BookUser size={18} />
             </p>
             <span className="flex flex-col gap-0.5">
-              <p className="text-sm text-gray-700">ส่งโดยอาจารย์</p>
+              <p className="text-xs sm:text-sm text-gray-600">โดยอาจารย์</p>
               {loadStats ? (
                 <Loader2 className="animate-spin text-blue-500 mt-1" />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {stats?.allProfessor?.toLocaleString() || 0}
                 </p>
               )}
@@ -254,18 +254,18 @@ const setProfileImage = () => {
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 rounded-lg bg-white border border-gray-300 shadow-sm flex items-center gap-3.5"
+              "p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center gap-3 sm:gap-3.5 col-span-2 sm:col-span-1"
             }
           >
-            <p className="p-2 rounded-lg bg-sky-50 text-sky-500">
-              <GraduationCap />
+            <p className="p-2 rounded-lg bg-sky-50 text-sky-600 shrink-0">
+              <GraduationCap size={18} />
             </p>
             <span className="flex flex-col gap-0.5">
-              <p className="text-sm text-gray-700">ส่งโดยศิษย์เก่า</p>
+              <p className="text-xs sm:text-sm text-gray-600">โดยศิษย์เก่า</p>
               {loadStats ? (
                 <Loader2 className="animate-spin text-blue-500 mt-1" />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {stats?.allAlumni?.toLocaleString() || 0}
                 </p>
               )}
@@ -273,58 +273,58 @@ const setProfileImage = () => {
           </FadeInSection>
         </div>
 
-        <div className="mt-5 w-full p-5 rounded-lg shadow-sm bg-white">
-          <div className="w-full flex items-center justify-between">
-            <p className="text-sm">
+        <div className="mt-4 sm:mt-5 w-full p-3 sm:p-5 rounded-xl shadow-2xs border border-gray-200 bg-white">
+          <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p className="text-xs sm:text-sm font-semibold text-gray-800">
               รายการประวัติการส่งข้อความ ({total} ครั้ง)
             </p>
             <Link
               href={"/alumni-president/message/0"}
-              className="flex items-center gap-2 text-sm hover:bg-blue-600 shadow-sm bg-blue-500 text-white p-2 px-3.5 rounded-lg"
+              className="flex items-center gap-2 text-xs sm:text-sm hover:bg-blue-700 shadow-xs bg-blue-600 text-white p-2 px-3.5 rounded-lg w-fit transition"
             >
-              <MailPlus size={18} />
+              <MailPlus size={16} />
               <p>ส่งข้อความ</p>
             </Link>
           </div>
 
-          <div className="w-full mt-1.5 flex items-center flex-wrap gap-2.5">
+          <div className="w-full mt-2 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
             <button
               onClick={() => setSearchSender("all")}
-              className={`flex ${searchSender === "all" ? "text-blue-500 bg-blue-100" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-sm justify-center flex-1 items-center gap-2 rounded-lg`}
+              className={`flex ${searchSender === "all" ? "text-blue-600 bg-blue-100 font-medium" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-xs sm:text-sm justify-center flex-1 items-center gap-1.5 sm:gap-2 rounded-lg transition`}
             >
               <Mail size={16} />
               <p>ทั้งหมด</p>
             </button>
             <button
               onClick={() => setSearchSender("admin")}
-              className={`flex ${searchSender === "admin" ? "text-blue-500 bg-blue-100" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-sm justify-center flex-1 items-center gap-2 rounded-lg`}
+              className={`flex ${searchSender === "admin" ? "text-blue-600 bg-blue-100 font-medium" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-xs sm:text-sm justify-center flex-1 items-center gap-1.5 sm:gap-2 rounded-lg transition`}
             >
               <UserCog size={16} />
               <p>ส่งโดยผู้ดูแล</p>
             </button>
             <button
               onClick={() => setSearchSender("executive")}
-              className={`flex ${searchSender === "executive" ? "text-blue-500 bg-blue-100" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-sm justify-center flex-1 items-center gap-2 rounded-lg`}
+              className={`flex ${searchSender === "executive" ? "text-blue-600 bg-blue-100 font-medium" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-xs sm:text-sm justify-center flex-1 items-center gap-1.5 sm:gap-2 rounded-lg transition`}
             >
               <User size={16} />
               <p>ส่งโดยผู้บริหาร</p>
             </button>
             <button
               onClick={() => setSearchSender("professor")}
-              className={`flex ${searchSender === "professor" ? "text-blue-500 bg-blue-100" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-sm justify-center flex-1 items-center gap-2 rounded-lg`}
+              className={`flex ${searchSender === "professor" ? "text-blue-600 bg-blue-100 font-medium" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-xs sm:text-sm justify-center flex-1 items-center gap-1.5 sm:gap-2 rounded-lg transition`}
             >
               <BookUser size={16} />
               <p>ส่งโดยอาจารย์</p>
             </button>
             <button
               onClick={() => setSearchSender("alumni")}
-              className={`flex ${searchSender === "alumni" ? "text-blue-500 bg-blue-100" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-sm justify-center flex-1 items-center gap-2 rounded-lg`}
+              className={`flex ${searchSender === "alumni" ? "text-blue-600 bg-blue-100 font-medium" : "bg-gray-50 text-gray-600 hover:bg-gray-100"} p-2 text-xs sm:text-sm justify-center flex-1 items-center gap-1.5 sm:gap-2 rounded-lg transition col-span-2 sm:col-span-1`}
             >
               <GraduationCap size={16} />
               <p>ส่งโดยศิษย์เก่า</p>
             </button>
           </div>
-          <div className="mt-2 w-full flex items-center gap-2.5 flex-wrap">
+          <div className="mt-3 w-full flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <div className="w-full md:w-1/2 lg:w-1/3">
               <SearchBox
                 page={page}
@@ -343,7 +343,7 @@ const setProfileImage = () => {
                   setPage(1);
                 }}
                 value={take}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               >
                 <option value={10} className="text-sm">
                   10
@@ -360,10 +360,10 @@ const setProfileImage = () => {
               </select>
               <label
                 htmlFor="select-row"
-                className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="p-2 px-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 shadow-xs flex items-center justify-center gap-2 cursor-pointer text-gray-700"
               >
-                <List size={17} />
-                <p className="text-sm">แสดง {take} แถว</p>
+                <List size={16} />
+                <p className="text-xs sm:text-sm">แสดง {take} แถว</p>
               </label>
             </div>
             <div title="เรียงตาม" className="relative inline-block">
@@ -373,7 +373,7 @@ const setProfileImage = () => {
                   setPage(1);
                 }}
                 value={sort}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               >
                 <option
                   value={JSON.stringify({ createdAt: "desc" })}
@@ -390,29 +390,31 @@ const setProfileImage = () => {
               </select>
               <label
                 htmlFor="select-row"
-                className="p-2 px-3.5 rounded-lg border border-gray-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="p-2 px-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 shadow-xs flex items-center justify-center gap-2 cursor-pointer text-gray-700"
               >
-                <ChevronsUpDown size={17} />
-                <p className="text-sm ">เรียง</p>
+                <ChevronsUpDown size={16} />
+                <p className="text-xs sm:text-sm">เรียง</p>
               </label>
             </div>
             <button
               type="button"
               onClick={resetSearch}
-              className="p-2 px-3 rounded-lg text-sm bg-white border border-gray-300 shadow-sm flex items-center gap-2"
+              className="p-2 px-3 rounded-lg text-xs sm:text-sm bg-white hover:bg-gray-50 border border-gray-300 shadow-xs flex items-center gap-1.5 text-gray-700"
             >
-              <ListRestart size={17} />
+              <ListRestart size={16} />
               <p>ล้างการค้นหา</p>
             </button>
-            <PaginationBtn
-              forwardPage={() => forwardPage(page, setPage, totalPage)}
-              page={page}
-              prevPage={() => prevPage(page, setPage)}
-              totalPage={totalPage}
-            />
+            <div className="sm:ml-auto flex items-center">
+              <PaginationBtn
+                forwardPage={() => forwardPage(page, setPage, totalPage)}
+                page={page}
+                prevPage={() => prevPage(page, setPage)}
+                totalPage={totalPage}
+              />
+            </div>
           </div>
-          <div className="mt-3.5 w-full h-[600px] rounded-tl-lg rounded-tr-lg overflow-auto">
-            <table className="min-w-max w-full">
+          <div className="mt-3.5 w-full h-[600px] rounded-xl border border-gray-200 overflow-auto">
+            <table className="min-w-[700px] w-full">
               <thead>
                 <tr className="border-b border-gray-300 bg-blue-50 shadow-sm sticky top-0 left-0 z-20">
                   <th className="text-sm p-2.5 font-normal text-start pb-3">

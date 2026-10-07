@@ -36,6 +36,7 @@ const Page = () => {
   const [selectYearStart, setSelectYearStart] = useState("");
   const [selectYearEnd, setSelectYearEnd] = useState("");
   const [selectEduLevel, setSelectEduLevel] = useState("");
+  const [canUse, setCanUse] = useState("");
 
   useEffect(() => {
     setFacultyId(user?.roleId <= 3 ? `${user?.facultyId}` : "");
@@ -55,6 +56,7 @@ const Page = () => {
     selectYearEnd,
     current = {},
     selectEduLevel,
+    canUse = "",
   ) => {
     setLoading(true);
     try {
@@ -71,6 +73,7 @@ const Page = () => {
           selectYearEnd,
           current,
           selectEduLevel,
+          canUse: canUse !== "" && canUse !== undefined ? canUse : undefined,
         },
       });
       if (res.status === 200) {
@@ -96,7 +99,7 @@ const Page = () => {
     <>
       <TablePage
         header="รายชื่อศิษย์เก่า"
-        theads={["วันที่นำเข้าข้อมูล", "ลงทะเบียน", "บัญชี", "จัดการ"]}
+        theads={["ลงทะเบียน", "บัญชี", "จัดการ"]}
         fetchData={fetchData}
         totalPage={totalPage}
         total={total}
@@ -173,6 +176,8 @@ const Page = () => {
         setSelectYearStart={setSelectYearStart}
         selectEduLevel={selectEduLevel}
         setSelectEduLevel={setSelectEduLevel} // ✅ optional filter
+        canUse={canUse}
+        setCanUse={setCanUse}
       >
         {loading ? (
           <RowLoader numcol={7} />
@@ -198,14 +203,14 @@ const Page = () => {
                     {" "}
                     {d?.facultyId
                       ? facultyText(faculties, d?.facultyId) ||
-                        "ไม่พบรหัสคณะนี้"
+                      "ไม่พบรหัสคณะนี้"
                       : "ไม่พบข้อมูล"}
                   </p>
                   <p className="text-gray-600">
                     {" "}
                     {d?.departmentId
                       ? departmentText(departments, d?.departmentId) ||
-                        "ไม่พบสาขาวิชานี้"
+                      "ไม่พบสาขาวิชานี้"
                       : "ไม่พบข้อมูล"}
                   </p>
                 </div>
@@ -214,7 +219,7 @@ const Page = () => {
                 {d?.year_start || "ไม่พบข้อมูล"} -{" "}
                 {d?.year_end || "ไม่พบข้อมูล"}
               </td>
-              <td className="p-2  text-start text-sm">
+              {/* <td className="p-2  text-start text-sm">
                 <p className="p-1.5 w-fit px-2 rounded-full bg-blue-50 shadow-xs text-xs">
                   {" "}
                   {new Date(d?.createtAt).toLocaleDateString("th-TH", {
@@ -223,7 +228,7 @@ const Page = () => {
                     year: "numeric",
                   })}
                 </p>
-              </td>
+              </td> */}
 
               <td className="p-2">
                 {d?.regis_alumni?.isApproved === "pending" ? (
@@ -246,7 +251,21 @@ const Page = () => {
               </td>
               <td className="p-2">
                 <ToggleAccoutStatus
-                  fetchData={fetchData}
+                  fetchData={() =>
+                    fetchData(
+                      page,
+                      take,
+                      search,
+                      facultyId,
+                      departmentId,
+                      sort,
+                      selectYearStart,
+                      selectYearEnd,
+                      filterWork,
+                      selectEduLevel,
+                      canUse,
+                    )
+                  }
                   user_id={d?.alumni_id}
                   canUse={d?.canUse}
                   role={1}
@@ -256,7 +275,8 @@ const Page = () => {
                 <DropdownMenu>
                   <>
                     <AlumniData alumniId={d?.alumni_id} />
-                    <DeleteAlumniData
+                    {/* {
+                     <DeleteAlumniData
                       alumni_id={d?.alumni_id}
                       fetch={() =>
                         fetchData(
@@ -270,7 +290,8 @@ const Page = () => {
                           selectYearEnd,
                         )
                       }
-                    />
+                    />} */}
+
                   </>
                 </DropdownMenu>
               </td>

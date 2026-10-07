@@ -218,17 +218,51 @@ const ExportRegisAlumniBtn = () => {
             `ส่งออกรายงานสำเร็จ! ดาวน์โหลดไฟล์ ${fileName}.xlxs แล้ว!`,
           );
         } else {
+          if (
+            res.data?.type === "application/json" ||
+            (res.data instanceof Blob && res.data.type?.includes("json"))
+          ) {
+            const text = await res.data.text();
+            try {
+              const parsed = JSON.parse(text);
+              return alerts.warning(parsed.err || "ไม่สามารถส่งออกไฟล์ PDF ได้");
+            } catch {
+              return alerts.warning(text);
+            }
+          }
+
+          if (!res.data || (res.data instanceof Blob && res.data.size < 100)) {
+            return alerts.err("ไฟล์ PDF ที่ได้รับจากเซิร์ฟเวอร์ไม่สมบูรณ์");
+          }
+
           const blob = new Blob([res.data], {
             type: "application/pdf",
           });
 
           const pdfUrl = URL.createObjectURL(blob);
+          const finalPdfName = fileName
+            ? fileName.toLowerCase().endsWith(".pdf")
+              ? fileName
+              : `${fileName}.pdf`
+            : "รายงานการลงทะเบียน.pdf";
 
-          window.open(pdfUrl, "_blank");
+          const downloadLink = document.createElement("a");
+          downloadLink.href = pdfUrl;
+          downloadLink.download = finalPdfName;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+
+          const previewTab = window.open(pdfUrl, "_blank");
+          if (previewTab) {
+            previewTab.focus();
+          }
+
+          alerts.success(`ส่งออกรายงาน PDF สำเร็จ! ดาวน์โหลดไฟล์ ${finalPdfName} แล้ว`);
 
           setTimeout(() => {
             URL.revokeObjectURL(pdfUrl);
-          }, 1000);
+          }, 600000);
         }
       }
     } catch (error) {

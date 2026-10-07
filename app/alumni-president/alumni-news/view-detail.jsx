@@ -4,6 +4,7 @@ import { DateTHFormat } from "@/libs/thai-local-formate-date";
 import { Eye, EyeClosed, HeartHandshake, Newspaper, X } from "lucide-react";
 import { useState } from "react";
 import { sanitizeHtml } from "@/libs/sanitize";
+import SafeImage from "@/components/safe-image";
 
 const ViewDetail = ({ data,showText = true }) => {
   const [showModal, setShowModal] = useState(false);
@@ -40,9 +41,10 @@ const ViewDetail = ({ data,showText = true }) => {
           <div className="max-h-[80vh] overflow-y-auto p-8">
             {/* Cover */}
             <div className="overflow-hidden rounded-2xl">
-              <img
+              <SafeImage
                 src={apiConfig.imgAPI + data?.thumnail}
-                alt={data?.title}
+                alt={data?.title || "News cover"}
+                type="image"
                 className="h-[350px] w-full object-cover"
               />
             </div>
@@ -79,51 +81,60 @@ const ViewDetail = ({ data,showText = true }) => {
               </span>
             </div>
 
-            {data?.category == 1 && (
-              <div className="mt-3 p-2 rounded-lg bg-pink-50 border border-red-300">
-                <div className="flex justify-between text-sm mb-1.5">
-                  <p>
-                    ยอดบริจาคปัจจุบัน :{" "}
-                    {data?.current_money?.toLocaleString() || 0} ฿
-                  </p>
-                  <p>
-                    เป้าหมาย : {data?.target_money?.toLocaleString() || 0} ฿
-                  </p>
+            {data?.category == 1 &&
+              (!data?.donate_end ||
+              data?.donate_end === "undefined" ||
+              data?.donate_end === "null" ||
+              data?.donate_end === "" ? (
+                <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-600 font-medium flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gray-400" />
+                  โครงการนี้ไม่รับเงินบริจาค
                 </div>
+              ) : (
+                <div className="mt-3 p-2 rounded-lg bg-pink-50 border border-red-300">
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <p>
+                      ยอดบริจาคปัจจุบัน :{" "}
+                      {data?.current_money?.toLocaleString() || 0} ฿
+                    </p>
+                    <p>
+                      เป้าหมาย : {data?.target_money?.toLocaleString() || 0} ฿
+                    </p>
+                  </div>
 
-                <div className="w-full h-2.5 bg-gray-200 rounded-full mt-3.5">
-                  <div
-                    className="h-full bg-pink-500 relative"
-                    style={{
-                      width: `${
-                        data?.target_money > 0
-                          ? Math.min(
-                              (data?.current_money / data?.target_money) * 100,
-                              100,
-                            )
-                          : 0
-                      }%`,
-                    }}
-                  >
-                    <div className="absolute bottom-[-6px] right-0 p-1.5 text-xs rounded-lg text-white bg-pink-500">
-                      {
-                        <p className="font-semibold">
-                          {data?.target_money > 0
-                            ? `${Math.round(
-                                (data?.current_money / data?.target_money) *
-                                  100,
-                              )}%`
-                            : "0%"}
-                        </p>
-                      }
+                  <div className="w-full h-2.5 bg-gray-200 rounded-full mt-3.5">
+                    <div
+                      className="h-full bg-pink-500 relative"
+                      style={{
+                        width: `${
+                          data?.target_money > 0
+                            ? Math.min(
+                                (data?.current_money / data?.target_money) * 100,
+                                100,
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    >
+                      <div className="absolute bottom-[-6px] right-0 p-1.5 text-xs rounded-lg text-white bg-pink-500">
+                        {
+                          <p className="font-semibold">
+                            {data?.target_money > 0
+                              ? `${Math.round(
+                                  (data?.current_money / data?.target_money) *
+                                    100,
+                                )}%`
+                              : "0%"}
+                          </p>
+                        }
+                      </div>
                     </div>
                   </div>
+                  <p className="text-sm text-gray-600 mt-1.5">
+                    ปิดรับบริจาค: {DateTHFormat(data?.donate_end)}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 mt-1.5">
-                  ปิดรับบริจาค: {DateTHFormat(data?.donate_end)}
-                </p>
-              </div>
-            )}
+              ))}
 
             {/* Short Detail */}
             <div className="mt-8">

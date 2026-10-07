@@ -26,15 +26,15 @@ const Layout = ({ children }) => {
   }, [checking, user]);
 
   return (
-    <div className="w-screen h-screen flex items-center">
+    <div className="w-full h-screen flex items-center overflow-hidden bg-gray-50">
       <Menu />
-      <div className="flex flex-col w-full h-full overflow-auto">
+      <div className="flex flex-col flex-1 w-full h-full min-w-0 overflow-y-auto overflow-x-hidden">
         {/* header */}
-        <header className="mb-2 p-3 w-full flex items-center gap-2 pb-2 border-b shadow-sm border-gray-300">
-          <Image alt="logo" priority className="w-10 h-10" src={logo} />
-          <div className="flex lg:gap-2 lg:items-center lg:flex-row flex-col">
-            <h1 className="font-bold text-sm text-blue-600">RMU ALUMNI</h1>
-            <p className="text-sm">
+        <header className="mb-2 p-3 pr-16 lg:pr-4 w-full flex items-center gap-2.5 pb-2.5 border-b shadow-2xs border-gray-200 bg-white shrink-0">
+          <Image alt="logo" priority className="w-9 h-9 sm:w-10 sm:h-10 shrink-0" src={logo} />
+          <div className="flex lg:gap-2 lg:items-center lg:flex-row flex-col min-w-0">
+            <h1 className="font-bold text-xs sm:text-sm text-blue-600 truncate">RMU ALUMNI</h1>
+            <p className="text-xs sm:text-sm text-gray-700 truncate">
               : ระบบสารสนเทศเครือข่ายศิษย์เก่า มหาวิทยาลัยราชภัฏมหาสารคาม (Admin)
             </p>
           </div>

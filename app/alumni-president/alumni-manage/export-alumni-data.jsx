@@ -56,48 +56,84 @@ const ExportAlumniData = () => {
     setSelectDepartmentId(departments.map((d) => d?.value));
   }, [faculties, departments]);
   useEffect(() => {
-    if (!departments || !facultyId) return;
-    let normalizedData = departmentList;
-    if (facultyId) {
-      normalizedData = departments.filter(
-        (d) => d?.value?.substring(0, 1) == String(facultyId)?.substring(1, 2),
-      );
+    if (!departments) return;
+    if (!facultyId) {
+      setDepartmentList(departments);
+      return;
     }
+    let normalizedData = departments.filter(
+      (d) =>
+        String(d?.faculty_id) === String(facultyId) ||
+        String(d?.faculty?.faculty_id) === String(facultyId),
+    );
     if (departmentId) {
       normalizedData = normalizedData.filter(
-        (d) => d?.value === departmentId || d?.value === departmentId,
+        (d) =>
+          String(d?.id) === String(departmentId) ||
+          String(d?.value) === String(departmentId),
       );
     }
     setDepartmentList(normalizedData);
-  }, [facultyId, departmentId]);
+  }, [facultyId, departmentId, departments]);
+
   useEffect(() => {
-    if (!facultyId) return;
-    setFacultyList(faculties.filter((d) => d?.value === facultyId));
-  }, [facultyId]);
+    if (!faculties) return;
+    if (!facultyId) {
+      setFacultyList(faculties);
+      return;
+    }
+    setFacultyList(
+      faculties.filter(
+        (d) =>
+          String(d?.id) === String(facultyId) ||
+          String(d?.value) === String(facultyId),
+      ),
+    );
+  }, [facultyId, faculties]);
+
   useEffect(() => {
     setSelectYearEnd(yearEndOptions.map((y) => y));
     setSelectYearStart(yearStartOptions.map((y) => y));
   }, [yearEndOptions, yearStartOptions]);
 
   const handleSelectAllFacId = () => {
-    if (selecetFacultyId.length === faculties.length) {
-      setSelectFacultyId([]);
+    const currentFacIds = (faultyList || []).map((f) => f?.value || f?.id);
+    const allSelected =
+      currentFacIds.length > 0 &&
+      currentFacIds.every((id) => selecetFacultyId.includes(id));
+    if (allSelected) {
+      setSelectFacultyId((prev) =>
+        prev.filter((id) => !currentFacIds.includes(id)),
+      );
     } else {
-      setSelectFacultyId(faculties.map((f) => f?.id));
+      setSelectFacultyId((prev) =>
+        Array.from(new Set([...prev, ...currentFacIds])),
+      );
     }
   };
+
   const handleSelectFacultyId = (facId) => {
     setSelectFacultyId((prev) =>
       prev.includes(facId) ? prev.filter((p) => p !== facId) : [...prev, facId],
     );
   };
+
   const handleSelectAllDepId = () => {
-    if (selectDepartmentId.length === departments.length) {
-      setSelectDepartmentId([]);
+    const currentDepIds = (departmentList || []).map((f) => f?.value || f?.id);
+    const allSelected =
+      currentDepIds.length > 0 &&
+      currentDepIds.every((id) => selectDepartmentId.includes(id));
+    if (allSelected) {
+      setSelectDepartmentId((prev) =>
+        prev.filter((id) => !currentDepIds.includes(id)),
+      );
     } else {
-      setSelectDepartmentId(departments.map((f) => f?.id));
+      setSelectDepartmentId((prev) =>
+        Array.from(new Set([...prev, ...currentDepIds])),
+      );
     }
   };
+
   const handleSelectDepId = (facId) => {
     setSelectDepartmentId((prev) =>
       prev.includes(facId) ? prev.filter((p) => p !== facId) : [...prev, facId],
@@ -186,11 +222,11 @@ const ExportAlumniData = () => {
         },
       );
 
-      if (res.data.err) {
-        return alerts.warning(res.data.err);
-      }
       if (res.status === 200) {
         if (selectFileType == 1) {
+          if (res.data?.err) {
+            return alerts.warning(res.data.err);
+          }
           const normalize = res?.data?.map((d) => ({
             ...(d?.prefix && { คำนำหน้า: d?.prefix }),
             ...(d?.alumni_id && { รหัสนักศึกษา: d?.alumni_id }),
@@ -199,7 +235,6 @@ const ExportAlumniData = () => {
             คณะ: facultyText(faculties, d?.facultyId),
             สาขาวิชา: departmentText(departments, d?.departmentId),
             ...(d?.year_start && { ปีที่เข้าศึกษา: d?.year_start }),
-            ...(d?.year_end && { ปีที่จบการศึกษา: d?.year_end }),
             ...(d?.year_end && { ปีที่จบการศึกษา: d?.year_end }),
             ...(selectAlumniField.includes("address") && {
               ที่อยู่: d?.alumni_contract?.address,
@@ -227,20 +262,58 @@ const ExportAlumniData = () => {
 
           ExportExcel(normalize, fileName);
           alerts.success(
-            `ส่งออกรายงานสำเร็จ! ดาวน์โหลดไฟล์ ${fileName}.xlxs แล้ว!`,
+            `ส่งออกรายงานสำเร็จ! ดาวน์โหลดไฟล์ ${fileName}.xlsx แล้ว!`,
           );
         } else {
+          // Check if server returned a JSON error disguised as a blob
+          if (
+            res.data?.type === "application/json" ||
+            (res.data instanceof Blob && res.data.type?.includes("json"))
+          ) {
+            const text = await res.data.text();
+            try {
+              const parsed = JSON.parse(text);
+              return alerts.warning(parsed.err || "ไม่สามารถส่งออกไฟล์ PDF ได้");
+            } catch {
+              return alerts.warning(text);
+            }
+          }
+
+          if (!res.data || (res.data instanceof Blob && res.data.size < 100)) {
+            return alerts.err("ไฟล์ PDF ที่ได้รับจากเซิร์ฟเวอร์ไม่สมบูรณ์");
+          }
+
           const blob = new Blob([res.data], {
             type: "application/pdf",
           });
 
           const pdfUrl = URL.createObjectURL(blob);
+          const finalPdfName = fileName
+            ? fileName.toLowerCase().endsWith(".pdf")
+              ? fileName
+              : `${fileName}.pdf`
+            : "รายงานข้อมูลศิษย์เก่า.pdf";
 
-          window.open(pdfUrl, "_blank");
+          // 1. Direct browser download
+          const downloadLink = document.createElement("a");
+          downloadLink.href = pdfUrl;
+          downloadLink.download = finalPdfName;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
 
+          // 2. Open in new tab for preview
+          const previewTab = window.open(pdfUrl, "_blank");
+          if (previewTab) {
+            previewTab.focus();
+          }
+
+          alerts.success(`ส่งออกรายงาน PDF สำเร็จ! ดาวน์โหลดไฟล์ ${finalPdfName} แล้ว`);
+
+          // 3. Keep blob URL in memory for 10 minutes so Chrome's PDF viewer won't get ERR_FILE_NOT_FOUND
           setTimeout(() => {
             URL.revokeObjectURL(pdfUrl);
-          }, 1000);
+          }, 600000);
         }
       }
     } catch (error) {

@@ -120,7 +120,12 @@ const ExportDataSelection = ({
                       className="hover:underline cursor-pointer flex items-center text-sm text-blue-500 gap-2"
                     >
                       <input
-                        checked={selecetFacultyId.length === faculties.length}
+                        checked={
+                          faultyList?.length > 0 &&
+                          faultyList.every((f) =>
+                            selecetFacultyId?.includes(f?.value || f?.id),
+                          )
+                        }
                         type="checkbox"
                         readOnly
                         className="w-3.5 h-3.5 cursor-pointer"
@@ -163,7 +168,10 @@ const ExportDataSelection = ({
                       <input
                         readOnly
                         checked={
-                          selectDepartmentId.length === departments.length
+                          departmentList?.length > 0 &&
+                          departmentList.every((d) =>
+                            selectDepartmentId?.includes(d?.value || d?.id),
+                          )
                         }
                         type="checkbox"
                         className="w-3.5 h-3.5 cursor-pointer"

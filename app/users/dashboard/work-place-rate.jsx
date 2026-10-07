@@ -41,18 +41,26 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true }) => {
+const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true, onSliceClick }) => {
   const total = data.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
   const dataWithTotal = data.map((item) => ({
     ...item,
     total,
   }));
 
-  const inThai = data.find((d) => d.name.includes("ในประเทศ"))?.value || 0;
-  const abroad = data.find((d) => d.name.includes("ต่างประเทศ"))?.value || 0;
+  const inThaiItem = data.find((d) => d.name.includes("ในประเทศ")) || { name: "ในประเทศ", value: 0 };
+  const abroadItem = data.find((d) => d.name.includes("ต่างประเทศ")) || { name: "ต่างประเทศ", value: 0 };
+  const inThai = inThaiItem.value || 0;
+  const abroad = abroadItem.value || 0;
+
+  const handleSliceClick = (entry) => {
+    if (!onSliceClick) return;
+    const item = entry?.payload || entry;
+    onSliceClick(item);
+  };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex-1 flex flex-col items-center justify-between">
       {total === 0 ? (
         <div className="w-full flex flex-col items-center justify-center gap-2 py-10 text-slate-400">
           <FaGlobeAsia size={38} className="opacity-25" />
@@ -71,6 +79,8 @@ const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true }) => {
                 outerRadius={85}
                 paddingAngle={3}
                 dataKey="value"
+                cursor={onSliceClick ? "pointer" : "default"}
+                onClick={(entry) => handleSliceClick(entry)}
               >
                 {dataWithTotal.map((entry, index) => (
                   <Cell
@@ -78,6 +88,7 @@ const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true }) => {
                     fill={entry.name.includes("ต่างประเทศ") ? "#10B981" : "#3B82F6"}
                     stroke="#ffffff"
                     strokeWidth={2}
+                    className={`transition-all duration-300 hover:opacity-80 ${onSliceClick ? "cursor-pointer" : ""}`}
                   />
                 ))}
               </Pie>
@@ -89,8 +100,14 @@ const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true }) => {
 
       {/* Summary Badges */}
       <div className="w-full grid grid-cols-2 gap-2 mt-2">
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50/80 border border-blue-100">
-          <div className="p-1.5 bg-blue-500 rounded-md text-white">
+        <div
+          onClick={() => onSliceClick && handleSliceClick(inThaiItem)}
+          className={`flex items-center gap-2 p-2 rounded-lg bg-blue-50/80 border border-blue-100 transition-all ${
+            onSliceClick ? "cursor-pointer hover:bg-blue-100/80 hover:shadow-sm" : ""
+          }`}
+          title={onSliceClick ? "คลิกเพื่อดูรายชื่อศิษย์เก่าที่ทำงานในประเทศ" : undefined}
+        >
+          <div className="p-1.5 bg-blue-500 rounded-md text-white shrink-0">
             <FaMapMarkerAlt size={14} />
           </div>
           <div className="flex flex-col min-w-0">
@@ -104,8 +121,14 @@ const WorkPlaceRatePieChartComponent = ({ data = [], openToolTip = true }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50/80 border border-emerald-100">
-          <div className="p-1.5 bg-emerald-500 rounded-md text-white">
+        <div
+          onClick={() => onSliceClick && handleSliceClick(abroadItem)}
+          className={`flex items-center gap-2 p-2 rounded-lg bg-emerald-50/80 border border-emerald-100 transition-all ${
+            onSliceClick ? "cursor-pointer hover:bg-emerald-100/80 hover:shadow-sm" : ""
+          }`}
+          title={onSliceClick ? "คลิกเพื่อดูรายชื่อศิษย์เก่าที่ทำงานต่างประเทศ" : undefined}
+        >
+          <div className="p-1.5 bg-emerald-500 rounded-md text-white shrink-0">
             <FaGlobeAsia size={14} />
           </div>
           <div className="flex flex-col min-w-0">

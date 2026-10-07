@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { Eye, Image, Mail, User, X } from "lucide-react";
 import { apiConfig } from "@/config/api.config";
 import { NO_PROFILE_IMG } from "@/app/users/profile/alumni-profile";
+import SafeImage from "@/components/safe-image";
 import { formatPhoneNumber } from "@/libs/validate";
 import { departmentText, facultyText } from "@/components/faculty-p";
 import { useFacultyDep } from "@/hook/useFacultyDep";
 import DeleteContractBtn from "./delete-contract-btn";
 import Loading from "@/components/loading";
+import { Skeleton } from "@/components/skeletons";
 import axios from "axios";
 import { alerts } from "@/libs/alerts";
 
@@ -52,9 +54,25 @@ const ViewProfessorDataBtn = ({ user_id, fetchData }) => {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <div className="p-5 px-8 z-50 h-[600px] overflow-auto rounded-lg bg-white shadow-md w-full lg:w-3/4 flex flex-col">
           {fetchUser ? (
-            <div className="w-full h-full gap-1 flex flex-col items-center justify-center">
-              <Loading type={2} />
-              <p>กำลังโหลด...</p>
+            <div className="w-full flex flex-col gap-6 animate-pulse py-2">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                <Skeleton className="h-6 w-36 rounded-md" />
+                <Skeleton className="h-6 w-6 rounded-md" />
+              </div>
+              <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
+                <div className="flex flex-col items-center gap-3">
+                  <Skeleton className="w-[250px] h-[200px] rounded-lg" />
+                  <Skeleton className="w-24 h-4 rounded" />
+                </div>
+                <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="space-y-1.5 p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <Skeleton className="h-3.5 w-24 rounded" />
+                      <Skeleton className="h-5 w-full rounded-md" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -75,15 +93,16 @@ const ViewProfessorDataBtn = ({ user_id, fetchData }) => {
                     <Image size={18} className="text-blue-500" />
                     <p className="text-sm">รูปโปรไฟล์</p>
                   </span>
-                  <div className="mt-2.5 w-[250px] h-[200px] rounded-lg border border-gray-300 shadow-sm">
-                    <img
+                  <div className="mt-2.5 w-[250px] h-[200px] rounded-lg border border-gray-300 shadow-sm overflow-hidden">
+                    <SafeImage
                       src={
                         userData?.profile
                           ? apiConfig.imgAPI + userData?.profile
                           : NO_PROFILE_IMG
                       }
+                      type="avatar"
                       className="w-full h-full object-cover"
-                      alt=""
+                      alt="profile"
                     />
                   </div>
                 </div>

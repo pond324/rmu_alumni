@@ -3,6 +3,7 @@
 import NewsAvtivity from "@/app/users/news/news-activity";
 import DropdownMenu from "@/components/dropdown";
 import FadeInSection from "@/components/fade-in-section";
+import SafeImage from "@/components/safe-image";
 import Loading from "@/components/loading";
 import PaginationBtn from "@/components/pageination-btn";
 import RowDataNotFound from "@/components/row-data-notfound";
@@ -208,134 +209,134 @@ const Page = () => {
 
   return (
     <>
-      <div className="w-full p-5 bg-gray-50 flex flex-col">
-        <p className="text-xl font-bold">จัดการข่าว/โครงการ/บริจาค</p>
-        <p className="text-gray-700">
+      <div className="w-full p-3 sm:p-5 bg-gray-50 flex flex-col">
+        <p className="text-lg sm:text-xl font-bold text-gray-800">จัดการข่าว/โครงการ/บริจาค</p>
+        <p className="text-xs sm:text-sm text-gray-600">
           เพิ่ม แก้ไข และจัดการข่าวสารหรือโครงการระดมทุนทั้งหมด
         </p>
 
-        <div className="mt-5 w-full grid lg:grid-cols-5 md:grid-cols-2 gap-3">
+        <div className="mt-4 sm:mt-5 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
           <FadeInSection
             className={
-              "p-3.5 bg-white flex justify-between items-start border border-gray-300 shadow-sm rounded-lg"
+              "p-3 sm:p-3.5 bg-white flex justify-between items-start border border-gray-200 shadow-2xs rounded-xl"
             }
           >
-            <p className="p-2 rounded-lg bg-blue-500 text-white">
+            <p className="p-2 rounded-lg bg-blue-500 text-white shrink-0">
               <Building2 size={18} />
             </p>
             <span className="flex flex-col justify-end items-end">
               {" "}
               {loadAvg ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-blue-500" />
               ) : (
-                <p className="text-xl font-bold ">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {avgAll?.all?.toLocaleString() || 0}
                 </p>
               )}
-              <p className="text-sm text-gray-700 mt-1.5">ทั้งหมด</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">ทั้งหมด</p>
             </span>
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 bg-white flex justify-between items-start border border-gray-300 shadow-sm rounded-lg"
+              "p-3 sm:p-3.5 bg-white flex justify-between items-start border border-gray-200 shadow-2xs rounded-xl"
             }
           >
-            <p className="p-2 rounded-lg bg-sky-500 text-white">
+            <p className="p-2 rounded-lg bg-sky-500 text-white shrink-0">
               <Newspaper size={18} />
             </p>
             <span className="flex flex-col justify-end items-end">
               {" "}
               {loadAvg ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-sky-500" />
               ) : (
-                <p className="text-xl font-bold ">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {avgAll?.allNews?.toLocaleString() || 0}
                 </p>
               )}
-              <p className="text-sm text-gray-700 mt-1.5">ข่าวสาร/กิจกรรม</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">ข่าวสาร/กิจกรรม</p>
             </span>
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 bg-white flex justify-between items-start border border-gray-300 shadow-sm rounded-lg"
+              "p-3 sm:p-3.5 bg-white flex justify-between items-start border border-gray-200 shadow-2xs rounded-xl"
             }
           >
-            <p className="p-2 rounded-lg bg-red-500 text-white">
+            <p className="p-2 rounded-lg bg-rose-500 text-white shrink-0">
               <HeartHandshake size={18} />
             </p>
             <span className="flex flex-col justify-end items-end">
               {" "}
               {loadAvg ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-rose-500" />
               ) : (
-                <p className="text-xl font-bold ">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {avgAll?.allDonation?.toLocaleString() || 0}
                 </p>
               )}
-              <p className="text-sm text-gray-700 mt-1.5">โครงการบริจาค</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">โครงการบริจาค</p>
             </span>
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 bg-white flex justify-between items-start border border-gray-300 shadow-sm rounded-lg"
+              "p-3 sm:p-3.5 bg-white flex justify-between items-start border border-gray-200 shadow-2xs rounded-xl"
             }
           >
-            <p className="p-2 rounded-lg bg-green-500 text-white">
+            <p className="p-2 rounded-lg bg-emerald-500 text-white shrink-0">
               <Eye size={18} />
             </p>
             <span className="flex flex-col justify-end items-end">
               {" "}
               {loadAvg ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-emerald-500" />
               ) : (
-                <p className="text-xl font-bold ">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {avgAll?.allViews?.toLocaleString() || 0}
                 </p>
               )}
-              <p className="text-sm text-gray-700 mt-1.5">
-                ยอดการเข้าชมทั้งหมด
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                ยอดเข้าชม
               </p>
             </span>
           </FadeInSection>
           <FadeInSection
             className={
-              "p-3.5 bg-white flex justify-between items-start border border-gray-300 shadow-sm rounded-lg"
+              "p-3 sm:p-3.5 bg-white flex justify-between items-start border border-gray-200 shadow-2xs rounded-xl col-span-2 sm:col-span-1"
             }
           >
-            <p className="p-2 rounded-lg bg-amber-500 text-white">
+            <p className="p-2 rounded-lg bg-amber-500 text-white shrink-0">
               <DollarSign size={18} />
             </p>
             <span className="flex flex-col justify-end items-end">
               {" "}
               {loadAvg ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-amber-500" />
               ) : (
-                <p className="text-xl font-bold ">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
                   {avgAll?.allMoney?.toLocaleString() || 0}
                 </p>
               )}
-              <p className="text-sm text-gray-700 mt-1.5">ยอดเงินบริจาคสะสม</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">ยอดเงินบริจาคสะสม</p>
             </span>
           </FadeInSection>
         </div>
 
-        <div className="mt-5 p-5 rounded-lg bg-white shadow-sm flex flex-col">
-          <div className="w-full flex items-center justify-between">
+        <div className="mt-4 sm:mt-5 p-3 sm:p-5 rounded-xl bg-white shadow-2xs border border-gray-200 flex flex-col">
+          <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="flex items-center gap-2">
               <Paperclip size={18} className="text-blue-500" />
-              <p className="font-semibold">
+              <p className="font-semibold text-gray-800 text-sm sm:text-base">
                 รายการข่าว/โครงการทั้งหมด ({total} รายการ)
               </p>
             </span>
             <Link
               href={"/alumni-president/alumni-news/0/add-new-activity"}
-              className="p-2 px-3 text-sm flex items-center gap-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
+              className="p-2 px-3.5 text-xs sm:text-sm w-fit flex items-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition"
             >
-              <Plus size={18} />
+              <Plus size={16} />
               <p>เพิ่มรายการใหม่</p>
             </Link>
           </div>
-          <div className="mt-2.5 w-full flex items-center gap-2.5 flex-wrap">
+          <div className="mt-3 w-full flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <div className="w-full lg:w-1/3">
               <SearchBox
                 search={search}
@@ -470,272 +471,152 @@ const Page = () => {
             />
           </div>
 
-          <div
-            className={`mt-3.5 h-[600px] overflow-auto w-full ${displayType === 1 && "grid md:grid-cols-2 gap-3.5 lg:grid-cols-4"}`}
-          >
-            <table
-              className={`min-w-max w-full ${displayType === 1 && "hidden"}`}
-            >
-              <thead>
-                <tr className="bg-blue-50 border-b border-gray-300 shadow-sm sticky top-0 left-0 z-20">
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    หัวข้อ
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    หมวดหมู่
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    สถานะ
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    ยอดบริจาค
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    ผู้ชม
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    แก้ไขล่าสุด
-                  </th>
-                  <th className="p-2.5 pb-3 text-sm font-normal text-start">
-                    จัดการ
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <RowLoader numcol={7} />
-                ) : newsDonation.length < 1 ? (
-                  <RowDataNotFound numCol={7} />
-                ) : (
-                  newsDonation.map((n, index) => (
-                    <tr
-                      key={index}
-                      className="border-b text-sm border-gray-300 cursor-pointer hover:bg-gray-50"
-                    >
-                      <td className="p-2.5 pb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="rounded-lg shadow-md w-13 h-13 overflow-hidden">
-                            <img
-                              src={apiConfig.imgAPI + n?.thumnail}
-                              className="w-full h-full object-cover"
-                              alt=""
-                            />
-                          </span>
-                          <div className="flex flex-col">
-                            <p className="font-semibold w-30 line-clamp-1">
-                              {n?.title}
-                            </p>
-                            <p className="text-sm line-clamp-1 w-80">
-                              {n?.short_detail}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        {n?.category == 0 ? (
-                          <span className="p-1 px-2 w-fit text-xs bg-blue-50 text-blue-500 rounded-full flex items-center gap-2">
-                            <Newspaper size={16} />
-                            <p>ข่าวสาร/กิจกรรม</p>
-                          </span>
-                        ) : (
-                          <span className="p-1 px-2 w-fit text-xs bg-red-50 text-red-500 rounded-full flex items-center gap-2">
-                            <HeartHandshake size={16} />
-                            <p>โครงการบริจาค</p>
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        {n?.isPublish ? (
-                          <span className="p-1 px-2 w-fit text-xs bg-green-50 text-green-500 rounded-full flex items-center gap-2">
-                            <Eye size={16} />
-                            <p>เผยแพร่อยู่</p>
-                          </span>
-                        ) : (
-                          <span className="p-1 px-2 w-fit text-xs bg-amber-50 text-amber-500 rounded-full flex items-center gap-2">
-                            <EyeClosed size={16} />
-                            <p>ฉบับร่าง</p>
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        {n?.category == 0 ? (
-                          <p>-</p>
-                        ) : (
-                          <>
-                            <div className="flex justify-between text-xs mb-1.5">
-                              <p>{n?.current_money?.toLocaleString() || 0} ฿</p>
-
-                              <p className="font-semibold">
-                                {n?.target_money > 0
-                                  ? `${Math.round(
-                                      (n.current_money / n.target_money) * 100,
-                                    )}% / ${n.target_money.toLocaleString()} ฿`
-                                  : "0%"}
+          {displayType === 0 ? (
+            <div className="mt-3.5 h-[600px] overflow-auto w-full border border-gray-200 rounded-xl">
+              <table className="min-w-[760px] w-full">
+                <thead>
+                  <tr className="bg-blue-50 border-b border-gray-300 shadow-sm sticky top-0 left-0 z-20">
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      หัวข้อ
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      หมวดหมู่
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      สถานะ
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      ยอดบริจาค
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      ผู้ชม
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      แก้ไขล่าสุด
+                    </th>
+                    <th className="p-2.5 pb-3 text-sm font-normal text-start">
+                      จัดการ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <RowLoader numcol={7} />
+                  ) : newsDonation.length < 1 ? (
+                    <RowDataNotFound numCol={7} />
+                  ) : (
+                    newsDonation.map((n, index) => (
+                      <tr
+                        key={index}
+                        className="border-b text-sm border-gray-300 cursor-pointer hover:bg-gray-50"
+                      >
+                        <td className="p-2.5 pb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="rounded-lg shadow-md w-13 h-13 overflow-hidden">
+                              <SafeImage
+                                src={n?.thumnail ? apiConfig.imgAPI + n?.thumnail : ""}
+                                type="image"
+                                className="w-full h-full object-cover"
+                                alt={n?.title || "thumbnail"}
+                              />
+                            </span>
+                            <div className="flex flex-col">
+                              <p className="font-semibold w-30 line-clamp-1">
+                                {n?.title}
+                              </p>
+                              <p className="text-sm line-clamp-1 w-80">
+                                {n?.short_detail}
                               </p>
                             </div>
-
-                            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-pink-500"
-                                style={{
-                                  width: `${
-                                    n?.target_money > 0
-                                      ? Math.min(
-                                          (n.current_money / n.target_money) *
-                                            100,
-                                          100,
-                                        )
-                                      : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1.5">
-                              ปิดรับบริจาค: {DateTHFormat(n?.donate_end)}
-                            </p>
-                          </>
-                        )}
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        <p>{n?.view?.toLocaleString() || 0}</p>
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        <p>{DateTHFormat(n?.updatedAt)}</p>
-                      </td>
-                      <td className="p-2.5 pb-3">
-                        <DropdownMenu>
-                          <ViewDetail data={n} />
-                          <Link
-                            href={`/alumni-president/alumni-news/${n?.id}/add-new-activity`}
-                            className="p-2 hover:bg-linear-90 hover:text-white hover:from-blue-600 hover:to-sky-300 rounded-lg px-3 text-sm flex items-center gap-2"
-                          >
-                            <Pen size={18} />
-                            <p>แก้ไข</p>
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(n?.id)}
-                            disabled={loading || deleting}
-                            className="p-2 hover:bg-red-500 text-red-500 hover:text-white 0 rounded-lg px-3 text-sm flex items-center gap-2"
-                          >
-                            {deleting ? (
-                              <>
-                                <Loader2 className="animate-spin" />
-                                <p>กำลังลบ...</p>
-                              </>
-                            ) : (
-                              <>
-                                {" "}
-                                <Trash2 size={18} />
-                                <p>ลบข้อมูล</p>
-                              </>
-                            )}
-                          </button>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            {displayType == 1 && (
-              <>
-                {loading ? (
-                  <div className="md:col-span-2 text-sm lg:col-span-5 gap-1.5 flex flex-col items-center py-28">
-                    <Loader2 size={35} className="animate-spin text-blue-500" />
-                    <p>กำลังโหลด...</p>
-                  </div>
-                ) : newsDonation.length < 1 ? (
-                  <div className="text-gray-700 md:col-span-2 text-sm lg:col-span-5 gap-1.5 flex flex-col items-center py-28">
-                    <FolderOpen size={35} className="" />
-                    <p>ไม่พบข้อมูล</p>
-                  </div>
-                ) : (
-                  newsDonation.map((n, index) => (
-                    <div
-                      key={index}
-                      className="rounded-lg group border h-fit overflow-hidden border-gray-300 shadow-sm"
-                    >
-                      <div className="h-40 relative overflow-hidden ">
-                        <div className="w-full flex z-10 items-center absolute top-1.5 left-0 px-2 justify-between">
-                          {n?.isPublish ? (
-                            <span className="p-0.5 px-1.5 w-fit text-xs bg-green-500 text-white rounded-full flex items-center gap-2">
-                              <p>เผยแพร่อยู่</p>
-                            </span>
-                          ) : (
-                            <span className="p-0.5 px-1.5 w-fit text-xs bg-amber-500 text-white rounded-full flex items-center gap-2">
-                              <p>ฉบับร่าง</p>
-                            </span>
-                          )}
+                          </div>
+                        </td>
+                        <td className="p-2.5 pb-3">
                           {n?.category == 0 ? (
-                            <span className="p-0.5 px-1.5 w-fit text-xs bg-blue-500 text-white rounded-full flex items-center gap-2">
+                            <span className="p-1 px-2 w-fit text-xs bg-blue-50 text-blue-500 rounded-full flex items-center gap-2">
+                              <Newspaper size={16} />
                               <p>ข่าวสาร/กิจกรรม</p>
                             </span>
                           ) : (
-                            <span className="p-0.5 px-1.5 w-fit text-xs bg-red-500 text-white rounded-full flex items-center gap-2">
+                            <span className="p-1 px-2 w-fit text-xs bg-red-50 text-red-500 rounded-full flex items-center gap-2">
+                              <HeartHandshake size={16} />
                               <p>โครงการบริจาค</p>
                             </span>
                           )}
-                        </div>
-                        <img
-                          src={apiConfig.imgAPI + n?.thumnail}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                          alt=""
-                        />
-                      </div>
-                      <div className="p-3 w-full flex flex-col text-sm">
-                        <p className="w-full font-semibold line-clamp-1">
-                          {n?.title}
-                        </p>
-                        <p className="text-gray-700 w-full line-clamp-2 mt-1 mb-2.5">
-                          {n?.short_detail}
-                        </p>
-                        {n?.category == 1 && (
-                          <>
-                            <div className="flex justify-between text-xs mb-1.5">
-                              <p>{n?.current_money?.toLocaleString() || 0} ฿</p>
+                        </td>
+                        <td className="p-2.5 pb-3">
+                          {n?.isPublish ? (
+                            <span className="p-1 px-2 w-fit text-xs bg-green-50 text-green-500 rounded-full flex items-center gap-2">
+                              <Eye size={16} />
+                              <p>เผยแพร่อยู่</p>
+                            </span>
+                          ) : (
+                            <span className="p-1 px-2 w-fit text-xs bg-amber-50 text-amber-500 rounded-full flex items-center gap-2">
+                              <EyeClosed size={16} />
+                              <p>ฉบับร่าง</p>
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-2.5 pb-3">
+                          {n?.category == 0 ? (
+                            <p>-</p>
+                          ) : !n?.donate_end ||
+                            n?.donate_end === "undefined" ||
+                            n?.donate_end === "null" ||
+                            n?.donate_end === "" ? (
+                            <span className="p-1 px-2.5 w-fit text-xs bg-gray-100 text-gray-600 rounded-full font-medium inline-block">
+                              ไม่รับเงินบริจาค
+                            </span>
+                          ) : (
+                            <>
+                              <div className="flex justify-between text-xs mb-1.5">
+                                <p>{n?.current_money?.toLocaleString() || 0} ฿</p>
 
-                              <p className="font-semibold">
-                                {n?.target_money > 0
-                                  ? `${Math.round(
-                                      (n.current_money / n.target_money) * 100,
-                                    )}% / ${n.target_money.toLocaleString()} ฿`
-                                  : "0%"}
-                              </p>
-                            </div>
+                                <p className="font-semibold">
+                                  {n?.target_money > 0
+                                    ? `${Math.round(
+                                        (n.current_money / n.target_money) * 100,
+                                      )}% / ${n.target_money.toLocaleString()} ฿`
+                                    : "0%"}
+                                </p>
+                              </div>
 
-                            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-pink-500"
-                                style={{
-                                  width: `${
-                                    n?.target_money > 0
-                                      ? Math.min(
-                                          (n.current_money / n.target_money) *
+                              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-pink-500"
+                                  style={{
+                                    width: `${
+                                      n?.target_money > 0
+                                        ? Math.min(
+                                            (n.current_money / n.target_money) *
+                                              100,
                                             100,
-                                          100,
-                                        )
-                                      : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1.5">
-                              ปิดรับบริจาค: {DateTHFormat(n?.donate_end)}
-                            </p>
-                          </>
-                        )}
-                        <div className="w-full mt-3 flex items-center justify-between">
-                          <span className="flex items-center gap-2 text-gray-700">
-                            <Eye size={16} />
-                            <p>{n?.view?.toLocaleString() || 0}</p>
-                          </span>
-                          <div className="flex items-center text-gray-700">
-                            <ViewDetail data={n} showText={false} />
+                                          )
+                                        : 0
+                                    }%`,
+                                  }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1.5">
+                                ปิดรับบริจาค: {DateTHFormat(n?.donate_end)}
+                              </p>
+                            </>
+                          )}
+                        </td>
+                        <td className="p-2.5 pb-3">
+                          <p>{n?.view?.toLocaleString() || 0}</p>
+                        </td>
+                        <td className="p-2.5 pb-3">
+                          <p>{DateTHFormat(n?.updatedAt)}</p>
+                        </td>
+                        <td className="p-2.5 pb-3">
+                          <DropdownMenu>
+                            <ViewDetail data={n} />
                             <Link
                               href={`/alumni-president/alumni-news/${n?.id}/add-new-activity`}
                               className="p-2 hover:bg-linear-90 hover:text-white hover:from-blue-600 hover:to-sky-300 rounded-lg px-3 text-sm flex items-center gap-2"
                             >
                               <Pen size={18} />
+                              <p>แก้ไข</p>
                             </Link>
                             <button
                               onClick={() => handleDelete(n?.id)}
@@ -745,23 +626,170 @@ const Page = () => {
                               {deleting ? (
                                 <>
                                   <Loader2 className="animate-spin" />
+                                  <p>กำลังลบ...</p>
                                 </>
                               ) : (
                                 <>
                                   {" "}
                                   <Trash2 size={18} />
+                                  <p>ลบข้อมูล</p>
                                 </>
                               )}
                             </button>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="mt-3.5 w-full">
+              {loading ? (
+                <div className="text-sm gap-2 flex flex-col items-center py-28 text-gray-500">
+                  <Loader2 size={35} className="animate-spin text-blue-500" />
+                  <p>กำลังโหลด...</p>
+                </div>
+              ) : newsDonation.length < 1 ? (
+                <div className="text-gray-500 text-sm gap-2 flex flex-col items-center py-28">
+                  <FolderOpen size={35} />
+                  <p>ไม่พบข้อมูล</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {newsDonation.map((n, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl group border border-gray-200 bg-white shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                    >
+                      <div>
+                        {/* Thumbnail Container */}
+                        <div className="h-44 w-full relative overflow-hidden bg-gray-100 flex-shrink-0">
+                          {/* Badges */}
+                          <div className="w-full flex z-10 items-center absolute top-2 left-0 px-2.5 justify-between">
+                            {n?.isPublish ? (
+                              <span className="p-0.5 px-2 w-fit text-xs bg-green-500 text-white rounded-full flex items-center gap-1.5 shadow-xs">
+                                <p>เผยแพร่อยู่</p>
+                              </span>
+                            ) : (
+                              <span className="p-0.5 px-2 w-fit text-xs bg-amber-500 text-white rounded-full flex items-center gap-1.5 shadow-xs">
+                                <p>ฉบับร่าง</p>
+                              </span>
+                            )}
+                            {n?.category == 0 ? (
+                              <span className="p-0.5 px-2 w-fit text-xs bg-blue-500 text-white rounded-full flex items-center gap-1.5 shadow-xs">
+                                <p>ข่าวสาร/กิจกรรม</p>
+                              </span>
+                            ) : (
+                              <span className="p-0.5 px-2 w-fit text-xs bg-red-500 text-white rounded-full flex items-center gap-1.5 shadow-xs">
+                                <p>โครงการบริจาค</p>
+                              </span>
+                            )}
                           </div>
+                          <SafeImage
+                            src={n?.thumnail ? apiConfig.imgAPI + n?.thumnail : ""}
+                            type="image"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                            alt={n?.title || "news-image"}
+                          />
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-3.5 flex flex-col text-sm">
+                          <p className="w-full font-semibold text-gray-900 line-clamp-1">
+                            {n?.title}
+                          </p>
+                          <p className="text-gray-600 w-full line-clamp-2 mt-1 mb-2.5 text-xs leading-relaxed">
+                            {n?.short_detail}
+                          </p>
+                          {n?.category == 1 &&
+                            (!n?.donate_end ||
+                            n?.donate_end === "undefined" ||
+                            n?.donate_end === "null" ||
+                            n?.donate_end === "" ? (
+                              <div className="mt-1 mb-2">
+                                <span className="p-1 px-2.5 w-fit text-xs bg-gray-100 text-gray-600 rounded-full font-medium inline-block">
+                                  ไม่รับเงินบริจาค
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="mt-1 mb-2">
+                                <div className="flex justify-between text-xs mb-1.5 text-gray-600">
+                                  <p>{n?.current_money?.toLocaleString() || 0} ฿</p>
+
+                                  <p className="font-semibold text-gray-800">
+                                    {n?.target_money > 0
+                                      ? `${Math.round(
+                                          (n.current_money / n.target_money) * 100,
+                                        )}% / ${n.target_money.toLocaleString()} ฿`
+                                      : "0%"}
+                                  </p>
+                                </div>
+
+                                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-pink-500"
+                                    style={{
+                                      width: `${
+                                        n?.target_money > 0
+                                          ? Math.min(
+                                              (n.current_money / n.target_money) *
+                                                100,
+                                              100,
+                                            )
+                                          : 0
+                                      }%`,
+                                    }}
+                                  />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1.5">
+                                  ปิดรับบริจาค: {DateTHFormat(n?.donate_end)}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="px-3.5 pb-3.5 pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <Eye size={15} />
+                          <p>{n?.view?.toLocaleString() || 0}</p>
+                        </span>
+                        <div className="flex items-center text-gray-700">
+                          <ViewDetail data={n} showText={false} />
+                          <Link
+                            href={`/alumni-president/alumni-news/${n?.id}/add-new-activity`}
+                            className="p-2 hover:bg-linear-90 hover:text-white hover:from-blue-600 hover:to-sky-300 rounded-lg px-2.5 text-sm flex items-center gap-2"
+                            title="แก้ไข"
+                          >
+                            <Pen size={17} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(n?.id)}
+                            disabled={loading || deleting}
+                            className="p-2 hover:bg-red-500 text-red-500 hover:text-white rounded-lg px-2.5 text-sm flex items-center gap-2"
+                            title="ลบข้อมูล"
+                          >
+                            {deleting ? (
+                              <>
+                                <Loader2 size={17} className="animate-spin" />
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 size={17} />
+                              </>
+                            )}
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>

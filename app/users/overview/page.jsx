@@ -1,5 +1,6 @@
 "use client";
 import FadeInSection from "@/components/fade-in-section";
+import { Skeleton } from "@/components/skeletons";
 import { apiConfig } from "@/config/api.config";
 import { alerts } from "@/libs/alerts";
 import axios from "axios";
@@ -79,10 +80,10 @@ const Overviews = () => {
               ศิษย์เก่าทั้งหมด
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-blue-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -106,10 +107,10 @@ const Overviews = () => {
               บุคลากรทั้งหมด
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-indigo-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -134,10 +135,10 @@ const Overviews = () => {
               ผู้ดูแล
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-sky-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -162,10 +163,10 @@ const Overviews = () => {
               รอตรวจสอบการลงทะเบียน
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-amber-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -190,10 +191,10 @@ const Overviews = () => {
               ข่าวสาร / กิจกรรม / บริจาค
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-emerald-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -217,10 +218,10 @@ const Overviews = () => {
               ยอดการเข้าชมข่าวทั้งหมด
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-cyan-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-28 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -236,16 +237,16 @@ const Overviews = () => {
         </FadeInSection>
 
         {/* Card 7: ยอดเงินบริจาคสะสม */}
-        <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-rose-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
+        <FadeInSection className="p-4 rounded-xl col-span-2 bg-white border border-gray-200 border-l-4 border-l-rose-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
           <span className="flex flex-col min-w-0 flex-1 mr-2">
             <p className="text-xs font-semibold text-gray-500 truncate">
               ยอดเงินบริจาคสะสม
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-rose-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-24 rounded" />
+                <Skeleton className="h-3.5 w-20 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -261,16 +262,16 @@ const Overviews = () => {
         </FadeInSection>
 
         {/* Card 8: ประวัติการส่งข้อความ */}
-        <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-violet-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
+        <FadeInSection className="p-4 rounded-xl col-span-2 bg-white border border-gray-200 border-l-4 border-l-violet-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
           <span className="flex flex-col min-w-0 flex-1 mr-2">
             <p className="text-xs font-semibold text-gray-500 truncate">
               ประวัติการส่งข้อความ
             </p>
             {loadStats ? (
-              <Loader2
-                size={30}
-                className="animate-spin mt-2 text-violet-500"
-              />
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-7 w-20 rounded" />
+                <Skeleton className="h-3.5 w-24 rounded" />
+              </div>
             ) : (
               <>
                 <p className="text-2xl font-bold text-gray-900 mt-1 truncate">
@@ -286,7 +287,7 @@ const Overviews = () => {
         </FadeInSection>
 
         {/* Card 9: การนำเข้าข้อมูลศิษย์เก่า */}
-        <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-teal-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
+        {/* <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-teal-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
           <span className="flex flex-col min-w-0 flex-1 mr-2">
             <p className="text-xs font-semibold text-gray-500 truncate">
               การนำเข้าข้อมูลศิษย์เก่า
@@ -308,10 +309,10 @@ const Overviews = () => {
           <div className="w-10 h-10 rounded-full border border-teal-200 bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
             <Database size={20} />
           </div>
-        </FadeInSection>
+        </FadeInSection> */}
 
         {/* Card 10: การนำเข้าข้อมูลบุคลากร */}
-        <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-purple-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
+        {/* <FadeInSection className="p-4 rounded-xl bg-white border border-gray-200 border-l-4 border-l-purple-500 shadow-xs hover:shadow-md transition-all flex items-start justify-between min-w-0">
           <span className="flex flex-col min-w-0 flex-1 mr-2">
             <p className="text-xs font-semibold text-gray-500 truncate">
               การนำเข้าข้อมูลบุคลากร
@@ -333,7 +334,7 @@ const Overviews = () => {
           <div className="w-10 h-10 rounded-full border border-purple-200 bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
             <Database size={20} />
           </div>
-        </FadeInSection>
+        </FadeInSection> */}
       </div>
 
       <div
@@ -358,7 +359,7 @@ const Overviews = () => {
         <PopularNews />
       </div>
 
-      <ImportDataHistory />
+      {/* <ImportDataHistory />  */}
     </div>
   );
 };

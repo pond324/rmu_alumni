@@ -31,11 +31,17 @@ const CustomCountryTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const AlumniColumnChart = ({ rawData = [] }) => {
+const AlumniColumnChart = ({ rawData = [], onBarClick }) => {
   const data = (rawData || []).map((item) => ({
     name: item.company_place || "ไม่ระบุ",
     alumniCount: item._count?.alumniId || item.value || 0,
   })).filter(item => item.alumniCount > 0);
+
+  const handleClick = (entry) => {
+    if (!onBarClick) return;
+    const item = entry?.payload || entry;
+    onBarClick(item);
+  };
 
   return (
     <div className="w-full">
@@ -69,6 +75,9 @@ const AlumniColumnChart = ({ rawData = [] }) => {
                 fill="#0D9488"
                 barSize={36}
                 radius={[6, 6, 0, 0]}
+                cursor={onBarClick ? "pointer" : "default"}
+                onClick={(entry) => handleClick(entry)}
+                className={onBarClick ? "hover:opacity-85 transition-opacity" : ""}
               >
                 <LabelList
                   dataKey="alumniCount"

@@ -102,7 +102,7 @@ const renderCustomizedLabel = ({
   );
 };
 
-const PieChartComponent = ({ data = [], openToolTip = true }) => {
+const PieChartComponent = ({ data = [], openToolTip = true, onSliceClick }) => {
   const validData = (data || []).filter((d) => d && Number(d.value) > 0);
   const total = validData.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
   const dataWithTotal = validData.map((item, index) => ({
@@ -120,9 +120,15 @@ const PieChartComponent = ({ data = [], openToolTip = true }) => {
     );
   }
 
+  const handleSliceClick = (entry) => {
+    if (!onSliceClick) return;
+    const item = entry?.payload || entry;
+    onSliceClick(item);
+  };
+
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="w-full h-[300px]">
+    <div className="w-full flex-1 flex flex-col items-center justify-between">
+      <div className="w-full h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -131,10 +137,12 @@ const PieChartComponent = ({ data = [], openToolTip = true }) => {
               cy="50%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={105}
-              innerRadius={50} // Donut shape for modern look
+              outerRadius={85}
+              innerRadius={48} // Donut shape matching workplace chart
               paddingAngle={2}
               dataKey="value"
+              cursor={onSliceClick ? "pointer" : "default"}
+              onClick={(entry) => handleSliceClick(entry)}
             >
               {dataWithTotal.map((entry, index) => (
                 <Cell
@@ -142,7 +150,7 @@ const PieChartComponent = ({ data = [], openToolTip = true }) => {
                   fill={getColor(entry.name, index)}
                   stroke="#ffffff"
                   strokeWidth={2}
-                  className="transition-all duration-300 hover:opacity-80"
+                  className={`transition-all duration-300 hover:opacity-80 ${onSliceClick ? "cursor-pointer" : ""}`}
                 />
               ))}
             </Pie>
@@ -156,7 +164,13 @@ const PieChartComponent = ({ data = [], openToolTip = true }) => {
         {dataWithTotal.map((item, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between text-xs py-1 px-2 rounded-md hover:bg-slate-50 transition-colors"
+            onClick={() => onSliceClick && handleSliceClick(item)}
+            className={`flex items-center justify-between text-xs py-1 px-2 rounded-md transition-colors ${
+              onSliceClick
+                ? "cursor-pointer hover:bg-blue-50/80 hover:text-blue-700"
+                : "hover:bg-slate-50"
+            }`}
+            title={onSliceClick ? `คลิกเพื่อดูรายชื่อศิษย์เก่า ${item.name}` : undefined}
           >
             <div className="flex items-center gap-2 truncate pr-2">
               <span

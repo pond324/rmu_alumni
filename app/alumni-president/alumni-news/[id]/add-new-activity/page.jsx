@@ -19,6 +19,7 @@ import { apiConfig } from "@/config/api.config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Loading from "@/components/loading";
+import { Skeleton } from "@/components/skeletons";
 const TiptapEditor = dynamic(() => import("@/components/text-editor"), {
   ssr: false,
 });
@@ -213,10 +214,28 @@ const page = () => {
   }, [params]);
 
   if (loading) {
-    <div className="w-full py-10 flex flex-col items-center justify-center gap-2">
-      <Loading type={2} />
-      <p>กำลังโหลด...</p>
-    </div>;
+    return (
+      <div className="p-5 sm:p-7 rounded-2xl bg-white w-full space-y-6 animate-pulse border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-20 rounded-lg" />
+          <Skeleton className="h-6 w-48 rounded-md" />
+        </div>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-28 rounded" />
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 rounded" />
+            <Skeleton className="h-48 w-full rounded-2xl" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-36 rounded" />
+            <Skeleton className="h-32 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 import { NO_PROFILE_IMG } from "@/app/users/profile/alumni-profile";
+import SafeImage from "@/components/safe-image";
 import { apiConfig } from "@/config/api.config";
 import useGetSession from "@/hook/useGetSeesion";
 import { alerts } from "@/libs/alerts";
@@ -107,16 +108,16 @@ const Menu = () => {
       allowed: [2, 3, 4, 5],
     },
     {
-      title: "บัญชี",
-      icon: <CircleUser size={20} />,
-      url: "/users/account",
-      allowed: [1, 2, 3, 4],
-    },
-    {
       title: "ข่าวสาร/การบริจาค",
       icon: <Newspaper size={20} />,
       url: "/alumni-president/alumni-news",
       allowed: [5],
+    },
+    {
+      title: "บัญชี",
+      icon: <CircleUser size={20} />,
+      url: user?.roleId === 5 ? "/alumni-president/account" : "/users/account",
+      allowed: [1, 2, 3, 4, 5],
     },
     // {
     //   title: "ช่วยเหลือ",
@@ -158,97 +159,106 @@ const Menu = () => {
 
   return (
     <>
-      <div
-        className={`p-3 bg-linear-200 from-blue-800 to-blue-950 lg:flex bg-white ${showResponsive ? "flex w-[80%] absolute top-0" : "hidden"
-          } w-1/6 h-full flex-col border-r-2 justify-between border-gray-200 shadow-md z-40`}
-      >
-        <div className="w-full flex flex-col">
-          <div className="flex items-center w-full gap-4 pb-3 p-1 border-b border-gray-200">
-            {user?.roleId < 5 && (
-              <Link
-                href="/users/profile"
-                className="w-[50px] h-[50px] overflow-hidden rounded-full border border-gray-300"
-              >
-                <img
-                  alt="user-profile"
-                  src={
-                    user?.profile
-                      ? apiConfig.imgAPI + user?.profile
-                      : NO_PROFILE_IMG
-                  }
-                  width={50}
-                  height={50}
-                  className="w-full h-full object-cover"
-                />
-              </Link>
-            )}
+      {/* Mobile Backdrop */}
+      {showResponsive && (
+        <div
+          onClick={() => setShowResponsive(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+        />
+      )}
 
-            <span className="flex flex-col text-blue-200 text-sm">
-              <p className="">ยินดีต้อนรับ!</p>
-              <p className="">คุณ{user?.fname}</p>
+      {/* Sidebar Navigation */}
+      <div
+        className={`p-3 bg-linear-200 from-blue-800 to-blue-950 text-white ${
+          showResponsive
+            ? "fixed inset-y-0 left-0 w-72 max-w-[85vw] flex z-50 shadow-2xl"
+            : "hidden lg:flex lg:w-64 lg:shrink-0"
+        } h-full flex-col border-r border-blue-900/40 justify-between overflow-y-auto z-40 transition-transform`}
+      >
+        <div className="w-full flex flex-col min-h-0">
+          <div className="flex items-center w-full gap-3 pb-3 p-1 border-b border-gray-200/40 relative">
+            <Link
+              href={user?.roleId === 5 ? "/alumni-president/account" : "/users/profile"}
+              onClick={() => setShowResponsive(false)}
+              className="w-[44px] h-[44px] shrink-0 overflow-hidden rounded-full border-2 border-white/40 hover:border-white transition-all shadow-sm"
+              title="ข้อมูลบัญชี"
+            >
+              <SafeImage
+                alt="user-profile"
+                src={
+                  user?.profile
+                    ? apiConfig.imgAPI + user?.profile
+                    : NO_PROFILE_IMG
+                }
+                type="avatar"
+                width={44}
+                height={44}
+                className="w-full h-full object-cover"
+              />
+            </Link>
+
+            <span className="flex flex-col text-blue-200 text-sm overflow-hidden flex-1 min-w-0">
+              <p className="text-xs text-blue-300">ยินดีต้อนรับ!</p>
+              <p className="font-semibold text-white truncate text-sm">
+                {user?.fname ? `คุณ${user?.fname}` : "คุณผู้ดูแล"}
+              </p>
             </span>
             {showResponsive && (
               <button
                 onClick={() => setShowResponsive(false)}
-                className="absolute top-3 right-5 text-white"
+                className="p-1 rounded-lg hover:bg-white/10 text-white transition-colors"
+                aria-label="ปิดเมนู"
               >
-                <X size={28} />
+                <X size={22} />
               </button>
             )}
           </div>
-          <label htmlFor="" className="my-4 text-sm text-gray-300">
-            เมนู
+          <label htmlFor="" className="mt-3 mb-1 text-xs font-semibold text-blue-300/80 uppercase tracking-wider">
+            เมนูหลัก
           </label>
-          {menus
-            .filter((m) => m.allowed.includes(user?.roleId))
-            .map((m, index) => (
-              <Link
-                onClick={() => setShowResponsive(false)}
-                key={index}
-                className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${path.split("/")[2] === m.url.split("/")[2]
-                    ? "border-l-4 border-l-gray-100 bg-white/25"
-                    : "hover:bg-white/15 hover:shadow-xs rounded-sm "
-                  }  mt-0.5 w-full px-3.5 py-3`}
-                href={m.url}
-              >
-                {m.icon}
-                {m.title}
-              </Link>
-            ))}
-          <label htmlFor="" className="my-4 text-sm text-gray-300">
+          <div className="space-y-0.5">
+            {menus
+              .filter((m) => m.allowed.includes(user?.roleId))
+              .map((m, index) => (
+                <Link
+                  onClick={() => setShowResponsive(false)}
+                  key={index}
+                  className={`flex items-center gap-3 transition-all text-gray-200 text-sm duration-200 ${
+                    path.split("/")[2] === m.url.split("/")[2]
+                      ? "border-l-4 border-l-blue-400 bg-white/20 font-medium text-white shadow-xs"
+                      : "hover:bg-white/10 hover:text-white rounded-sm"
+                  } w-full px-3 py-2.5 rounded-r-md`}
+                  href={m.url}
+                >
+                  <span className="shrink-0">{m.icon}</span>
+                  <span className="truncate">{m.title}</span>
+                </Link>
+              ))}
+          </div>
+
+          <label htmlFor="" className="mt-4 mb-1 text-xs font-semibold text-blue-300/80 uppercase tracking-wider">
             ระบบ
           </label>
-          {user?.roleId == 5 && (
-            <Link
-              className={`flex items-center gap-3 transition-all text-gray-300 text-sm duration-300 ${path.split("/")[2] === "setting"
-                  ? "border-l-4 border-l-gray-100 bg-white/25"
-                  : "hover:bg-white/15 hover:shadow-xs "
-                }  mt-0.5 rounded-lg w-full px-3.5 py-3`}
-              href={"/alumni-president/setting/regis"}
-            >
-              <Cog className="" size={18} />
-              <p>ตั้งค่าระบบ</p>
-            </Link>
-          )}
           <button
             onClick={logout}
-            className="flex items-center text-sm gap-3 shadow-sm text-red-500 bg-red/15  hover:text-gray-100 transition-all duration-300 hover:bg-red-500 mt-1 rounded-lg w-full px-3.5 py-3"
+            className="flex items-center text-sm gap-3 shadow-xs text-red-300 bg-red-500/20 hover:text-white transition-all duration-200 hover:bg-red-600 rounded-lg w-full px-3 py-2.5 mt-1"
           >
-            <LogOut size={20} />
-            <p>ออกจากระบบ</p>
+            <LogOut size={18} className="shrink-0" />
+            <p className="truncate">ออกจากระบบ</p>
           </button>
         </div>
-
-        {/* developby */}
       </div>
 
-      {/* responsive button */}
-      <button
-        onClick={() => setShowResponsive(!showResponsive)}
-        className="lg:hidden inline fixed z-[100] bg-white top-3 right-5 p-1.5 rounded-full hover:bg-blue-200"
-      >
-        <MenuIcon size={28} />
-      </button>
+      {/* Mobile Floating Menu Toggle Button */}
+      {!showResponsive && (
+        <button
+          onClick={() => setShowResponsive(true)}
+          aria-label="เปิดเมนู"
+          className="lg:hidden inline-flex items-center justify-center fixed z-40 bg-white/95 backdrop-blur-xs text-gray-700 shadow-md border border-gray-200 top-2.5 right-3.5 p-2 rounded-xl hover:bg-blue-50 active:scale-95 transition-all"
+        >
+          <MenuIcon size={22} />
+        </button>
+      )}
     </>
   );
 };

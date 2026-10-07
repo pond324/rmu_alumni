@@ -1,5 +1,6 @@
 "use client";
 import Loading from "@/components/loading";
+import { Skeleton } from "@/components/skeletons";
 import { apiConfig } from "@/config/api.config";
 import useGetSession from "@/hook/useGetSeesion";
 import { alerts } from "@/libs/alerts";
@@ -113,9 +114,19 @@ const Contact = () => {
 
   if (load)
     return (
-      <div className="w-full h-[400px] flex flex-col items-center justify-center gap-2 py-10">
-        <Loading type={2} />
-        <p>กำลังโหลด...</p>
+      <div className="w-full flex flex-col gap-4 animate-pulse py-4">
+        <div className="flex justify-between items-center pb-2">
+          <Skeleton className="h-6 w-32 rounded-md" />
+          <Skeleton className="h-8 w-24 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-3 bg-gray-50/80 rounded-xl border border-gray-100 space-y-2">
+              <Skeleton className="h-3.5 w-24 rounded" />
+              <Skeleton className="h-5 w-3/4 rounded-md" />
+            </div>
+          ))}
+        </div>
       </div>
     );
 

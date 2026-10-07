@@ -30,17 +30,25 @@ const CustomLineTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const AlumniLineChart = ({ data = [] }) => {
+const AlumniLineChart = ({ data = [], onPointClick }) => {
   const validData = (data || []).filter((d) => d && (d.company_place || d.name));
+
+  const handleChartClick = (state) => {
+    if (!onPointClick) return;
+    if (state && state.activePayload && state.activePayload.length) {
+      onPointClick(state.activePayload[0].payload);
+    }
+  };
 
   return (
     <div className="w-full">
       {validData.length > 0 ? (
-        <div className="w-full h-[320px]">
+        <div className={`w-full h-[320px] ${onPointClick ? "cursor-pointer" : ""}`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={validData}
               margin={{ top: 10, right: 20, left: -15, bottom: 40 }}
+              onClick={handleChartClick}
             >
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -74,7 +82,15 @@ const AlumniLineChart = ({ data = [] }) => {
                 fillOpacity={1}
                 fill="url(#colorValue)"
                 dot={{ r: 4, fill: "#2563EB", stroke: "#ffffff", strokeWidth: 2 }}
-                activeDot={{ r: 7, fill: "#1D4ED8", stroke: "#ffffff", strokeWidth: 2 }}
+                activeDot={{
+                  r: 7,
+                  fill: "#1D4ED8",
+                  stroke: "#ffffff",
+                  strokeWidth: 2,
+                  onClick: (_, event) => {
+                    // Handled by chart click or dot click
+                  },
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
